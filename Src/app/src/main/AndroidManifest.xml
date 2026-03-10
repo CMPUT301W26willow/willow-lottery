@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
         android:allowBackup="true"
@@ -11,19 +11,25 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Willow_Lotto_app">
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
+        <!-- App starts here -->
+        <activity
+            android:name=".LoginActivity"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
         </activity>
-        <activity android:name="EventsActivity"/>
-        <activity android:name="LoginActivity"/>
-        <activity android:name="NotificationActivity"/>
-        <activity android:name="ProfileActivity"/>
+
+        <!-- Main screens -->
+        <activity android:name=".MainActivity" android:exported="false"/>
+        <activity android:name=".EventsActivity" android:exported="false"/>
+        <activity android:name=".NotificationActivity" android:exported="false"/>
+        <activity android:name=".ProfileActivity" android:exported="false"/>
+
     </application>
 
 </manifest>

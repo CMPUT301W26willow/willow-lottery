@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "14708092843",
+    "project_id": "willow-lottery",
+    "storage_bucket": "willow-lottery.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:14708092843:android:a621e49738cf39104b6cee",
+        "android_client_info": {
+          "package_name": "com.example.willow_lotto_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDErr9U0sD14iNjpR2flkx2PkUKkN0mpS4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
