@@ -8,6 +8,13 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+/**
+ * Main activity, this is the home page
+ */
+
+
+
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
