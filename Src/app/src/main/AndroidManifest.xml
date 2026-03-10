@@ -20,6 +20,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="EventsActivity"/>
+        <activity android:name="LoginActivity"/>
+        <activity android:name="NotificationActivity"/>
+        <activity android:name="ProfileActivity"/>
     </application>
 
 </manifest>

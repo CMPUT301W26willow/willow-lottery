@@ -1,4 +1,6 @@
 package com.example.willow_lotto_app;
 
-public class ProfileActivity {
+import androidx.appcompat.app.AppCompatActivity;
+
+public class ProfileActivity extends AppCompatActivity {
 }
