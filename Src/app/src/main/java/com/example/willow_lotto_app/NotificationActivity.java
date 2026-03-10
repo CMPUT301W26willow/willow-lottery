@@ -1,4 +1,6 @@
 package com.example.willow_lotto_app;
 
-public class NotificationActivity {
+import androidx.appcompat.app.AppCompatActivity;
+
+public class NotificationActivity extends AppCompatActivity {
 }
