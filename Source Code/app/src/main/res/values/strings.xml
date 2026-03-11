@@ -1,14 +1,27 @@
 <resources>
     <string name="app_name">Willow_Lotto_app</string>
+    
     <string name="profile_title">Profile</string>
-    <string name="profile_name_label">Name *</string>
-    <string name="profile_email_label">Email *</string>
+    <string name="profile_name_label">Name </string>
+    <string name="profile_email_label">Email Address</string>
     <string name="profile_phone_label">Phone (Optional)</string>
     <string name="profile_name_hint">Alex Rivera</string>
     <string name="profile_email_hint">alex.rivera@example.com</string>
     <string name="profile_phone_hint">+1555123456</string>
     <string name="profile_save_changes">Save Changes</string>
     <string name="profile_cancel">Cancel</string>
+    
+    <string name="login_email_label">Email Address</string>
+    <string name="login_password_label">Password</string>
+    <string name="login_remember">Remember me</string>
+    <string name="login_forgot">Forgot Password?</string>
+    <string name="login_email_hint">Enter your email address</string>
+    <string name="login_password_hint">Enter your password</string>
+    <string name="login_sign_in">Sign In</string>
+    <string name="login_continue_as_guest">Continue as Guest</string>
+    <string name="login_no_account">Don\'t Have an Account?</string>
+    <string name="login_admin_dashboard">Access Admin Dashboard</string>
+    
     <string name="organizer_dashboard_title">Organizer Dashboard</string>
     <string name="organizer_dashboard_body">Create events, manage attendees, and track ticket sales.</string>
     <string name="organizer_dashboard_button">Go to Organizer Dashboard</string>
