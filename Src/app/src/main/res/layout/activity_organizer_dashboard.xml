@@ -23,12 +23,23 @@
         android:text="@string/organizer_dashboard_screen_body"
         android:textColor="#666666"/>
 
+    <Button
+        android:id="@+id/createEventButton"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_below="@id/organizer_dashboard_body"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/create_event"
+        android:textColor="@android:color/white"
+        android:background="@drawable/button_primary_purple"/>
+
     <TextView
         android:id="@+id/waitingListLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/organizer_dashboard_body"
-        android:layout_marginTop="24dp"
+        android:layout_below="@id/createEventButton"
+        android:layout_marginTop="8dp"
         android:text="Waiting List"
         android:textSize="18sp"
         android:textStyle="bold"
