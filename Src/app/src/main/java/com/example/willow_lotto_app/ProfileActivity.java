@@ -18,7 +18,7 @@ import java.util.Map;
 public class ProfileActivity extends AppCompatActivity {
 
     EditText nameInput, emailInput, phoneInput;
-    Button saveButton;
+    Button saveButton, cancelButton, organizerDashboardButton;
     BottomNavigationView bottomNav;
 
     FirebaseAuth mAuth;
@@ -33,6 +33,8 @@ public class ProfileActivity extends AppCompatActivity {
         emailInput = findViewById(R.id.emailInput);
         phoneInput = findViewById(R.id.phoneInput);
         saveButton = findViewById(R.id.saveButton);
+        cancelButton = findViewById(R.id.cancelButton);
+        organizerDashboardButton = findViewById(R.id.organizerDashboardButton);
         bottomNav = findViewById(R.id.bottom_nav);
 
         mAuth = FirebaseAuth.getInstance();
@@ -41,6 +43,9 @@ public class ProfileActivity extends AppCompatActivity {
         bottomNav.setSelectedItemId(R.id.nav_profile);
 
         saveButton.setOnClickListener(v -> saveProfile());
+        cancelButton.setOnClickListener(v -> finish());
+        organizerDashboardButton.setOnClickListener(
+                v -> startActivity(new Intent(this, OrganizerDashboardActivity.class)));
 
         bottomNav.setOnItemSelectedListener(item -> {
 

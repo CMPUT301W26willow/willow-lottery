@@ -64,20 +64,15 @@ public class LoginActivity extends AppCompatActivity {
     private void checkUserProfile() {
 
         FirebaseUser user = mAuth.getCurrentUser();
-
         if (user == null) {
             return;
         }
-
         String uid = user.getUid();
-
         db.collection("users")
                 .document(uid)
                 .get()
                 .addOnSuccessListener(document -> {
-
                     if (document.exists()) {
-
                         Log.d("PROFILE_CHECK", "Profile exists");
                         startActivity(new Intent(LoginActivity.this, MainActivity.class));
 
@@ -85,11 +80,9 @@ public class LoginActivity extends AppCompatActivity {
 
                         Log.d("PROFILE_CHECK", "Profile missing");
                         startActivity(new Intent(LoginActivity.this, ProfileActivity.class));
-
                     }
 
                     finish();
-
                 })
                 .addOnFailureListener(e ->
                         Log.e("PROFILE_CHECK", "Error checking profile", e));
