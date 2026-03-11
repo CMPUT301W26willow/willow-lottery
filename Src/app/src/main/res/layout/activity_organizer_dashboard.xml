@@ -23,6 +23,26 @@
         android:text="@string/organizer_dashboard_screen_body"
         android:textColor="#666666"/>
 
+    <TextView
+        android:id="@+id/waitingListLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/organizer_dashboard_body"
+        android:layout_marginTop="24dp"
+        android:text="Waiting List"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="@color/textDark"/>
+
+    <ListView
+        android:id="@+id/waitingListView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/waitingListLabel"
+        android:layout_above="@id/backToProfileButton"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="16dp"/>
+
     <Button
         android:id="@+id/backToProfileButton"
         android:layout_width="match_parent"
