@@ -127,7 +127,6 @@
 
             </LinearLayout>
 
-            <!-- DELETE PROFILE BUTTON -->
             <Button
                 android:id="@+id/deleteProfileButton"
                 android:layout_width="match_parent"

@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,9 +45,11 @@ public class ProfileActivity extends AppCompatActivity {
 
         bottomNav.setSelectedItemId(R.id.nav_profile);
 
+        loadProfile(); // NEW: Load existing profile data when screen opens
+
         saveButton.setOnClickListener(v -> saveProfile());
         cancelButton.setOnClickListener(v -> finish());
-        deleteButton.setOnClickListener(v -> confirmDeleteProfile()); // NEW
+        deleteButton.setOnClickListener(v -> confirmDeleteProfile());
         organizerDashboardButton.setOnClickListener(
                 v -> startActivity(new Intent(this, OrganizerDashboardActivity.class)));
 
@@ -78,6 +81,29 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
+    private void loadProfile() {
+        if (mAuth.getCurrentUser() == null) return;
+
+        String uid = mAuth.getCurrentUser().getUid();
+
+        db.collection("users")
+                .document(uid)
+                .get()
+                .addOnSuccessListener(document -> {
+                    if (document.exists()) {
+                        String name = document.getString("name");
+                        String email = document.getString("email");
+                        String phone = document.getString("phone");
+
+                        if (name != null) nameInput.setText(name);
+                        if (email != null) emailInput.setText(email);
+                        if (phone != null) phoneInput.setText(phone);
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Failed to load profile", Toast.LENGTH_SHORT).show());
+    }
+
     private void confirmDeleteProfile() {
         new AlertDialog.Builder(this)
                 .setTitle("Delete Profile")
@@ -92,12 +118,10 @@ public class ProfileActivity extends AppCompatActivity {
 
         String uid = mAuth.getCurrentUser().getUid();
 
-        // Step 1: Delete Firestore user document
         db.collection("users")
                 .document(uid)
                 .delete()
                 .addOnSuccessListener(unused -> {
-
                     mAuth.getCurrentUser().delete()
                             .addOnSuccessListener(unused2 -> {
                                 Toast.makeText(this, "Profile deleted successfully", Toast.LENGTH_SHORT).show();
@@ -109,24 +133,22 @@ public class ProfileActivity extends AppCompatActivity {
                             })
                             .addOnFailureListener(e ->
                                     Toast.makeText(this, "Failed to delete account: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Failed to delete profile data: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     private void saveProfile() {
+        String name = nameInput.getText().toString().trim();
+        String email = emailInput.getText().toString().trim();
+        String phone = phoneInput.getText().toString().trim();
 
-        String name = nameInput.getText().toString();
-        String email = emailInput.getText().toString();
-        String phone = phoneInput.getText().toString();
-
-        if(name.isEmpty() || email.isEmpty()){
+        if (name.isEmpty() || email.isEmpty()) {
             Toast.makeText(this, "Name and Email required", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (mAuth.getCurrentUser() == null) return; // null check added
+        if (mAuth.getCurrentUser() == null) return;
         String uid = mAuth.getCurrentUser().getUid();
 
         Map<String, Object> user = new HashMap<>();
@@ -136,13 +158,11 @@ public class ProfileActivity extends AppCompatActivity {
 
         db.collection("users")
                 .document(uid)
-                .set(user)
+                .set(user, SetOptions.merge())
                 .addOnSuccessListener(unused -> {
-
-                    Toast.makeText(this, "Profile Saved", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Profile Updated", Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(ProfileActivity.this, MainActivity.class));
                     finish();
-
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Error Saving Profile", Toast.LENGTH_SHORT).show());
