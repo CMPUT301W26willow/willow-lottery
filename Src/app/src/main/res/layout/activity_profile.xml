@@ -127,6 +127,16 @@
 
             </LinearLayout>
 
+            <!-- DELETE PROFILE BUTTON -->
+            <Button
+                android:id="@+id/deleteProfileButton"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="Delete Profile"
+                android:textColor="@android:color/white"
+                android:background="@color/design_default_color_error"
+                android:layout_marginBottom="24dp"/>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
