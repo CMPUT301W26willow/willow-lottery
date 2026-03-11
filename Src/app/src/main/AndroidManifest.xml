@@ -29,6 +29,7 @@
         <activity android:name=".EventsActivity" android:exported="false"/>
         <activity android:name=".NotificationActivity" android:exported="false"/>
         <activity android:name=".ProfileActivity" android:exported="false"/>
+        <activity android:name=".OrganizerDashboardActivity" android:exported="false"/>
 
     </application>
 

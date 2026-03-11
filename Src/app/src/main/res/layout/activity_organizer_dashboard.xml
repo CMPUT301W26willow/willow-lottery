@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/backgroundGray"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/organizer_dashboard_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/organizer_dashboard_screen_title"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="@color/textDark"/>
+
+    <TextView
+        android:id="@+id/organizer_dashboard_body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/organizer_dashboard_title"
+        android:layout_marginTop="12dp"
+        android:text="@string/organizer_dashboard_screen_body"
+        android:textColor="#666666"/>
+
+    <Button
+        android:id="@+id/backToProfileButton"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_alignParentBottom="true"
+        android:text="@string/back_to_profile"
+        android:textColor="@android:color/white"
+        android:background="@drawable/button_primary_purple"/>
+
+</RelativeLayout>
