@@ -14,6 +14,7 @@
 
 package com.example.willow_lotto_app;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
@@ -39,7 +40,10 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_organizer_dashboard);
 
+        Button createEventButton = findViewById(R.id.createEventButton);
         Button backButton = findViewById(R.id.backToProfileButton);
+
+        createEventButton.setOnClickListener(v -> startActivity(new Intent(this, CreateEventActivity.class)));
         backButton.setOnClickListener(v -> finish());
 
         waitingListView = findViewById(R.id.waitingListView);
