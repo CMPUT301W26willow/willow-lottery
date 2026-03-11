@@ -1,5 +1,6 @@
 package com.example.willow_lotto_app;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
@@ -18,7 +19,7 @@ import java.util.Map;
 public class ProfileActivity extends AppCompatActivity {
 
     EditText nameInput, emailInput, phoneInput;
-    Button saveButton, cancelButton, organizerDashboardButton;
+    Button saveButton, cancelButton, organizerDashboardButton, deleteButton;
     BottomNavigationView bottomNav;
 
     FirebaseAuth mAuth;
@@ -33,6 +34,7 @@ public class ProfileActivity extends AppCompatActivity {
         emailInput = findViewById(R.id.emailInput);
         phoneInput = findViewById(R.id.phoneInput);
         saveButton = findViewById(R.id.saveButton);
+        deleteButton = findViewById(R.id.deleteProfileButton);
         cancelButton = findViewById(R.id.cancelButton);
         organizerDashboardButton = findViewById(R.id.organizerDashboardButton);
         bottomNav = findViewById(R.id.bottom_nav);
@@ -44,6 +46,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         saveButton.setOnClickListener(v -> saveProfile());
         cancelButton.setOnClickListener(v -> finish());
+        deleteButton.setOnClickListener(v -> confirmDeleteProfile()); // NEW
         organizerDashboardButton.setOnClickListener(
                 v -> startActivity(new Intent(this, OrganizerDashboardActivity.class)));
 
@@ -75,6 +78,43 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
+    private void confirmDeleteProfile() {
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Profile")
+                .setMessage("Are you sure you want to delete your profile? This action cannot be undone.")
+                .setPositiveButton("Delete", (dialog, which) -> deleteProfile())
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
+    private void deleteProfile() {
+        if (mAuth.getCurrentUser() == null) return;
+
+        String uid = mAuth.getCurrentUser().getUid();
+
+        // Step 1: Delete Firestore user document
+        db.collection("users")
+                .document(uid)
+                .delete()
+                .addOnSuccessListener(unused -> {
+
+                    mAuth.getCurrentUser().delete()
+                            .addOnSuccessListener(unused2 -> {
+                                Toast.makeText(this, "Profile deleted successfully", Toast.LENGTH_SHORT).show();
+
+                                Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(intent);
+                                finish();
+                            })
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(this, "Failed to delete account: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Failed to delete profile data: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
     private void saveProfile() {
 
         String name = nameInput.getText().toString();
@@ -86,6 +126,7 @@ public class ProfileActivity extends AppCompatActivity {
             return;
         }
 
+        if (mAuth.getCurrentUser() == null) return; // null check added
         String uid = mAuth.getCurrentUser().getUid();
 
         Map<String, Object> user = new HashMap<>();
@@ -106,4 +147,5 @@ public class ProfileActivity extends AppCompatActivity {
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Error Saving Profile", Toast.LENGTH_SHORT).show());
     }
+
 }
