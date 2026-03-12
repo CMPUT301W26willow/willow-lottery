@@ -39,5 +39,13 @@
             android:ellipsize="end"
             android:textColor="#666666"
             android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/event_join_leave_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginTop="12dp"
+            android:minWidth="100dp" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>

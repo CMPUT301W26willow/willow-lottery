@@ -8,26 +8,15 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
-/**
- * Generates QR codes for sharing event links.
- * Payload format: willow-lottery://event/{eventId}
- */
 public final class QRCodeHelper {
 
     public static final String SCHEME = "willow-lottery://event/";
 
-    /** Builds the string encoded in the event QR code (for deep link / scanning). */
     public static String getEventQrPayload(String eventId) {
         if (eventId == null) eventId = "";
         return SCHEME + eventId;
     }
 
-    /**
-     * Encodes the event payload as a QR code bitmap.
-     * @param eventId event document ID
-     * @param sizePx width and height of the bitmap
-     * @return QR code bitmap, or null if encoding fails
-     */
     public static Bitmap generateEventQrBitmap(String eventId, int sizePx) {
         String content = getEventQrPayload(eventId);
         try {
