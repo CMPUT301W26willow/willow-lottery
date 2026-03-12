@@ -9,7 +9,7 @@ import java.util.List;
  * Data model class representing an Event.
  * Provides a clean interface for managing waitlist data and database updates.
  */
-public class Event {
+public class EventWaitlist {
 
 
     private List<String> waitingList; // Local cache of user IDs
