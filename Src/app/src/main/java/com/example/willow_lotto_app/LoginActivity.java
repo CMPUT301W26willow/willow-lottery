@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.TextView;
 
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -22,8 +23,9 @@ public class LoginActivity extends AppCompatActivity {
 
     // UI elements
     TextInputLayout emailInput, passwordInput;
-    Button signIn, continueAnon, signUp, adminDash, forgotPass;
+    Button signIn, continueAnon, adminDash, forgotPass;
     CheckBox rememberMe;
+    TextView signUp;
 
     // SharedPreferences
     private SharedPreferences sharedPref;
@@ -60,10 +62,14 @@ public class LoginActivity extends AppCompatActivity {
         signIn = findViewById(R.id.buttonSignIn);
         continueAnon = findViewById(R.id.loginAsGuest);
         adminDash = findViewById(R.id.loginAdminAccess);
+        signUp = findViewById(R.id.loginSignUp);
 
         // Click listeners
         continueAnon.setOnClickListener(view -> signInAnonymously());
         signIn.setOnClickListener(view -> checkUserProfile());
+        signUp.setOnClickListener(view -> {startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
+            finish();
+        });
     }
 
     private void signInAnonymously() {
@@ -79,7 +85,7 @@ public class LoginActivity extends AppCompatActivity {
                             Log.d("FIREBASE_LOGIN", "UID: " + user.getUid());
                         }
 
-                        checkUserProfile();
+                        //checkUserProfile();
 
                     } else {
 
@@ -89,7 +95,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 });
     }
-
+    
     private void checkUserProfile() {
 
         FirebaseUser user = mAuth.getCurrentUser();
