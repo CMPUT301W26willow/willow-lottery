@@ -1,17 +1,3 @@
-/**
- * OrganizerDashboardActivity.java
- *
- * This class represents the organizer dashboard screen in the Willow Lottery app
- * and displays a list of entrants (participants) that are waiting to be selected
- * for the lottery.
- *
- * Role: Controller/View in the MVC pattern.
- *
- * Outstanding issues:
- * - Event ID is currently hardcoded as "event1". Should be passed dynamically
- *   via Intent from the previous screen.
- */
-
 package com.example.willow_lotto_app;
 
 import android.content.Intent;
