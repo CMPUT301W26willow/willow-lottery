@@ -6,22 +6,28 @@ import java.util.List;
 
 
 /**
- * Represent an Event and handles data management for its waiting list.
+ * Data model class representing an Event.
+ * Provides a clean interface for managing waitlist data and database updates.
  */
 public class Event {
 
 
-    private List<String> waitingList; // List of user IDs on the waitlist
+    private List<String> waitingList; // Local cache of user IDs
     private FirebaseFirestore db;
 
 
+    /**
+     * Lazy-loading getter for the Firestore instance.
+     */
     private FirebaseFirestore getDb(){
         if(db == null) db = FirebaseFirestore.getInstance();
         return db;
     }
 
 
-    // Helper method to update status from anywhere in the app
+    /**
+     * Global method to update an entrant's status from outside the Activity.
+     */
     public void updateStatus(String eventId, String userId, String status){
         getDb().collection("events")
                 .document(eventId)
@@ -32,12 +38,14 @@ public class Event {
 
 
     public void setLocalWaitingList(List<String> list){
-        this.waitingList = list;
+        waitingList = list;
     }
 
 
+    /**
+     * Logic to safely return the size of the waitlist.
+     */
     public int getWaitingCount(){
-
-        return (waitingList != null) ? waitingList.size() : 0;
+        return waitingList != null ? waitingList.size() : 0;
     }
 }
