@@ -4,6 +4,16 @@ package com.example.willow_lotto_app;
  * Model for a lottery event.
  */
 public class Event {
+
+    private String status;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
     private String id;
     private String name;
     private String description;

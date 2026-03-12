@@ -95,4 +95,6 @@ public class EventsActivity extends AppCompatActivity {
         Object o = doc.get(field);
         return o != null ? o.toString() : "";
     }
+
+
 }

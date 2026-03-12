@@ -39,5 +39,15 @@
             android:ellipsize="end"
             android:textColor="#666666"
             android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/register_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Register"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="@color/primaryPurple"
+            android:textColor="@android:color/white"/>
+
     </LinearLayout>
 </androidx.cardview.widget.CardView>
