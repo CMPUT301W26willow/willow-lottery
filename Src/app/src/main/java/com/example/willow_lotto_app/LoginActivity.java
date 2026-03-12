@@ -1,5 +1,6 @@
 package com.example.willow_lotto_app;
 
+import android.content.SharedPreferences;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,8 +25,23 @@ public class LoginActivity extends AppCompatActivity {
     Button signIn,continueAnon,signUp,adminDash,forgotPass;
     CheckBox rememberMe;
 
+    // SharedPreferences (initialize in onCreate; Activity has no Context in constructor)
+    private SharedPreferences sharedPref;
+    private SharedPreferences.Editor editor;
+    private boolean rememberUser;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        sharedPref = getSharedPreferences("appData", MODE_PRIVATE);
+        editor = sharedPref.edit();
+        rememberUser = sharedPref.getBoolean("rememberUser", false);
+
+        if (rememberUser) {
+            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+            finish();
+            return;
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
@@ -99,6 +115,10 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnSuccessListener(document -> {
                     if (document.exists()) {
                         Log.d("PROFILE_CHECK", "Profile exists");
+                        if (rememberMe.isChecked()) {
+                            editor.putBoolean("rememberUser", true);
+                            editor.apply();
+                        }
                         startActivity(new Intent(LoginActivity.this, MainActivity.class));
 
                     } else {
