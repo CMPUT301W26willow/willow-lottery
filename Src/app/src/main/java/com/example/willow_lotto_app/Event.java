@@ -1,14 +1,17 @@
 package com.example.willow_lotto_app;
 
-/**
- * Model for a lottery event.
- */
+/** Lottery event model; maps to Firestore "events" docs. */
 public class Event {
     private String id;
     private String name;
     private String description;
     private String date;
     private String organizerId;
+    private String registrationStart;
+    private String registrationEnd;
+    private String posterUri;
+    private Integer limit;      // max spots
+    private Integer drawSize;   // lottery winner count
 
     public Event() {
     }
@@ -59,5 +62,45 @@ public class Event {
 
     public void setOrganizerId(String organizerId) {
         this.organizerId = organizerId;
+    }
+
+    public String getRegistrationStart() {
+        return registrationStart;
+    }
+
+    public void setRegistrationStart(String registrationStart) {
+        this.registrationStart = registrationStart;
+    }
+
+    public String getRegistrationEnd() {
+        return registrationEnd;
+    }
+
+    public void setRegistrationEnd(String registrationEnd) {
+        this.registrationEnd = registrationEnd;
+    }
+
+    public String getPosterUri() {
+        return posterUri;
+    }
+
+    public void setPosterUri(String posterUri) {
+        this.posterUri = posterUri;
+    }
+
+    public Integer getLimit() {
+        return limit;
+    }
+
+    public void setLimit(Integer limit) {
+        this.limit = limit;
+    }
+
+    public Integer getDrawSize() {
+        return drawSize;
+    }
+
+    public void setDrawSize(Integer drawSize) {
+        this.drawSize = drawSize;
     }
 }

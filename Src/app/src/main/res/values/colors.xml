@@ -11,4 +11,7 @@
 
     <color name="borderGray">#DDDDDD</color>
     <color name="primaryPurple">#6750A4</color>
+    <color name="toolbarDark">#212121</color>
+    <color name="accentBlue">#2196F3</color>
+    <color name="iconGray">#666666</color>
 </resources>
