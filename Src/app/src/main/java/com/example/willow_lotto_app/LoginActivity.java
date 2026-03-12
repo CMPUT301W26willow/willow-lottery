@@ -1,17 +1,16 @@
 package com.example.willow_lotto_app;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
+
+import com.google.android.material.textfield.TextInputLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -21,26 +20,32 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
-    //Initialising all the various clickables
-    TextInputLayout emailInput,passwordInput;
-    Button signIn,continueAnon,signUp,adminDash,forgotPass;
+    // UI elements
+    TextInputLayout emailInput, passwordInput;
+    Button signIn, continueAnon, signUp, adminDash, forgotPass;
     CheckBox rememberMe;
 
-    //Setting SharedPreferences
-    SharedPreferences sharedPref = getSharedPreferences("appData",MODE_PRIVATE);
-    SharedPreferences.Editor editor = sharedPref.edit();
-    boolean rememberUser = sharedPref.getBoolean("rememberUser",false);//Checks for default Value, will use actual if different
-
+    // SharedPreferences
+    private SharedPreferences sharedPref;
+    private SharedPreferences.Editor editor;
+    private boolean rememberUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-        //Allows user to skip if the on device preference file matches
-        if(rememberUser){
+        // Initialize SharedPreferences (must be inside onCreate)
+        sharedPref = getSharedPreferences("appData", MODE_PRIVATE);
+        editor = sharedPref.edit();
+        rememberUser = sharedPref.getBoolean("rememberUser", false);
+
+        // Skip login if user chose "remember me"
+        if (rememberUser) {
             startActivity(new Intent(LoginActivity.this, MainActivity.class));
+            finish();
+            return;
         }
 
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
         mAuth = FirebaseAuth.getInstance();
@@ -48,32 +53,17 @@ public class LoginActivity extends AppCompatActivity {
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
 
-        //Assigning views to buttons
+        // Assign views
         rememberMe = findViewById(R.id.rememberLogin);
         emailInput = findViewById(R.id.loginEmailInput);
         passwordInput = findViewById(R.id.loginPasswordInput);
         signIn = findViewById(R.id.buttonSignIn);
         continueAnon = findViewById(R.id.loginAsGuest);
-        //signUp = findViewById(R.id.loginSignUp);
         adminDash = findViewById(R.id.loginAdminAccess);
-        //forgotPass = findViewById(R.id.forgotPassword);
 
-        //Setting On clicks
+        // Click listeners
         continueAnon.setOnClickListener(view -> signInAnonymously());
         signIn.setOnClickListener(view -> checkUserProfile());
-
-        /* commented out to allow for login testing
-        if (currentUser != null) {
-
-            Log.d("FIREBASE_LOGIN", "Already logged in UID: " + currentUser.getUid());
-            checkUserProfile();
-
-        } else {
-
-            signInAnonymously();
-
-        }
-         */
     }
 
     private void signInAnonymously() {
@@ -106,28 +96,20 @@ public class LoginActivity extends AppCompatActivity {
         if (user == null) {
             return;
         }
+
         String uid = user.getUid();
+
         db.collection("users")
                 .document(uid)
                 .get()
                 .addOnSuccessListener(document -> {
                     if (document.exists()) {
                         Log.d("PROFILE_CHECK", "Profile exists");
-                        if(rememberMe.isChecked()){
-                            editor.putBoolean("rememberUser",true);
-                            editor.apply();
-                        }
                         startActivity(new Intent(LoginActivity.this, MainActivity.class));
-
+                        finish();
                     } else {
-
-                        Log.d("PROFILE_CHECK", "Profile missing");
-                        startActivity(new Intent(LoginActivity.this, ProfileActivity.class));
+                        Log.d("PROFILE_CHECK", "No profile found");
                     }
-
-                    finish();
-                })
-                .addOnFailureListener(e ->
-                        Log.e("PROFILE_CHECK", "Error checking profile", e));
+                });
     }
 }
