@@ -1,3 +1,76 @@
 <resources>
     <string name="app_name">Willow_Lotto_app</string>
+    <string name="profile_title">Profile</string>
+    <string name="profile_name_label">Name *</string>
+    <string name="profile_email_label">Email *</string>
+    <string name="profile_phone_label">Phone (Optional)</string>
+    <string name="profile_name_hint">Alex Rivera</string>
+    <string name="profile_email_hint">alex.rivera@example.com</string>
+    <string name="profile_phone_hint">+1555123456</string>
+    <string name="profile_save_changes">Save Changes</string>
+    <string name="profile_cancel">Cancel</string>
+
+    <string name="login_email_label">Email Address</string>
+    <string name="login_email_hint">Enter your email address</string>
+    <string name="login_password_label">Password</string>
+    <string name="login_password_hint">Enter your password</string>
+    <string name="login_remember">Remember Me</string>
+    <string name="login_forgot">Forgot Password</string>
+    <string name="login_sign_in">Sign in</string>
+    <string name="login_continue_as_guest">Continue as Guest</string>
+    <string name="login_no_account">Don\'t Have an account?</string>
+    <string name="login_admin_dashboard">Admin Access</string>
+    <string name="login_sign_up">Sign Up</string>
+
+    <string name="sign_up_title">Create an Account</string>
+    <string name="sign_up_name_title">Name</string>
+    <string name="sign_up_name_hint">Enter your name</string>
+    <string name="sign_up_complete">Get Started</string>
+
+    <string name="organizer_dashboard_title">Organizer Dashboard</string>
+    <string name="organizer_dashboard_body">Create events, manage attendees, and track ticket sales.</string>
+    <string name="organizer_dashboard_button">Go to Organizer Dashboard</string>
+    <string name="organizer_dashboard_screen_title">Organizer Dashboard</string>
+    <string name="organizer_dashboard_screen_body">Organizer tools will live here.</string>
+    <string name="back_to_profile">Back to Profile</string>
+
+    <string name="create_event">Create event</string>
+    <string name="create_event_title">Create Event</string>
+    <string name="event_name_label">Event Name *</string>
+    <string name="event_name_hint">Enter event name</string>
+    <string name="event_description_label">Description *</string>
+    <string name="event_description_hint">Describe your event</string>
+    <string name="location_requirement">Location Requirement</string>
+    <string name="location_required_hint">Location is required to join</string>
+    <string name="event_poster">Event Poster</string>
+    <string name="event_poster_hint">Click to upload or drag and drop</string>
+    <string name="choose_file">Choose File</string>
+    <string name="registration_period">Registration Period</string>
+    <string name="start_date">Start Date</string>
+    <string name="end_date">End Date</string>
+    <string name="event_date_label">Event Date *</string>
+    <string name="event_date_hint">e.g. 2025-03-20</string>
+    <string name="create_event_submit">Create event</string>
+    <string name="event_qr_instruction">Share this QR code with entrants to let them quickly join the waiting list.</string>
+    <string name="event_created_success">Event \'%1$s\' created successfully!</string>
+    <string name="event_qr_content_description">QR code for event</string>
+    <string name="download_qr">Download QR</string>
+    <string name="share_qr_code">Share QR code</string>
+    <string name="done">Done</string>
+    <string name="event_join">Join</string>
+    <string name="event_leave">Leave</string>
+    <string name="event_detail_title">Event Details</string>
+    <string name="event_detail_registration_format">%1$s – %2$s</string>
+    <string name="event_detail_no_registration_dates">Not set</string>
+    <string name="event_detail_organized_by">Organized by %1$s</string>
+    <string name="event_detail_event_date">Event Date %1$s</string>
+    <string name="event_detail_registration_opens">Registration opens %1$s</string>
+    <string name="event_detail_waiting_list_count">%1$d people on waiting list</string>
+    <string name="event_detail_limit_spots">Limit: %1$d spots</string>
+    <string name="event_detail_lottery_criteria">Lottery Criteria</string>
+    <string name="event_detail_draw_size">Draw Size: %1$d winners</string>
+    <string name="event_detail_random_selection">Random selection from waiting list</string>
+    <string name="event_detail_one_entry">One entry per device</string>
+    <string name="event_join_waiting_list">Join Waiting List</string>
+    <string name="event_joined_waiting_list">Joined Waiting List</string>
 </resources>

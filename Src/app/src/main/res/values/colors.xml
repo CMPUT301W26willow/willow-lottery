@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+
+    <color name="backgroundGray">#F4F4F4</color>
+    <color name="textDark">#222222</color>
+    <color name="textGray">#4d4d4d</color>
+
+    <color name="primary">#4CAF50</color>
+    <color name="primaryDark">#388E3C</color>
+
+    <color name="borderGray">#DDDDDD</color>
+    <color name="primaryPurple">#6750A4</color>
+    <color name="toolbarDark">#212121</color>
+    <color name="accentBlue">#2196F3</color>
+    <color name="iconGray">#666666</color>
 </resources>
