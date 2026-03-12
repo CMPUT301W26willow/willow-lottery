@@ -5,9 +5,8 @@ plugins {
 
 android {
     namespace = "com.example.willow_lotto_app"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
+
 
     defaultConfig {
         applicationId = "com.example.willow_lotto_app"
@@ -45,5 +44,6 @@ dependencies {
 
     implementation(platform("com.google.firebase:firebase-bom:34.8.0"))
     implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-auth")
+
+
 }
