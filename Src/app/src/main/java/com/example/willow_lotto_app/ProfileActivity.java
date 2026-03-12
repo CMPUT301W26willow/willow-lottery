@@ -19,18 +19,25 @@ import java.util.Map;
 
 public class ProfileActivity extends AppCompatActivity {
 
+    //refrences to UI elements
     EditText nameInput, emailInput, phoneInput;
+    // Button UI references from the profile screen
     Button saveButton, cancelButton, organizerDashboardButton, deleteButton;
+    // refrences to the NAV( home, events, notifications, profile)
     BottomNavigationView bottomNav;
 
     FirebaseAuth mAuth;
     FirebaseFirestore db;
 
+    // Called when the ProfileActivity screen is first created.
+    // Initializes the UI layout, connects all UI elements to the code,
+    // sets up Firebase instances, loads the user's profile data,
+    // and sets click listeners for buttons and bottom navigation.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
-
+        //calling the resource folder for the UI elements
         nameInput = findViewById(R.id.nameInput);
         emailInput = findViewById(R.id.emailInput);
         phoneInput = findViewById(R.id.phoneInput);
@@ -50,29 +57,30 @@ public class ProfileActivity extends AppCompatActivity {
         saveButton.setOnClickListener(v -> saveProfile());
         cancelButton.setOnClickListener(v -> finish());
         deleteButton.setOnClickListener(v -> confirmDeleteProfile());
+        // click listener for Organizer Dashboard button
         organizerDashboardButton.setOnClickListener(
                 v -> startActivity(new Intent(this, OrganizerDashboardActivity.class)));
-
+        // click listener for Bottom Navigation to guide to diffrent navigation pages of the app
         bottomNav.setOnItemSelectedListener(item -> {
-
+            // click listener for home page
             if (item.getItemId() == R.id.nav_home) {
                 startActivity(new Intent(this, MainActivity.class));
                 finish();
                 return true;
             }
-
+            // click listener for events page
             if (item.getItemId() == R.id.nav_events) {
                 startActivity(new Intent(this, EventsActivity.class));
                 finish();
                 return true;
             }
-
+            // click listener for notifications page
             if (item.getItemId() == R.id.nav_notifications) {
                 startActivity(new Intent(this, NotificationActivity.class));
                 finish();
                 return true;
             }
-
+            // click listener for profile page
             if (item.getItemId() == R.id.nav_profile) {
                 return true;
             }
@@ -81,11 +89,13 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
+    // Retrieves the user's profile from Firestore and fills the input fields
     private void loadProfile() {
+        //Load existing profile data when screen opens
         if (mAuth.getCurrentUser() == null) return;
-
+        // Get the current user's UID
         String uid = mAuth.getCurrentUser().getUid();
-
+        //store the data in the database
         db.collection("users")
                 .document(uid)
                 .get()
@@ -104,6 +114,9 @@ public class ProfileActivity extends AppCompatActivity {
                         Toast.makeText(this, "Failed to load profile", Toast.LENGTH_SHORT).show());
     }
 
+    // Displays a confirmation dialog asking the user if they are sure
+    // they want to delete their profile. If the user confirms,
+    // the deleteProfile() method is called.
     private void confirmDeleteProfile() {
         new AlertDialog.Builder(this)
                 .setTitle("Delete Profile")
@@ -112,7 +125,9 @@ public class ProfileActivity extends AppCompatActivity {
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                 .show();
     }
-
+    // Deletes the user's profile from Firestore and removes their
+    // Firebase authentication account. After successful deletion,
+    // the user is redirected to the LoginActivity screen.
     private void deleteProfile() {
         if (mAuth.getCurrentUser() == null) return;
 
@@ -137,7 +152,10 @@ public class ProfileActivity extends AppCompatActivity {
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Failed to delete profile data: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
-
+    // Saves or updates the user's profile information in Firestore.
+    // It collects the name, email, and phone from the input fields,
+    // validates required fields, and stores the data under the
+    // current user's UID in the "users" collection.
     private void saveProfile() {
         String name = nameInput.getText().toString().trim();
         String email = emailInput.getText().toString().trim();
