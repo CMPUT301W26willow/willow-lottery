@@ -14,6 +14,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FieldValue;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -82,20 +86,15 @@ public class LoginActivity extends AppCompatActivity {
                         checkUserProfile();
 
                     } else {
-
-                        Log.e("FIREBASE_LOGIN", "Login Failed", task.getException());
-
+                        Log.e("FIREBASE_LOGIN", "Anonymous sign-in failed", task.getException());
                     }
-
                 });
     }
 
     private void checkUserProfile() {
 
         FirebaseUser user = mAuth.getCurrentUser();
-        if (user == null) {
-            return;
-        }
+        if (user == null) return;
 
         String uid = user.getUid();
 
@@ -108,7 +107,26 @@ public class LoginActivity extends AppCompatActivity {
                         startActivity(new Intent(LoginActivity.this, MainActivity.class));
                         finish();
                     } else {
-                        Log.d("PROFILE_CHECK", "No profile found");
+                        Log.d("PROFILE_CHECK", "No profile found, creating guest user");
+
+                        String guestName = "Guest-" + uid.substring(0, 6);
+
+                        Map<String, Object> userData = new HashMap<>();
+                        userData.put("displayName", guestName);
+                        userData.put("isAnonymous", true);
+                        userData.put("createdAt", FieldValue.serverTimestamp());
+
+                        db.collection("users")
+                                .document(uid)
+                                .set(userData)
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.d("PROFILE_CHECK", "Guest profile created");
+                                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                                    finish();
+                                })
+                                .addOnFailureListener(e ->
+                                        Log.e("PROFILE_CHECK", "Failed to create guest profile", e)
+                                );
                     }
                 });
     }
