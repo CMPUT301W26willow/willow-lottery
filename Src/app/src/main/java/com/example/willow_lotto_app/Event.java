@@ -1,5 +1,6 @@
 package com.example.willow_lotto_app;
 
+
 /** Lottery event model; maps to Firestore "events" docs. */
 public class Event {
     private String id;
@@ -12,6 +13,7 @@ public class Event {
     private String posterUri;
     private Integer limit;      // max spots
     private Integer drawSize;   // lottery winner count
+    private java.util.List<String> registeredUsers;
 
     public Event() {
     }
@@ -102,5 +104,13 @@ public class Event {
 
     public void setDrawSize(Integer drawSize) {
         this.drawSize = drawSize;
+    }
+
+    public java.util.List<String> getRegisteredUsers() {
+        return registeredUsers;
+    }
+
+    public void setRegisteredUsers(java.util.List<String> registeredUsers) {
+        this.registeredUsers = registeredUsers;
     }
 }

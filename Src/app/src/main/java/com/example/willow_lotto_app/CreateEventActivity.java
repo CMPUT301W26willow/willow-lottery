@@ -139,6 +139,8 @@ public class CreateEventActivity extends AppCompatActivity {
         event.put("registrationEnd", registrationEnd);
         event.put("locationRequired", locationRequired);
         event.put("organizerId", uid);
+        event.put("drawSize", 0);
+        event.put("registeredUsers", new java.util.ArrayList<String>());
 
         db.collection("events")
                 .add(event)
@@ -245,6 +247,8 @@ public class CreateEventActivity extends AppCompatActivity {
             event.put("posterUri", posterUrl);
         }
         event.put("organizerId", uid);
+        event.put("drawSize", 0);
+        event.put("registeredUsers", new java.util.ArrayList<String>());
 
         //Creating the event in Firebase with unique id from Hash
         db.collection("events")
