@@ -22,7 +22,7 @@
         android:layout_marginBottom="20dp"
         android:text="Waiting List: 0"
         android:textSize="18sp"
-        android:layout_marginTop="100dp"/>
+        android:layout_marginTop="99dp"/>
 
     <Button
         android:id="@+id/accept_invite"
