@@ -91,12 +91,15 @@ public class CreateEventActivity extends AppCompatActivity {
     }
 
     private void createEvent() {
+
+        //Getting all the user inputted items into Vars to input into event HashMap
         String name = nameInput.getText().toString().trim();
         String description = descriptionInput.getText().toString().trim();
         String registrationStart = registrationStartInput.getText().toString().trim();
         String registrationEnd = registrationEndInput.getText().toString().trim();
         String eventDate = eventDateInput.getText().toString().trim();
 
+        //Toast Msgs to ensure all fields are filled
         if (name.isEmpty()) {
             Toast.makeText(this, "Event name is required", Toast.LENGTH_SHORT).show();
             return;
@@ -243,6 +246,7 @@ public class CreateEventActivity extends AppCompatActivity {
         }
         event.put("organizerId", uid);
 
+        //Creating the event in Firebase with unique id from Hash
         db.collection("events")
                 .add(event)
                 .addOnSuccessListener(documentReference -> {
@@ -257,5 +261,16 @@ public class CreateEventActivity extends AppCompatActivity {
                     Toast.makeText(this, "Failed to create event", Toast.LENGTH_SHORT).show();
                     submitButton.setEnabled(true);
                 });
+
+        //Creating Sub Collections for event
+        db.collection("events")
+                .document(event.toString())
+                .collection("WaitList");
+        db.collection("events")
+                .document(event.toString())
+                .collection("ChosenList");
+        db.collection("events").document(event.toString())
+                .collection("EnrolledList");
+
     }
 }

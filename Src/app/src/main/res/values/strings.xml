@@ -9,12 +9,26 @@
     <string name="profile_phone_hint">+1555123456</string>
     <string name="profile_save_changes">Save Changes</string>
     <string name="profile_cancel">Cancel</string>
+
+    <string name="login_email_label">Email Address</string>
+    <string name="login_email_hint">Enter your email address</string>
+    <string name="login_password_label">Password</string>
+    <string name="login_password_hint">Enter your password</string>
+    <string name="login_remember">Remember Me</string>
+    <string name="login_forgot">Forgot Password</string>
+    <string name="login_sign_in">Sign in</string>
+    <string name="login_continue_as_guest">Continue as Guest</string>
+    <string name="login_no_account">Don\'t Have an account?</string>
+    <string name="login_admin_dashboard">Admin Access</string>
+    <string name="login_sign_up">Sign Up</string>
+
     <string name="organizer_dashboard_title">Organizer Dashboard</string>
     <string name="organizer_dashboard_body">Create events, manage attendees, and track ticket sales.</string>
     <string name="organizer_dashboard_button">Go to Organizer Dashboard</string>
     <string name="organizer_dashboard_screen_title">Organizer Dashboard</string>
     <string name="organizer_dashboard_screen_body">Organizer tools will live here.</string>
     <string name="back_to_profile">Back to Profile</string>
+
     <string name="create_event">Create event</string>
     <string name="create_event_title">Create Event</string>
     <string name="event_name_label">Event Name *</string>
