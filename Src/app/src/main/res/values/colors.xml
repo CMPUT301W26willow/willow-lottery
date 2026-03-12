@@ -4,6 +4,7 @@
 
     <color name="backgroundGray">#F4F4F4</color>
     <color name="textDark">#222222</color>
+    <color name="textGray">#4d4d4d</color>
 
     <color name="primary">#4CAF50</color>
     <color name="primaryDark">#388E3C</color>
