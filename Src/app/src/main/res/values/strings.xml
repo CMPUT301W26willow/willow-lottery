@@ -38,4 +38,20 @@
     <string name="download_qr">Download QR</string>
     <string name="share_qr_code">Share QR code</string>
     <string name="done">Done</string>
+    <string name="event_join">Join</string>
+    <string name="event_leave">Leave</string>
+    <string name="event_detail_title">Event Details</string>
+    <string name="event_detail_registration_format">%1$s – %2$s</string>
+    <string name="event_detail_no_registration_dates">Not set</string>
+    <string name="event_detail_organized_by">Organized by %1$s</string>
+    <string name="event_detail_event_date">Event Date %1$s</string>
+    <string name="event_detail_registration_opens">Registration opens %1$s</string>
+    <string name="event_detail_waiting_list_count">%1$d people on waiting list</string>
+    <string name="event_detail_limit_spots">Limit: %1$d spots</string>
+    <string name="event_detail_lottery_criteria">Lottery Criteria</string>
+    <string name="event_detail_draw_size">Draw Size: %1$d winners</string>
+    <string name="event_detail_random_selection">Random selection from waiting list</string>
+    <string name="event_detail_one_entry">One entry per device</string>
+    <string name="event_join_waiting_list">Join Waiting List</string>
+    <string name="event_joined_waiting_list">Joined Waiting List</string>
 </resources>
