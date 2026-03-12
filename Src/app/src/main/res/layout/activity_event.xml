@@ -5,27 +5,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
     <TextView
         android:id="@+id/lottery_info"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
         android:text="Lottery Information"
         android:textSize="20sp"
-        android:layout_marginBottom="10dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_marginTop="100dp"/>
 
     <TextView
         android:id="@+id/waiting_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
         android:text="Waiting List: 0"
         android:textSize="18sp"
-        android:layout_marginBottom="20dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-    <Button
-        android:id="@+id/join_waiting"
-        android:text="Join Waiting List"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_marginTop="100dp"/>
 
     <Button
         android:id="@+id/accept_invite"
@@ -35,6 +32,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
+
     <Button
         android:id="@+id/decline_invite"
         android:text="Decline Invitation"
@@ -42,5 +40,4 @@
         android:backgroundTint="#F44336"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
-
 </LinearLayout>
