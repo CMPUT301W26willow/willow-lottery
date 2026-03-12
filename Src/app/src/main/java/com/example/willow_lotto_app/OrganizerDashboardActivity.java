@@ -15,12 +15,26 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 
-public class OrganizerDashboardActivity extends AppCompatActivity {
 
+/**
+ * OrganizerDashboardActivity: This activity is used to display the organizer dashboard.
+ * 
+ * Features:
+ * - Display the waiting list
+ * - Display the create event button
+ * - Display the back button
+  */
+public class OrganizerDashboardActivity extends AppCompatActivity {
+    // reference to the waiting list view
     private ListView waitingListView;
+    // reference to the array adapter
     private ArrayAdapter<String> adapter;
+    // reference to the array list of entrant names
     private ArrayList<String> entrantNames;
 
+    // Called when the activity is created.
+    // Initializes the UI layout, connects all UI elements to the code,
+    // and sets up the waiting list.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,10 +42,11 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
 
         Button createEventButton = findViewById(R.id.createEventButton);
         Button backButton = findViewById(R.id.backToProfileButton);
-
+        // set the create event button to the create event activity
         createEventButton.setOnClickListener(v -> startActivity(new Intent(this, CreateEventActivity.class)));
+        // set the back button to the finish method
         backButton.setOnClickListener(v -> finish());
-
+        // get the waiting list view and set it to the waitingListView variable
         waitingListView = findViewById(R.id.waitingListView);
         entrantNames = new ArrayList<>();
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, entrantNames);
@@ -40,6 +55,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         loadWaitingList();
     }
 
+    // Load the waiting list from the database
     private void loadWaitingList() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
