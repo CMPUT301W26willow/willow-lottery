@@ -19,6 +19,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Profile management screen for the signed-in user.
+ *
+ * Responsibilities:
+ * - Lets users view and edit basic profile fields backed by Firestore.
+ * - Provides navigation into organizer flows (create first event or open
+ *   {@link OrganizerDashboardActivity} for the latest event).
+ * - Exposes registration history for the user based on stored event IDs.
+ */
 public class ProfileActivity extends AppCompatActivity {
 
     //refrences to UI elements
@@ -61,13 +70,8 @@ public class ProfileActivity extends AppCompatActivity {
         saveButton.setOnClickListener(v -> saveProfile());
         cancelButton.setOnClickListener(v -> finish());
         deleteButton.setOnClickListener(v -> confirmDeleteProfile());
-        organizerDashboardButton.setOnClickListener(
-                v -> startActivity(new Intent(this, OrganizerDashboardActivity.class)));
-
-        // click listener for Organizer Dashboard button
-        /*organizerDashboardButton.setOnClickListener(
-                v -> startActivity(new Intent(this, OrganizerDashboardActivity.class)));*/
-        //organizerDashboardButton.setOnClickListener(v -> openOrganizerDashboardForLatestEvent());
+        // Open the organizer dashboard for the latest event created by this user
+        organizerDashboardButton.setOnClickListener(v -> openOrganizerDashboardForLatestEvent());
         // click listener for Bottom Navigation to guide to diffrent navigation pages of the app
 
         bottomNav.setOnItemSelectedListener(item -> {
@@ -112,15 +116,14 @@ public class ProfileActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (queryDocumentSnapshots.isEmpty()) {
-                        Toast.makeText(this, "You have not created any events yet.", Toast.LENGTH_SHORT).show();
-                        return;
+                        // No events yet → take organizer to create their first one.
+                        startActivity(new Intent(ProfileActivity.this, CreateEventActivity.class));
+                    } else {
+                        String eventId = queryDocumentSnapshots.getDocuments().get(0).getId();
+                        Intent intent = new Intent(ProfileActivity.this, OrganizerDashboardActivity.class);
+                        intent.putExtra(OrganizerDashboardActivity.EXTRA_EVENT_ID, eventId);
+                        startActivity(intent);
                     }
-
-                    String eventId = queryDocumentSnapshots.getDocuments().get(0).getId();
-
-                    Intent intent = new Intent(ProfileActivity.this, OrganizerDashboardActivity.class);
-                    intent.putExtra(OrganizerDashboardActivity.EXTRA_EVENT_ID, eventId);
-                    startActivity(intent);
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Could not open organizer dashboard.", Toast.LENGTH_SHORT).show());
@@ -204,8 +207,9 @@ public class ProfileActivity extends AppCompatActivity {
         String email = emailInput.getText().toString().trim();
         String phone = phoneInput.getText().toString().trim();
 
-        if (name.isEmpty() || email.isEmpty()) {
-            Toast.makeText(this, "Name and Email required", Toast.LENGTH_SHORT).show();
+        String error = validateProfileInput(name, email);
+        if (error != null) {
+            Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -229,10 +233,9 @@ public class ProfileActivity extends AppCompatActivity {
                         Toast.makeText(this, "Error Saving Profile", Toast.LENGTH_SHORT).show());
     }
 
-<<<<<<< Updated upstream
     // Reads the registeredEvents array stored directly on the user's document,
     // then looks up each event name from the events collection
-=======
+
     /** Validates profile fields; returns error message or null if valid. */
     static String validateProfileInput(String name, String email) {
         if (name == null || name.trim().isEmpty() ||
@@ -245,23 +248,17 @@ public class ProfileActivity extends AppCompatActivity {
     /**
      * Retrieves and displays current user registration history in an alert dialogue
      */
->>>>>>> Stashed changes
     private void showRegistrationHistory() {
-
         // Exit early if no user is signed in
         if (mAuth.getCurrentUser() == null) return;
-
         String uid = mAuth.getCurrentUser().getUid();
-
         // Read the user's own document
         db.collection("users")
                 .document(uid)
                 .get()
                 .addOnSuccessListener(userDoc -> {
-
                     // Pull the registeredEvents array directly off the user document
                     List<String> registeredEvents = (List<String>) userDoc.get("registeredEvents");
-
                     if (registeredEvents == null || registeredEvents.isEmpty()) {
                         new AlertDialog.Builder(this)
                                 .setTitle("Registration History")
@@ -270,11 +267,9 @@ public class ProfileActivity extends AppCompatActivity {
                                 .show();
                         return;
                     }
-
                     // Fetch each event document to get its name
                     StringBuilder history = new StringBuilder();
                     AtomicInteger remaining = new AtomicInteger(registeredEvents.size());
-
                     for (String eventId : registeredEvents) {
                         db.collection("events").document(eventId)
                                 .get()
@@ -282,7 +277,6 @@ public class ProfileActivity extends AppCompatActivity {
                                     String eventName = eventDoc.getString("name");
                                     history.append("• ").append(eventName != null ? eventName : eventId)
                                             .append("\n\n");
-
                                     // Show the dialog only once all event lookups are done
                                     if (remaining.decrementAndGet() == 0) {
                                         new AlertDialog.Builder(this)

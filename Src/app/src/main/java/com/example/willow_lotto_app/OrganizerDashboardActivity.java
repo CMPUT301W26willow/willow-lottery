@@ -41,8 +41,10 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
 
     public static final String EXTRA_EVENT_ID = "event_id";
     private EditText drawSizeInput;
+    private Button createEventButton;
     private Button runLotteryButton;
     private Button drawReplacementButton;
+    private Button backToProfileButton;
     private Switch geolocationSwitch;
 
     private String eventId;
@@ -72,9 +74,16 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         waitingListView.setAdapter(adapter);
 
         drawSizeInput = findViewById(R.id.drawSizeInput);
+        createEventButton = findViewById(R.id.createEventButton);
         runLotteryButton = findViewById(R.id.runLotteryButton);
         drawReplacementButton = findViewById(R.id.drawReplacementButton);
+        backToProfileButton = findViewById(R.id.backToProfileButton);
         geolocationSwitch = findViewById(R.id.geolocationSwitch);
+
+        createEventButton.setOnClickListener(v ->
+                startActivity(new Intent(this, CreateEventActivity.class)));
+
+        backToProfileButton.setOnClickListener(v -> finish());
 
         runLotteryButton.setOnClickListener(v -> runLottery());
         drawReplacementButton.setOnClickListener(v -> drawReplacement());

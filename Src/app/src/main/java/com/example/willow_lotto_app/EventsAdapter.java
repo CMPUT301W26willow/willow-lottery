@@ -1,20 +1,37 @@
 package com.example.willow_lotto_app;
 
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/** RecyclerView adapter for event list; supports join/leave and opening event detail. */
+/**
+ * RecyclerView adapter for event cards on Home and Events screens.
+ *
+ * Responsibilities:
+ * - Binds Firestore-backed {@link Event} models to {@code item_event.xml}
+ *   cards, including poster, title, date, and short description.
+ * - Exposes callbacks for:
+ *   - Joining/leaving events (01.01.01 / 01.01.02) via
+ *     {@link OnJoinLeaveListener} (used in older flows).
+ *   - Opening detailed event view (01.01.03) via
+ *     {@link OnEventClickListener}.
+ */
 public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewHolder> {
 
     public interface OnJoinLeaveListener {
@@ -82,24 +99,33 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
         Event event = events.get(position);
+        String posterUrl = event.getPosterUri();
+        if (posterUrl != null && !posterUrl.trim().isEmpty()) {
+            Uri uri = Uri.parse(posterUrl.trim());
+            RequestOptions options = new RequestOptions()
+                    .centerCrop()
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .placeholder(R.drawable.poster_placeholder)
+                    .error(R.drawable.poster_placeholder);
+            Glide.with(holder.itemView.getContext())
+                    .load(uri)
+                    .apply(options)
+                    .into(holder.poster);
+        } else {
+            holder.poster.setImageResource(R.drawable.poster_placeholder);
+        }
         holder.name.setText(event.getName() != null ? event.getName() : "");
         holder.date.setText(event.getDate() != null ? event.getDate() : "");
         holder.description.setText(event.getDescription() != null ? event.getDescription() : "");
 
-        boolean joined = event.getId() != null && joinedEventIds.contains(event.getId());
-        boolean canJoinLeave = currentUserId != null && joinLeaveListener != null;
-
-        holder.joinLeaveBtn.setEnabled(canJoinLeave);
+        // Home/Events list matches mockup: primary action is "View Details".
+        boolean canViewDetails = eventClickListener != null && event.getId() != null;
         holder.joinLeaveBtn.setVisibility(View.VISIBLE);
-        holder.joinLeaveBtn.setText(joined
-                ? holder.itemView.getContext().getString(R.string.event_leave)
-                : holder.itemView.getContext().getString(R.string.event_join));
+        holder.joinLeaveBtn.setEnabled(canViewDetails);
+        holder.joinLeaveBtn.setText(R.string.event_view_details);
         holder.joinLeaveBtn.setOnClickListener(v -> {
-            if (joinLeaveListener == null) return;
-            if (joined) {
-                joinLeaveListener.onLeave(event);
-            } else {
-                joinLeaveListener.onJoin(event);
+            if (eventClickListener != null && event.getId() != null) {
+                eventClickListener.onEventClick(event);
             }
         });
 
@@ -116,6 +142,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
     }
 
     static class EventViewHolder extends RecyclerView.ViewHolder {
+        final ImageView poster;
         final TextView name;
         final TextView date;
         final TextView description;
@@ -123,6 +150,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
 
         EventViewHolder(View itemView) {
             super(itemView);
+            poster = itemView.findViewById(R.id.event_poster);
             name = itemView.findViewById(R.id.event_name);
             date = itemView.findViewById(R.id.event_date);
             description = itemView.findViewById(R.id.event_description);

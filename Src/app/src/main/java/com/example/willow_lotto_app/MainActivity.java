@@ -21,7 +21,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** Home screen: event list with join/leave and nav to Events, Notifications, Profile. */
+/**
+ * Home screen for entrants.
+ *
+ * Responsibilities:
+ * - Implements 01.01.03 "View events available to join" by showing a
+ *   limited feed of events the user can browse.
+ * - Wires up bottom navigation to Events, Notifications, and Profile.
+ * - Delegates rendering of individual cards to {@link EventsAdapter}.
+ */
 public class MainActivity extends AppCompatActivity {
 
     private static final String REGISTRATIONS_COLLECTION = "registrations";
@@ -39,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
 
         bottomNav = findViewById(R.id.bottom_nav);
         bottomNav.setSelectedItemId(R.id.nav_home);
-
         homeEventsRecycler = findViewById(R.id.home_events_recycler);
         adapter = new EventsAdapter();
         homeEventsRecycler.setLayoutManager(new LinearLayoutManager(this));
@@ -64,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
                         })
                         .addOnFailureListener(e -> Toast.makeText(MainActivity.this, "Could not join event", Toast.LENGTH_SHORT).show());
             }
-
+            
             @Override
             public void onLeave(Event event) {
                 if (currentUserId == null) return;
@@ -120,6 +127,7 @@ public class MainActivity extends AppCompatActivity {
                         event.setDescription(getString(doc, "description"));
                         event.setDate(getString(doc, "date"));
                         event.setOrganizerId(getString(doc, "organizerId"));
+                        event.setPosterUri(getString(doc, "posterUri"));
                         list.add(event);
                     }
                     adapter.setEvents(list);
@@ -160,4 +168,4 @@ public class MainActivity extends AppCompatActivity {
         Object o = doc.get(field);
         return o != null ? o.toString() : "";
     }
-}
+    }
