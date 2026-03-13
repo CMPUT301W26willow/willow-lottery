@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
-
+/**
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.NotificationViewHolder> {
 
     private final List<UserNotificationItem> notifications = new ArrayList<>();
@@ -25,6 +25,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
     @NonNull
     @Override
+    /**
     public NotificationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_notification, parent, false);
@@ -59,7 +60,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         TextView typeText;
         TextView dateText;
         TextView readText;
-
+/**
         NotificationViewHolder(@NonNull View itemView) {
             super(itemView);
             titleText = itemView.findViewById(R.id.notification_title);
@@ -68,5 +69,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             dateText = itemView.findViewById(R.id.notification_date);
             readText = itemView.findViewById(R.id.notification_read_status);
         }
+
     }
 }
+ **/
