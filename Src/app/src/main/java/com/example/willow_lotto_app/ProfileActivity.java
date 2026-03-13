@@ -58,8 +58,9 @@ public class ProfileActivity extends AppCompatActivity {
         cancelButton.setOnClickListener(v -> finish());
         deleteButton.setOnClickListener(v -> confirmDeleteProfile());
         // click listener for Organizer Dashboard button
-        organizerDashboardButton.setOnClickListener(
-                v -> startActivity(new Intent(this, OrganizerDashboardActivity.class)));
+        /*organizerDashboardButton.setOnClickListener(
+                v -> startActivity(new Intent(this, OrganizerDashboardActivity.class)));*/
+        organizerDashboardButton.setOnClickListener(v -> openOrganizerDashboardForLatestEvent());
         // click listener for Bottom Navigation to guide to diffrent navigation pages of the app
         bottomNav.setOnItemSelectedListener(item -> {
             // click listener for home page
@@ -87,6 +88,34 @@ public class ProfileActivity extends AppCompatActivity {
 
             return false;
         });
+    }
+
+    private void openOrganizerDashboardForLatestEvent() {
+        if (mAuth.getCurrentUser() == null) {
+            Toast.makeText(this, "No signed-in user.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String uid = mAuth.getCurrentUser().getUid();
+
+        db.collection("events")
+                .whereEqualTo("organizerId", uid)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (queryDocumentSnapshots.isEmpty()) {
+                        Toast.makeText(this, "You have not created any events yet.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    String eventId = queryDocumentSnapshots.getDocuments().get(0).getId();
+
+                    Intent intent = new Intent(ProfileActivity.this, OrganizerDashboardActivity.class);
+                    intent.putExtra(OrganizerDashboardActivity.EXTRA_EVENT_ID, eventId);
+                    startActivity(intent);
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Could not open organizer dashboard.", Toast.LENGTH_SHORT).show());
     }
 
     // Retrieves the user's profile from Firestore and fills the input fields

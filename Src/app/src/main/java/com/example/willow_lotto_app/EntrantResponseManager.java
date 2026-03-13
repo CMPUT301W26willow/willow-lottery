@@ -13,11 +13,11 @@ public class EntrantResponseManager {
     }
 
     private final FirebaseFirestore db;
-    private final RegistrationRepository registrationRepository;
+    private final RegistrationStore registrationRepository;
 
     public EntrantResponseManager() {
         this.db = FirebaseFirestore.getInstance();
-        this.registrationRepository = new RegistrationRepository();
+        this.registrationRepository = new RegistrationStore();
     }
 
     /**
@@ -29,7 +29,7 @@ public class EntrantResponseManager {
         registrationRepository.updateRegistrationStatus(
                 registrationId,
                 RegistrationStatus.ACCEPTED.getValue(),
-                new RegistrationRepository.SimpleCallback() {
+                new RegistrationStore.SimpleCallback() {
                     @Override
                     public void onSuccess() {
                         db.collection("events")
@@ -55,7 +55,7 @@ public class EntrantResponseManager {
         registrationRepository.updateRegistrationStatus(
                 registrationId,
                 RegistrationStatus.DECLINED.getValue(),
-                new RegistrationRepository.SimpleCallback() {
+                new RegistrationStore.SimpleCallback() {
                     @Override
                     public void onSuccess() {
                         callback.onSuccess("Invitation declined successfully.");
@@ -77,7 +77,7 @@ public class EntrantResponseManager {
         registrationRepository.updateRegistrationStatus(
                 registrationId,
                 RegistrationStatus.CANCELLED.getValue(),
-                new RegistrationRepository.SimpleCallback() {
+                new RegistrationStore.SimpleCallback() {
                     @Override
                     public void onSuccess() {
                         db.collection("events")
