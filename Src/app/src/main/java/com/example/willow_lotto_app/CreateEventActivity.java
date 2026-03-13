@@ -90,17 +90,6 @@ public class CreateEventActivity extends AppCompatActivity {
         submitButton.setOnClickListener(v -> createEvent());
     }
 
-    /**
-     * Validates required event form fields. Returns the error message to show, or null if valid.
-     * Exposed for unit testing.
-     */
-    static String validateEventForm(String name, String description, String eventDate) {
-        if (name == null || name.trim().isEmpty()) return "Event name is required";
-        if (description == null || description.trim().isEmpty()) return "Description is required";
-        if (eventDate == null || eventDate.trim().isEmpty()) return "Event date is required";
-        return null;
-    }
-
     private void createEvent() {
 
         //Getting all the user inputted items into Vars to input into event HashMap
@@ -110,9 +99,17 @@ public class CreateEventActivity extends AppCompatActivity {
         String registrationEnd = registrationEndInput.getText().toString().trim();
         String eventDate = eventDateInput.getText().toString().trim();
 
-        String error = validateEventForm(name, description, eventDate);
-        if (error != null) {
-            Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+        //Toast Msgs to ensure all fields are filled
+        if (name.isEmpty()) {
+            Toast.makeText(this, "Event name is required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (description.isEmpty()) {
+            Toast.makeText(this, "Description is required", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (eventDate.isEmpty()) {
+            Toast.makeText(this, "Event date is required", Toast.LENGTH_SHORT).show();
             return;
         }
 
