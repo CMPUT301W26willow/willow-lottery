@@ -1,13 +1,19 @@
 package com.example.willow_lotto_app;
 
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -82,6 +88,21 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
         Event event = events.get(position);
+        String posterUrl = event.getPosterUri();
+        if (posterUrl != null && !posterUrl.trim().isEmpty()) {
+            Uri uri = Uri.parse(posterUrl.trim());
+            RequestOptions options = new RequestOptions()
+                    .centerCrop()
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .placeholder(R.drawable.poster_placeholder)
+                    .error(R.drawable.poster_placeholder);
+            Glide.with(holder.itemView.getContext())
+                    .load(uri)
+                    .apply(options)
+                    .into(holder.poster);
+        } else {
+            holder.poster.setImageResource(R.drawable.poster_placeholder);
+        }
         holder.name.setText(event.getName() != null ? event.getName() : "");
         holder.date.setText(event.getDate() != null ? event.getDate() : "");
         holder.description.setText(event.getDescription() != null ? event.getDescription() : "");
@@ -110,6 +131,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
     }
 
     static class EventViewHolder extends RecyclerView.ViewHolder {
+        final ImageView poster;
         final TextView name;
         final TextView date;
         final TextView description;
@@ -117,6 +139,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
 
         EventViewHolder(View itemView) {
             super(itemView);
+            poster = itemView.findViewById(R.id.event_poster);
             name = itemView.findViewById(R.id.event_name);
             date = itemView.findViewById(R.id.event_date);
             description = itemView.findViewById(R.id.event_description);

@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity {
 
         bottomNav = findViewById(R.id.bottom_nav);
         bottomNav.setSelectedItemId(R.id.nav_home);
-
         homeEventsRecycler = findViewById(R.id.home_events_recycler);
         adapter = new EventsAdapter();
         homeEventsRecycler.setLayoutManager(new LinearLayoutManager(this));
@@ -64,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
                         })
                         .addOnFailureListener(e -> Toast.makeText(MainActivity.this, "Could not join event", Toast.LENGTH_SHORT).show());
             }
-
+            
             @Override
             public void onLeave(Event event) {
                 if (currentUserId == null) return;
@@ -120,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
                         event.setDescription(getString(doc, "description"));
                         event.setDate(getString(doc, "date"));
                         event.setOrganizerId(getString(doc, "organizerId"));
+                        event.setPosterUri(getString(doc, "posterUri"));
                         list.add(event);
                     }
                     adapter.setEvents(list);

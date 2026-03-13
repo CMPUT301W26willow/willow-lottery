@@ -122,6 +122,7 @@ public class EventsActivity extends AppCompatActivity {
                         event.setDescription(getString(doc, "description"));
                         event.setDate(getString(doc, "date"));
                         event.setOrganizerId(getString(doc, "organizerId"));
+                        event.setPosterUri(getString(doc, "posterUri"));
                         list.add(event);
                     }
                     adapter.setEvents(list);
