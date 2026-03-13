@@ -1,13 +1,16 @@
 package com.example.willow_lotto_app;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -26,7 +29,9 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.InputStream;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /** Create event form; uploads poster to Storage and saves event to Firestore. */
@@ -81,6 +86,10 @@ public class CreateEventActivity extends AppCompatActivity {
         submitButton = findViewById(R.id.create_event_submit);
         db = FirebaseFirestore.getInstance();
 
+        setupDatePickerField(registrationStartInput);
+        setupDatePickerField(registrationEndInput);
+        setupDatePickerField(eventDateInput);
+
         findViewById(R.id.create_event_choose_file).setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("image/*");
@@ -88,6 +97,36 @@ public class CreateEventActivity extends AppCompatActivity {
         });
 
         submitButton.setOnClickListener(v -> createEvent());
+    }
+
+    /** Attach a DatePickerDialog to the given date field. */
+    private void setupDatePickerField(EditText field) {
+        field.setInputType(InputType.TYPE_NULL);
+        field.setOnClickListener(v -> showDatePicker(field));
+        field.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                showDatePicker(field);
+            }
+        });
+    }
+
+    private void showDatePicker(EditText target) {
+        final Calendar cal = Calendar.getInstance();
+        int year = cal.get(Calendar.YEAR);
+        int month = cal.get(Calendar.MONTH);
+        int day = cal.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog dialog = new DatePickerDialog(
+                this,
+                (DatePicker view, int y, int m, int d) -> {
+                    String formatted = String.format(Locale.US, "%04d-%02d-%02d", y, m + 1, d);
+                    target.setText(formatted);
+                },
+                year,
+                month,
+                day
+        );
+        dialog.show();
     }
 
     /** Validates required event fields. Returns error message, or null if valid. */
