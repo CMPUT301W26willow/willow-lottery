@@ -190,8 +190,9 @@ public class ProfileActivity extends AppCompatActivity {
         String email = emailInput.getText().toString().trim();
         String phone = phoneInput.getText().toString().trim();
 
-        if (name.isEmpty() || email.isEmpty()) {
-            Toast.makeText(this, "Name and Email required", Toast.LENGTH_SHORT).show();
+        String error = validateProfileInput(name, email);
+        if (error != null) {
+            Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -213,6 +214,15 @@ public class ProfileActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Error Saving Profile", Toast.LENGTH_SHORT).show());
+    }
+
+    /** Validates profile fields; returns error message or null if valid. */
+    static String validateProfileInput(String name, String email) {
+        if (name == null || name.trim().isEmpty() ||
+                email == null || email.trim().isEmpty()) {
+            return "Name and Email required";
+        }
+        return null;
     }
 
 }
