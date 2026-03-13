@@ -66,15 +66,28 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
             return;
         }
 
+        // Waiting list UI
         waitingListView = findViewById(R.id.waitingListView);
         entrantNames = new ArrayList<>();
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, entrantNames);
         waitingListView.setAdapter(adapter);
 
+        // Top-level buttons
+        Button createEventButton = findViewById(R.id.createEventButton);
+        Button backToProfileButton = findViewById(R.id.backToProfileButton);
+
         drawSizeInput = findViewById(R.id.drawSizeInput);
         runLotteryButton = findViewById(R.id.runLotteryButton);
         drawReplacementButton = findViewById(R.id.drawReplacementButton);
         geolocationSwitch = findViewById(R.id.geolocationSwitch);
+
+        if (createEventButton != null) {
+            createEventButton.setOnClickListener(
+                    v -> startActivity(new Intent(this, CreateEventActivity.class)));
+        }
+        if (backToProfileButton != null) {
+            backToProfileButton.setOnClickListener(v -> finish());
+        }
 
         runLotteryButton.setOnClickListener(v -> runLottery());
         drawReplacementButton.setOnClickListener(v -> drawReplacement());
