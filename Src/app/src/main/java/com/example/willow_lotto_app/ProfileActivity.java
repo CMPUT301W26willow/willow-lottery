@@ -65,7 +65,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         bottomNav.setSelectedItemId(R.id.nav_profile);
 
-        loadProfile(); // NEW: Load existing profile data when screen opens
+        loadProfile(); // Load existing profile data when screen opens
 
         saveButton.setOnClickListener(v -> saveProfile());
         cancelButton.setOnClickListener(v -> finish());
@@ -129,7 +129,9 @@ public class ProfileActivity extends AppCompatActivity {
                         Toast.makeText(this, "Could not open organizer dashboard.", Toast.LENGTH_SHORT).show());
     }
 
-    // Retrieves the user's profile from Firestore and fills the input fields
+    /**
+     * Loads the user profile by filling the login areas with information if it already exists
+     */
     private void loadProfile() {
         //Load existing profile data when screen opens
         if (mAuth.getCurrentUser() == null) return;
@@ -154,9 +156,9 @@ public class ProfileActivity extends AppCompatActivity {
                         Toast.makeText(this, "Failed to load profile", Toast.LENGTH_SHORT).show());
     }
 
-    // Displays a confirmation dialog asking the user if they are sure
-    // they want to delete their profile. If the user confirms,
-    // the deleteProfile() method is called.
+    /**
+     * Sends an alert for the user to confirm whether they want to delete there account or not
+     */
     private void confirmDeleteProfile() {
         new AlertDialog.Builder(this)
                 .setTitle("Delete Profile")
@@ -166,11 +168,11 @@ public class ProfileActivity extends AppCompatActivity {
                 .show();
     }
 
-  
-    // Deletes the user's profile from Firestore and removes their
-    // Firebase authentication account. After successful deletion,
-    // the user is redirected to the LoginActivity screen.
-  
+
+    /**
+     * Actual delete profile function, deletes the user account both in the app and the firebase document
+     */
+
     private void deleteProfile() {
         if (mAuth.getCurrentUser() == null) return;
 
@@ -195,10 +197,10 @@ public class ProfileActivity extends AppCompatActivity {
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Failed to delete profile data: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
-    // Saves or updates the user's profile information in Firestore.
-    // It collects the name, email, and phone from the input fields,
-    // validates required fields, and stores the data under the
-    // current user's UID in the "users" collection.
+
+    /**
+     * Saves the Text input into the firebase in the users area
+     */
 
     private void saveProfile() {
         String name = nameInput.getText().toString().trim();
@@ -231,6 +233,9 @@ public class ProfileActivity extends AppCompatActivity {
                         Toast.makeText(this, "Error Saving Profile", Toast.LENGTH_SHORT).show());
     }
 
+    // Reads the registeredEvents array stored directly on the user's document,
+    // then looks up each event name from the events collection
+
     /** Validates profile fields; returns error message or null if valid. */
     static String validateProfileInput(String name, String email) {
         if (name == null || name.trim().isEmpty() ||
@@ -239,8 +244,10 @@ public class ProfileActivity extends AppCompatActivity {
         }
         return null;
     }
-    // Reads the registeredEvents array stored directly on the user's document,
-    // then looks up each event name from the events collection
+
+    /**
+     * Retrieves and displays current user registration history in an alert dialogue
+     */
     private void showRegistrationHistory() {
         // Exit early if no user is signed in
         if (mAuth.getCurrentUser() == null) return;
