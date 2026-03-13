@@ -1,5 +1,4 @@
 package com.example.willow_lotto_app;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
