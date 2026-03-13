@@ -23,7 +23,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** Full events list with join/leave and tap-to-open event detail. */
+/**
+ * Full events list screen.
+ *
+ * Responsibilities:
+ * - Implements 01.01.03 "View events available to join" by listing all
+ *   events from Firestore with an empty-state message when none exist.
+ * - Connects join/leave interactions (01.01.01 / 01.01.02) via
+ *   {@link EventsAdapter.OnJoinLeaveListener}.
+ * - Opens {@link EventDetailActivity} for the selected event.
+ */
 public class EventsActivity extends AppCompatActivity {
 
     private static final String REGISTRATIONS_COLLECTION = "registrations";

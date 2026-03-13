@@ -20,6 +20,12 @@ import com.google.firebase.firestore.FieldValue;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Handles login for:
+ * - Email/password users (01.02.01 Account Registration + sign-in)
+ * - Anonymous guest users (separate "Continue as Guest" path)
+ *
+ */
 public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
@@ -72,7 +78,8 @@ public class LoginActivity extends AppCompatActivity {
         // Guest path: create an anonymous Firebase user, ensure they have a Firestore
         // profile, then send them to the main screen.
         continueAnon.setOnClickListener(view -> signInAnonymously());
-        signIn.setOnClickListener(view -> checkUserProfile());
+        // Email/password sign-in: verify credentials with Firebase Auth first.
+        signIn.setOnClickListener(view -> signInWithEmailPassword());
         signUp.setOnClickListener(view -> {startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
             finish();
         });
@@ -100,7 +107,53 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
     }
-    
+
+    /** Validates login fields; returns error message or null if valid. */
+    static String validateLoginInput(String email, String password) {
+        if (email == null || email.trim().isEmpty()) return "Email required";
+        if (password == null || password.isEmpty()) return "Password required";
+        return null;
+    }
+
+    /** Normal email/password sign-in flow. */
+    private void signInWithEmailPassword() {
+        String email = emailInput.getEditText() != null
+                ? emailInput.getEditText().getText().toString().trim()
+                : "";
+        String password = passwordInput.getEditText() != null
+                ? passwordInput.getEditText().getText().toString()
+                : "";
+
+        String error = validateLoginInput(email, password);
+        if (error != null) {
+            if (error.contains("Email")) {
+                emailInput.setError(error);
+                passwordInput.setError(null);
+            } else {
+                passwordInput.setError(error);
+                emailInput.setError(null);
+            }
+            return;
+        }
+        emailInput.setError(null);
+        passwordInput.setError(null);
+
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        // Remember user if checkbox is checked
+                        if (rememberMe.isChecked()) {
+                            editor.putBoolean("rememberUser", true);
+                            editor.apply();
+                        }
+                        checkUserProfile();
+                    } else {
+                        Log.e("FIREBASE_LOGIN", "Email sign-in failed", task.getException());
+                        passwordInput.setError("Incorrect email or password");
+                    }
+                });
+    }
+
     private void checkUserProfile() {
 
         FirebaseUser user = mAuth.getCurrentUser();

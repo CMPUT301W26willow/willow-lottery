@@ -22,7 +22,15 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Shows full event details, poster, registration dates, and join/leave waiting list. */
+/**
+ * Detailed view for a single event.
+ *
+ * Responsibilities:
+ * - Displays event metadata, poster, and registration period (02.01.04).
+ * - Implements 01.01.01 / 01.01.02 "Join/Leave Events" by letting the user
+ *   join or leave the waiting list for this event.
+ * - Supports deep links from QR codes (willow-lottery://event/{id}).
+ */
 public class EventDetailActivity extends AppCompatActivity {
 
     private static final String REGISTRATIONS_COLLECTION = "registrations";
