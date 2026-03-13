@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import java.util.Map;
-
 /**
  * Unit tests for {@link Registration} logic.
  * Tests data mapping and status strings (Pure Logic).
