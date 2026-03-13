@@ -38,7 +38,8 @@
         <activity android:name=".CreateEventActivity" android:exported="false"/>
         <activity android:name=".EventQrActivity" android:exported="false"/>
         <activity android:name=".EventDetailActivity" android:exported="false"/>
-        <activity android:name="SignUpActivity" android:exported="false"/>
+        <activity android:name=".SignUpActivity" android:exported="false"/>
+        <activity android:name=".EditEventActivity" android:exported="false"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"
