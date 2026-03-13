@@ -1,9 +1,13 @@
 package com.example.willow_lotto_app;
 
+import android.util.Log;
+import android.widget.Toast;
+
 import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,6 +32,7 @@ import java.util.List;
 
 public class OrganizerLotteryManager {
 
+
     public interface LotteryCallback {
         void onSuccess(String message, List<Registration> affectedRegistrations);
         void onFailure(Exception e);
@@ -41,6 +46,7 @@ public class OrganizerLotteryManager {
     private final FirebaseFirestore db;
     private final RegistrationStore registrationRepository;
     private final NotificationStore notificationRepository;
+    private static final String TAG = "OrganizerLotteryManager";
 
     public OrganizerLotteryManager() {
         this.db = FirebaseFirestore.getInstance();
@@ -292,6 +298,7 @@ public class OrganizerLotteryManager {
                     "lottery_invited"
             );
 
+
             notificationRepository.sendNotificationToUser(
                     registration.getUserId(),
                     notification,
@@ -302,6 +309,7 @@ public class OrganizerLotteryManager {
                             if (completed[0] == total) {
                                 callback.onSuccess("Lottery draw completed successfully.", selected);
                             }
+                            System.out.print("Notification Sent");
                         }
 
                         @Override
@@ -330,6 +338,7 @@ public class OrganizerLotteryManager {
                         List<Registration> result = new ArrayList<>();
                         result.add(replacement);
                         callback.onSuccess("Replacement entrant selected successfully.", result);
+                        System.out.print("Notification Sent replacement");
                     }
 
                     @Override

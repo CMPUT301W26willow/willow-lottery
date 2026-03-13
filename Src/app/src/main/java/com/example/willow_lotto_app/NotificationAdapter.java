@@ -1,5 +1,8 @@
 package com.example.willow_lotto_app;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +29,9 @@ import java.util.List;
  */
 
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.NotificationViewHolder> {
+
+
+
 
     private final List<UserNotificationItem> notifications = new ArrayList<>();
 
