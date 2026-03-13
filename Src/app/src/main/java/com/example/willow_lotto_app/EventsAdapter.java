@@ -86,20 +86,14 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         holder.date.setText(event.getDate() != null ? event.getDate() : "");
         holder.description.setText(event.getDescription() != null ? event.getDescription() : "");
 
-        boolean joined = event.getId() != null && joinedEventIds.contains(event.getId());
-        boolean canJoinLeave = currentUserId != null && joinLeaveListener != null;
-
-        holder.joinLeaveBtn.setEnabled(canJoinLeave);
+        // Home/Events list matches mockup: primary action is "View Details".
+        boolean canViewDetails = eventClickListener != null && event.getId() != null;
         holder.joinLeaveBtn.setVisibility(View.VISIBLE);
-        holder.joinLeaveBtn.setText(joined
-                ? holder.itemView.getContext().getString(R.string.event_leave)
-                : holder.itemView.getContext().getString(R.string.event_join));
+        holder.joinLeaveBtn.setEnabled(canViewDetails);
+        holder.joinLeaveBtn.setText(R.string.event_view_details);
         holder.joinLeaveBtn.setOnClickListener(v -> {
-            if (joinLeaveListener == null) return;
-            if (joined) {
-                joinLeaveListener.onLeave(event);
-            } else {
-                joinLeaveListener.onJoin(event);
+            if (eventClickListener != null && event.getId() != null) {
+                eventClickListener.onEventClick(event);
             }
         });
 

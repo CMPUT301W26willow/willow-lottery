@@ -37,15 +37,18 @@
             android:layout_marginTop="4dp"
             android:maxLines="2"
             android:ellipsize="end"
-            android:textColor="#666666"
+            android:textColor="@color/textGray"
             android:textSize="14sp" />
 
         <Button
             android:id="@+id/event_join_leave_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginTop="12dp"
-            android:minWidth="100dp" />
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/button_primary_purple"
+            android:text="@string/event_view_details"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="14sp" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>
