@@ -49,11 +49,34 @@
         android:id="@+id/waitingListView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-
         android:layout_below="@id/lotteryButtonsRow"
-        android:layout_above="@id/viewMapButton"
+        android:layout_above="@id/geolocationRow"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp"/>
+
+    <LinearLayout
+        android:id="@+id/geolocationRow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/viewMapButton"
+        android:layout_marginBottom="8dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Require Geolocation"
+            android:textSize="16sp"
+            android:textColor="@color/textDark"/>
+
+        <Switch
+            android:id="@+id/geolocationSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/viewMapButton"
