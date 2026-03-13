@@ -22,6 +22,11 @@
     <string name="login_admin_dashboard">Admin Access</string>
     <string name="login_sign_up">Sign Up</string>
 
+    <string name="sign_up_title">Create an Account</string>
+    <string name="sign_up_name_title">Name</string>
+    <string name="sign_up_name_hint">Enter your name</string>
+    <string name="sign_up_complete">Get Started</string>
+
     <string name="organizer_dashboard_title">Organizer Dashboard</string>
     <string name="organizer_dashboard_body">Create events, manage attendees, and track ticket sales.</string>
     <string name="organizer_dashboard_button">Go to Organizer Dashboard</string>

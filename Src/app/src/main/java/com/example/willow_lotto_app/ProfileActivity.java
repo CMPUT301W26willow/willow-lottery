@@ -21,23 +21,26 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ProfileActivity extends AppCompatActivity {
 
+    //refrences to UI elements
     EditText nameInput, emailInput, phoneInput;
-<<<<<<< Updated upstream
-    Button saveButton, cancelButton, organizerDashboardButton, deleteButton;
-=======
     // Button UI references from the profile screen
     Button saveButton, cancelButton, organizerDashboardButton, deleteButton, registerButton;    // refrences to the NAV( home, events, notifications, profile)
->>>>>>> Stashed changes
+    // Button UI references from the profile screen
+
     BottomNavigationView bottomNav;
 
     FirebaseAuth mAuth;
     FirebaseFirestore db;
 
+    // Called when the ProfileActivity screen is first created.
+    // Initializes the UI layout, connects all UI elements to the code,
+    // sets up Firebase instances, loads the user's profile data,
+    // and sets click listeners for buttons and bottom navigation.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
-
+        //calling the resource folder for the UI elements
         nameInput = findViewById(R.id.nameInput);
         emailInput = findViewById(R.id.emailInput);
         phoneInput = findViewById(R.id.phoneInput);
@@ -58,38 +61,35 @@ public class ProfileActivity extends AppCompatActivity {
         saveButton.setOnClickListener(v -> saveProfile());
         cancelButton.setOnClickListener(v -> finish());
         deleteButton.setOnClickListener(v -> confirmDeleteProfile());
-<<<<<<< Updated upstream
         organizerDashboardButton.setOnClickListener(
                 v -> startActivity(new Intent(this, OrganizerDashboardActivity.class)));
 
-=======
-        registerButton.setOnClickListener(v -> showRegistrationHistory());
         // click listener for Organizer Dashboard button
         /*organizerDashboardButton.setOnClickListener(
                 v -> startActivity(new Intent(this, OrganizerDashboardActivity.class)));*/
-        organizerDashboardButton.setOnClickListener(v -> openOrganizerDashboardForLatestEvent());
+        //organizerDashboardButton.setOnClickListener(v -> openOrganizerDashboardForLatestEvent());
         // click listener for Bottom Navigation to guide to diffrent navigation pages of the app
->>>>>>> Stashed changes
-        bottomNav.setOnItemSelectedListener(item -> {
 
+        bottomNav.setOnItemSelectedListener(item -> {
+            // click listener for home page
             if (item.getItemId() == R.id.nav_home) {
                 startActivity(new Intent(this, MainActivity.class));
                 finish();
                 return true;
             }
-
+            // click listener for events page
             if (item.getItemId() == R.id.nav_events) {
                 startActivity(new Intent(this, EventsActivity.class));
                 finish();
                 return true;
             }
-
+            // click listener for notifications page
             if (item.getItemId() == R.id.nav_notifications) {
                 startActivity(new Intent(this, NotificationActivity.class));
                 finish();
                 return true;
             }
-
+            // click listener for profile page
             if (item.getItemId() == R.id.nav_profile) {
                 return true;
             }
@@ -98,11 +98,41 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
-    private void loadProfile() {
-        if (mAuth.getCurrentUser() == null) return;
+    private void openOrganizerDashboardForLatestEvent() {
+        if (mAuth.getCurrentUser() == null) {
+            Toast.makeText(this, "No signed-in user.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         String uid = mAuth.getCurrentUser().getUid();
 
+        db.collection("events")
+                .whereEqualTo("organizerId", uid)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (queryDocumentSnapshots.isEmpty()) {
+                        Toast.makeText(this, "You have not created any events yet.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    String eventId = queryDocumentSnapshots.getDocuments().get(0).getId();
+
+                    Intent intent = new Intent(ProfileActivity.this, OrganizerDashboardActivity.class);
+                    intent.putExtra(OrganizerDashboardActivity.EXTRA_EVENT_ID, eventId);
+                    startActivity(intent);
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Could not open organizer dashboard.", Toast.LENGTH_SHORT).show());
+    }
+
+    // Retrieves the user's profile from Firestore and fills the input fields
+    private void loadProfile() {
+        //Load existing profile data when screen opens
+        if (mAuth.getCurrentUser() == null) return;
+        // Get the current user's UID
+        String uid = mAuth.getCurrentUser().getUid();
+        //store the data in the database
         db.collection("users")
                 .document(uid)
                 .get()
@@ -121,6 +151,9 @@ public class ProfileActivity extends AppCompatActivity {
                         Toast.makeText(this, "Failed to load profile", Toast.LENGTH_SHORT).show());
     }
 
+    // Displays a confirmation dialog asking the user if they are sure
+    // they want to delete their profile. If the user confirms,
+    // the deleteProfile() method is called.
     private void confirmDeleteProfile() {
         new AlertDialog.Builder(this)
                 .setTitle("Delete Profile")
@@ -130,12 +163,11 @@ public class ProfileActivity extends AppCompatActivity {
                 .show();
     }
 
-<<<<<<< Updated upstream
-=======
+  
     // Deletes the user's profile from Firestore and removes their
     // Firebase authentication account. After successful deletion,
     // the user is redirected to the LoginActivity screen.
->>>>>>> Stashed changes
+  
     private void deleteProfile() {
         if (mAuth.getCurrentUser() == null) return;
 
@@ -160,14 +192,11 @@ public class ProfileActivity extends AppCompatActivity {
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Failed to delete profile data: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
-
-<<<<<<< Updated upstream
-=======
     // Saves or updates the user's profile information in Firestore.
     // It collects the name, email, and phone from the input fields,
     // validates required fields, and stores the data under the
     // current user's UID in the "users" collection.
->>>>>>> Stashed changes
+
     private void saveProfile() {
         String name = nameInput.getText().toString().trim();
         String email = emailInput.getText().toString().trim();
@@ -199,7 +228,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     // Reads the registeredEvents array stored directly on the user's document,
-// then looks up each event name from the events collection
+    // then looks up each event name from the events collection
     private void showRegistrationHistory() {
 
         // Exit early if no user is signed in

@@ -61,15 +61,18 @@ public class EventDetailActivity extends AppCompatActivity {
         }
 
         db = FirebaseFirestore.getInstance();
+
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         }
 
         MaterialToolbar toolbar = findViewById(R.id.event_detail_toolbar);
         setSupportActionBar(toolbar);
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
         toolbar.setNavigationOnClickListener(v -> finish());
 
         nameView = findViewById(R.id.event_detail_name);
@@ -88,7 +91,6 @@ public class EventDetailActivity extends AppCompatActivity {
         loadEvent();
     }
 
-    // Load event doc then waiting-list count and join state.
     private void loadEvent() {
         db.collection("events").document(eventId).get()
                 .addOnSuccessListener(this::applyEventDoc)
@@ -99,12 +101,15 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     private void applyEventDoc(DocumentSnapshot doc) {
+
         if (doc == null || !doc.exists()) {
             Toast.makeText(this, "Event not found", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
+
         event = new Event();
+
         event.setId(doc.getId());
         event.setName(getString(doc, "name"));
         event.setDescription(getString(doc, "description"));
@@ -116,43 +121,56 @@ public class EventDetailActivity extends AppCompatActivity {
         event.setLimit(getInt(doc, "limit"));
         event.setDrawSize(getInt(doc, "drawSize"));
 
-        nameView.setText(event.getName() != null ? event.getName() : "");
-        descriptionView.setText(event.getDescription() != null ? event.getDescription() : "");
+        nameView.setText(event.getName());
+        descriptionView.setText(event.getDescription());
 
-        organizerView.setText(getString(R.string.event_detail_organized_by,
-                event.getOrganizerId() != null && !event.getOrganizerId().isEmpty()
-                        ? event.getOrganizerId() : "Organizer"));
+        //organizer name.
+        loadOrganizerName(event.getOrganizerId());
 
-        dateView.setText(getString(R.string.event_detail_event_date,
-                event.getDate() != null ? event.getDate() : ""));
+        dateView.setText(getString(R.string.event_detail_event_date, event.getDate()));
 
         String start = event.getRegistrationStart();
         String end = event.getRegistrationEnd();
+
         if (start != null && !start.isEmpty() && end != null && !end.isEmpty()) {
-            registrationDatesView.setText(getString(R.string.event_detail_registration_format, start, end));
+
+            registrationDatesView.setText(
+                    getString(R.string.event_detail_registration_format, start, end));
+
             registrationOpensView.setVisibility(View.VISIBLE);
-            registrationOpensView.setText(getString(R.string.event_detail_registration_opens, start));
+
+            registrationOpensView.setText(
+                    getString(R.string.event_detail_registration_opens, start));
+
         } else {
+
             registrationDatesView.setText(R.string.event_detail_no_registration_dates);
             registrationOpensView.setVisibility(View.GONE);
         }
 
         String posterUrl = event.getPosterUri();
+
         if (posterUrl != null && !posterUrl.trim().isEmpty()) {
+
             posterPlaceholder.setVisibility(View.GONE);
             posterView.setVisibility(View.VISIBLE);
+
             Uri uri = Uri.parse(posterUrl.trim());
+
             RequestOptions options = new RequestOptions()
                     .centerCrop()
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .placeholder(R.drawable.poster_placeholder)
                     .error(R.drawable.poster_placeholder);
+
             Glide.with(this)
                     .load(uri)
                     .apply(options)
                     .transition(DrawableTransitionOptions.withCrossFade(200))
                     .into(posterView);
+
         } else {
+
             posterView.setVisibility(View.GONE);
             posterPlaceholder.setVisibility(View.VISIBLE);
         }
@@ -160,66 +178,142 @@ public class EventDetailActivity extends AppCompatActivity {
         loadWaitingListCount();
     }
 
-    // Query registrations for this event to show count and limit.
+    // 🔧 NEW METHOD ADDED
+    // This fetches the organizer's name from the users collection
+    // using organizerId stored in the event document.
+    private void loadOrganizerName(String organizerId) {
+
+        if (organizerId == null || organizerId.isEmpty()) {
+
+            organizerView.setText(
+                    getString(R.string.event_detail_organized_by, "Organizer"));
+
+            return;
+        }
+
+        db.collection("users")
+                .document(organizerId)
+                .get()
+                .addOnSuccessListener(doc -> {
+
+                    String name = "Organizer";
+
+                    if (doc != null && doc.exists()) {
+
+                        Object o = doc.get("name");
+
+                        if (o != null) {
+                            name = o.toString();
+                        }
+                    }
+
+                    organizerView.setText(
+                            getString(R.string.event_detail_organized_by, name));
+                })
+                .addOnFailureListener(e ->
+                        organizerView.setText(
+                                getString(R.string.event_detail_organized_by, "Organizer")));
+    }
+
     private void loadWaitingListCount() {
+
         db.collection(REGISTRATIONS_COLLECTION)
                 .whereEqualTo("eventId", eventId)
                 .get()
                 .addOnSuccessListener(snap -> {
+
                     waitingListCount = snap != null ? snap.size() : 0;
-                    waitingListView.setText(getString(R.string.event_detail_waiting_list_count, waitingListCount));
+
+                    waitingListView.setText(
+                            getString(R.string.event_detail_waiting_list_count, waitingListCount));
+
                     Integer limit = event.getLimit();
+
                     if (limit != null && limit > 0) {
+
                         limitView.setVisibility(View.VISIBLE);
-                        limitView.setText(getString(R.string.event_detail_limit_spots, limit));
+
+                        limitView.setText(
+                                getString(R.string.event_detail_limit_spots, limit));
+
                     } else {
+
                         limitView.setVisibility(View.GONE);
                     }
+
                     buildLotteryCriteria();
                     checkJoinedAndUpdateButton();
                 })
                 .addOnFailureListener(e -> {
-                    waitingListView.setText(getString(R.string.event_detail_waiting_list_count, 0));
+
+                    waitingListView.setText(
+                            getString(R.string.event_detail_waiting_list_count, 0));
+
                     limitView.setVisibility(View.GONE);
+
                     buildLotteryCriteria();
                     checkJoinedAndUpdateButton();
                 });
     }
 
     private void buildLotteryCriteria() {
+
         Integer drawSize = event.getDrawSize();
+
         StringBuilder sb = new StringBuilder();
+
         if (drawSize != null && drawSize > 0) {
-            sb.append("• ").append(getString(R.string.event_detail_draw_size, drawSize)).append("\n");
+
+            sb.append("• ")
+                    .append(getString(R.string.event_detail_draw_size, drawSize))
+                    .append("\n");
         }
-        sb.append("• ").append(getString(R.string.event_detail_random_selection)).append("\n");
-        sb.append("• ").append(getString(R.string.event_detail_one_entry));
+
+        sb.append("• ")
+                .append(getString(R.string.event_detail_random_selection))
+                .append("\n");
+
+        sb.append("• ")
+                .append(getString(R.string.event_detail_one_entry));
+
         lotteryBulletsView.setText(sb.toString());
     }
 
     private void checkJoinedAndUpdateButton() {
+
         if (currentUserId == null) {
+
             joinLeaveBtn.setEnabled(false);
             joinLeaveBtn.setText(R.string.event_join_waiting_list);
+
             return;
         }
+
         db.collection(REGISTRATIONS_COLLECTION)
                 .document(eventId + "_" + currentUserId)
                 .get()
                 .addOnSuccessListener(doc -> {
+
                     joined = doc != null && doc.exists();
                     updateJoinLeaveButton();
-                })
-                .addOnFailureListener(e -> {
+
+                }).addOnFailureListener(e -> {
+
                     joined = false;
                     updateJoinLeaveButton();
                 });
     }
 
     private void updateJoinLeaveButton() {
+
         joinLeaveBtn.setEnabled(true);
-        joinLeaveBtn.setText(joined ? R.string.event_joined_waiting_list : R.string.event_join_waiting_list);
+
+        joinLeaveBtn.setText(joined ?
+                R.string.event_joined_waiting_list :
+                R.string.event_join_waiting_list);
+
         joinLeaveBtn.setOnClickListener(v -> {
+
             if (joined) {
                 leaveEvent();
             } else {
@@ -229,45 +323,73 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     private void joinEvent() {
+
         if (currentUserId == null) return;
+
         String docId = eventId + "_" + currentUserId;
+
         Map<String, Object> reg = new HashMap<>();
+
         reg.put("eventId", eventId);
         reg.put("userId", currentUserId);
-        db.collection(REGISTRATIONS_COLLECTION).document(docId).set(reg)
+
+        db.collection(REGISTRATIONS_COLLECTION)
+                .document(docId)
+                .set(reg)
                 .addOnSuccessListener(aVoid -> {
+
                     joined = true;
+
                     waitingListCount++;
-                    waitingListView.setText(getString(R.string.event_detail_waiting_list_count, waitingListCount));
+
+                    waitingListView.setText(
+                            getString(R.string.event_detail_waiting_list_count, waitingListCount));
+
                     updateJoinLeaveButton();
                 })
-                .addOnFailureListener(e -> Toast.makeText(this, "Could not join event", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Could not join event", Toast.LENGTH_SHORT).show());
     }
 
     private void leaveEvent() {
+
         if (currentUserId == null) return;
+
         String docId = eventId + "_" + currentUserId;
-        db.collection(REGISTRATIONS_COLLECTION).document(docId).delete()
+
+        db.collection(REGISTRATIONS_COLLECTION)
+                .document(docId)
+                .delete()
                 .addOnSuccessListener(aVoid -> {
+
                     joined = false;
+
                     if (waitingListCount > 0) waitingListCount--;
-                    waitingListView.setText(getString(R.string.event_detail_waiting_list_count, waitingListCount));
+
+                    waitingListView.setText(
+                            getString(R.string.event_detail_waiting_list_count, waitingListCount));
+
                     updateJoinLeaveButton();
                 })
-                .addOnFailureListener(e -> Toast.makeText(this, "Could not leave event", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Could not leave event", Toast.LENGTH_SHORT).show());
     }
 
-    /** Returns doc field as string, or "". */
     private static String getString(DocumentSnapshot doc, String field) {
+
         Object o = doc.get(field);
+
         return o != null ? o.toString() : "";
     }
 
-    /** Returns doc field as Integer, or null. */
     private static Integer getInt(DocumentSnapshot doc, String field) {
+
         Object o = doc.get(field);
+
         if (o == null) return null;
+
         if (o instanceof Number) return ((Number) o).intValue();
+
         try {
             return Integer.parseInt(o.toString());
         } catch (NumberFormatException e) {
