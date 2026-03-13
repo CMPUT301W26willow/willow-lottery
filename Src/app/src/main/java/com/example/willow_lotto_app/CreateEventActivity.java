@@ -45,6 +45,7 @@ public class CreateEventActivity extends AppCompatActivity {
     private SwitchCompat locationRequiredSwitch;
     private ImageView posterPreview;
     private View posterPlaceholder;
+    private View posterArea;
     private Button submitButton;
     private FirebaseFirestore db;
 
@@ -83,6 +84,7 @@ public class CreateEventActivity extends AppCompatActivity {
         locationRequiredSwitch = findViewById(R.id.create_event_location_required);
         posterPreview = findViewById(R.id.create_event_poster_preview);
         posterPlaceholder = findViewById(R.id.create_event_poster_placeholder);
+        posterArea = findViewById(R.id.create_event_poster_area);
         submitButton = findViewById(R.id.create_event_submit);
         db = FirebaseFirestore.getInstance();
 
@@ -90,13 +92,19 @@ public class CreateEventActivity extends AppCompatActivity {
         setupDatePickerField(registrationEndInput);
         setupDatePickerField(eventDateInput);
 
-        findViewById(R.id.create_event_choose_file).setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("image/*");
-            pickImage.launch(Intent.createChooser(intent, "Select poster image"));
-        });
+        View chooseFileButton = findViewById(R.id.create_event_choose_file);
+        View.OnClickListener openPicker = v -> openImagePicker();
+        chooseFileButton.setOnClickListener(openPicker);
+        posterArea.setOnClickListener(openPicker);
+        posterPlaceholder.setOnClickListener(openPicker);
 
         submitButton.setOnClickListener(v -> createEvent());
+    }
+
+    private void openImagePicker() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        pickImage.launch(Intent.createChooser(intent, "Select poster image"));
     }
 
     /** Attach a DatePickerDialog to the given date field. */
