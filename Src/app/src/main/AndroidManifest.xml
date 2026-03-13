@@ -5,6 +5,9 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <meta-data
+        android:name="com.google.android.maps.v2.API_KEY"
+        android:value="AIzaSyDErr9U0sD14iNjpR2flkx2PkUKkN0mpS4"/>
 
     <application
         android:allowBackup="true"
@@ -18,8 +21,6 @@
 
 
         <!-- App starts here -->
-        android:theme="@style/Theme.MaterialComponents.Light.NoActionBar"
-        tools:targetApi="31">
 
 
         <activity
@@ -59,6 +60,7 @@
         <activity android:name=".EventDetailActivity" android:exported="false"/>
         <activity android:name=".SignUpActivity" android:exported="false"/>
         <activity android:name=".EditEventActivity" android:exported="false"/>
+        <activity android:name=".EntrantMapActivity" android:exported="false"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"
