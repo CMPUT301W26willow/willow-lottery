@@ -63,34 +63,71 @@ public class OrganizerLotteryManager {
             return;
         }
 
-        registrationRepository.getRegistrationsForEventByStatus(
-                eventId,
-                RegistrationStatus.WAITLISTED.getValue(),
-                new RegistrationStore.RegistrationListCallback() {
+        getEventDrawSize(eventId, new DrawSizeCallback() {
+            @Override
+            public void onSuccess(int savedDrawSize) {
+                if (savedDrawSize <= 0) {
+                    callback.onFailure(new Exception("Draw size must be set before running the lottery."));
+                    return;
+                }
+
+                getFilledSpotCount(eventId, new FilledCountCallback() {
                     @Override
-                    public void onSuccess(List<Registration> waitlistedRegistrations) {
-                        if (waitlistedRegistrations.isEmpty()) {
-                            callback.onFailure(new Exception("No waitlisted entrants available."));
+                    public void onSuccess(int filledCount) {
+                        int remainingSpots = savedDrawSize - filledCount;
+
+                        if (remainingSpots <= 0) {
+                            callback.onFailure(new Exception("No spots remaining."));
                             return;
                         }
 
-                        Collections.shuffle(waitlistedRegistrations);
-
-                        int actualDrawCount = Math.min(numberToDraw, waitlistedRegistrations.size());
-                        List<Registration> selected = new ArrayList<>(waitlistedRegistrations.subList(0, actualDrawCount));
-
-                        List<String> selectedIds = new ArrayList<>();
-                        for (Registration registration : selected) {
-                            selectedIds.add(registration.getId());
-                        }
-
-                        registrationRepository.updateManyStatuses(
-                                selectedIds,
-                                RegistrationStatus.INVITED.getValue(),
-                                new RegistrationStore.SimpleCallback() {
+                        registrationRepository.getRegistrationsForEventByStatus(
+                                eventId,
+                                RegistrationStatus.WAITLISTED.getValue(),
+                                new RegistrationStore.RegistrationListCallback() {
                                     @Override
-                                    public void onSuccess() {
-                                        sendInvitedNotifications(eventId, selected, callback);
+                                    public void onSuccess(List<Registration> waitlistedRegistrations) {
+                                        if (waitlistedRegistrations.isEmpty()) {
+                                            callback.onFailure(new Exception("No waitlisted entrants available."));
+                                            return;
+                                        }
+
+                                        Collections.shuffle(waitlistedRegistrations);
+
+                                        int actualDrawCount = Math.min(
+                                                Math.min(numberToDraw, remainingSpots),
+                                                waitlistedRegistrations.size()
+                                        );
+
+                                        if (actualDrawCount <= 0) {
+                                            callback.onFailure(new Exception("No spots remaining."));
+                                            return;
+                                        }
+
+                                        List<Registration> selected = new ArrayList<>(
+                                                waitlistedRegistrations.subList(0, actualDrawCount)
+                                        );
+
+                                        List<String> selectedIds = new ArrayList<>();
+                                        for (Registration registration : selected) {
+                                            selectedIds.add(registration.getId());
+                                        }
+
+                                        registrationRepository.updateManyStatuses(
+                                                selectedIds,
+                                                RegistrationStatus.INVITED.getValue(),
+                                                new RegistrationStore.SimpleCallback() {
+                                                    @Override
+                                                    public void onSuccess() {
+                                                        sendInvitedNotifications(eventId, selected, callback);
+                                                    }
+
+                                                    @Override
+                                                    public void onFailure(Exception e) {
+                                                        callback.onFailure(e);
+                                                    }
+                                                }
+                                        );
                                     }
 
                                     @Override
@@ -105,8 +142,14 @@ public class OrganizerLotteryManager {
                     public void onFailure(Exception e) {
                         callback.onFailure(e);
                     }
-                }
-        );
+                });
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                callback.onFailure(e);
+            }
+        });
     }
 
     /**
@@ -114,30 +157,51 @@ public class OrganizerLotteryManager {
      * Draw exactly one replacement from the WAITLISTED pool.
      */
     public void drawReplacement(String eventId, final LotteryCallback callback) {
-        registrationRepository.getRegistrationsForEventByStatus(
-                eventId,
-                RegistrationStatus.WAITLISTED.getValue(),
-                new RegistrationStore.RegistrationListCallback() {
+        getEventDrawSize(eventId, new DrawSizeCallback() {
+            @Override
+            public void onSuccess(int savedDrawSize) {
+                if (savedDrawSize <= 0) {
+                    callback.onFailure(new Exception("Draw size must be set before drawing a replacement."));
+                    return;
+                }
+
+                getFilledSpotCount(eventId, new FilledCountCallback() {
                     @Override
-                    public void onSuccess(List<Registration> waitlistedRegistrations) {
-                        if (waitlistedRegistrations.isEmpty()) {
-                            callback.onFailure(new Exception("No replacement entrants available."));
+                    public void onSuccess(int filledCount) {
+                        if (filledCount >= savedDrawSize) {
+                            callback.onFailure(new Exception("No replacement needed. Event is already full."));
                             return;
                         }
 
-                        Collections.shuffle(waitlistedRegistrations);
-                        Registration selectedReplacement = waitlistedRegistrations.get(0);
-
-                        registrationRepository.updateRegistrationStatus(
-                                selectedReplacement.getId(),
-                                RegistrationStatus.INVITED.getValue(),
-                                new RegistrationStore.SimpleCallback() {
+                        registrationRepository.getRegistrationsForEventByStatus(
+                                eventId,
+                                RegistrationStatus.WAITLISTED.getValue(),
+                                new RegistrationStore.RegistrationListCallback() {
                                     @Override
-                                    public void onSuccess() {
-                                        List<Registration> singleResult = new ArrayList<>();
-                                        singleResult.add(selectedReplacement);
+                                    public void onSuccess(List<Registration> waitlistedRegistrations) {
+                                        if (waitlistedRegistrations.isEmpty()) {
+                                            callback.onFailure(new Exception("No replacement entrants available."));
+                                            return;
+                                        }
 
-                                        sendReplacementNotification(eventId, selectedReplacement, callback);
+                                        Collections.shuffle(waitlistedRegistrations);
+                                        Registration selectedReplacement = waitlistedRegistrations.get(0);
+
+                                        registrationRepository.updateRegistrationStatus(
+                                                selectedReplacement.getId(),
+                                                RegistrationStatus.INVITED.getValue(),
+                                                new RegistrationStore.SimpleCallback() {
+                                                    @Override
+                                                    public void onSuccess() {
+                                                        sendReplacementNotification(eventId, selectedReplacement, callback);
+                                                    }
+
+                                                    @Override
+                                                    public void onFailure(Exception e) {
+                                                        callback.onFailure(e);
+                                                    }
+                                                }
+                                        );
                                     }
 
                                     @Override
@@ -152,8 +216,14 @@ public class OrganizerLotteryManager {
                     public void onFailure(Exception e) {
                         callback.onFailure(e);
                     }
-                }
-        );
+                });
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                callback.onFailure(e);
+            }
+        });
     }
 
     /**
@@ -251,5 +321,55 @@ public class OrganizerLotteryManager {
                     }
                 }
         );
+    }
+
+    private void getEventDrawSize(String eventId, final DrawSizeCallback callback) {
+        db.collection("events")
+                .document(eventId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (!documentSnapshot.exists()) {
+                        callback.onFailure(new Exception("Event not found."));
+                        return;
+                    }
+
+                    Long drawSizeLong = documentSnapshot.getLong("drawSize");
+                    int drawSize = drawSizeLong == null ? 0 : drawSizeLong.intValue();
+                    callback.onSuccess(drawSize);
+                })
+                .addOnFailureListener(callback::onFailure);
+    }
+
+    private void getFilledSpotCount(String eventId, final FilledCountCallback callback) {
+        registrationRepository.getRegistrationsForEvent(eventId, new RegistrationStore.RegistrationListCallback() {
+            @Override
+            public void onSuccess(List<Registration> registrations) {
+                int filled = 0;
+
+                for (Registration registration : registrations) {
+                    RegistrationStatus status = registration.getStatusEnum();
+                    if (status == RegistrationStatus.INVITED || status == RegistrationStatus.ACCEPTED) {
+                        filled++;
+                    }
+                }
+
+                callback.onSuccess(filled);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                callback.onFailure(e);
+            }
+        });
+    }
+
+    private interface DrawSizeCallback {
+        void onSuccess(int drawSize);
+        void onFailure(Exception e);
+    }
+
+    private interface FilledCountCallback {
+        void onSuccess(int filledCount);
+        void onFailure(Exception e);
     }
 }

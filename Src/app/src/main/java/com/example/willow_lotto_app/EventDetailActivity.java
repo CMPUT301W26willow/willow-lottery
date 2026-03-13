@@ -257,6 +257,7 @@ public class EventDetailActivity extends AppCompatActivity {
         Map<String, Object> reg = new HashMap<>();
         reg.put("eventId", eventId);
         reg.put("userId", currentUserId);
+        reg.put("status", RegistrationStatus.WAITLISTED.getValue());
         db.collection(REGISTRATIONS_COLLECTION).document(docId).set(reg)
                 .addOnSuccessListener(aVoid -> {
                     joined = true;

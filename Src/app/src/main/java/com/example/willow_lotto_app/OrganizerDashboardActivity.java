@@ -28,6 +28,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
+import android.view.WindowManager;
 
 /**
  * Activity that shows the organizer dashboard including waiting list,
@@ -56,6 +57,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_organizer_dashboard);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         db = FirebaseFirestore.getInstance();
         lotteryManager = new OrganizerLotteryManager();
         registrationRepository = new RegistrationStore();
@@ -74,6 +76,11 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         waitingListView.setAdapter(adapter);
 
         drawSizeInput = findViewById(R.id.drawSizeInput);
+        drawSizeInput.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                saveDrawSizeOnly();
+            }
+        });
         createEventButton = findViewById(R.id.createEventButton);
         runLotteryButton = findViewById(R.id.runLotteryButton);
         drawReplacementButton = findViewById(R.id.drawReplacementButton);
@@ -231,6 +238,34 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                 });
     }
 
+    private void saveDrawSizeOnly() {
+        String input = drawSizeInput.getText().toString().trim();
+
+        if (input.isEmpty()) {
+            return;
+        }
+
+        int drawSize;
+        try {
+            drawSize = Integer.parseInt(input);
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Draw size must be a number.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        lotteryManager.setDrawSize(eventId, drawSize, new OrganizerLotteryManager.SimpleCallback() {
+            @Override
+            public void onSuccess(String message) {
+                // saved silently
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(OrganizerDashboardActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     /**
      * Runs the lottery for the event using the draw size input.
      */
@@ -277,6 +312,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
      * Draws a replacement entrant for the event lottery.
      */
     private void drawReplacement() {
+        saveDrawSizeOnly();
         lotteryManager.drawReplacement(eventId, new OrganizerLotteryManager.LotteryCallback() {
             @Override
             public void onSuccess(String message, List<Registration> affectedRegistrations) {
@@ -290,4 +326,6 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
             }
         });
     }
+
+
 }
