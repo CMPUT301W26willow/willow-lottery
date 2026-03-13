@@ -2,7 +2,7 @@ package com.example.willow_lotto_app;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 
-public class NotificationRepository {
+public class NotificationStore {
 
     public interface SimpleCallback {
         void onSuccess();
@@ -11,7 +11,7 @@ public class NotificationRepository {
 
     private final FirebaseFirestore db;
 
-    public NotificationRepository() {
+    public NotificationStore() {
         this.db = FirebaseFirestore.getInstance();
     }
 

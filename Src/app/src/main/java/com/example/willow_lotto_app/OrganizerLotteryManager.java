@@ -22,13 +22,13 @@ public class OrganizerLotteryManager {
     }
 
     private final FirebaseFirestore db;
-    private final RegistrationRepository registrationRepository;
-    private final NotificationRepository notificationRepository;
+    private final RegistrationStore registrationRepository;
+    private final NotificationStore notificationRepository;
 
     public OrganizerLotteryManager() {
         this.db = FirebaseFirestore.getInstance();
-        this.registrationRepository = new RegistrationRepository();
-        this.notificationRepository = new NotificationRepository();
+        this.registrationRepository = new RegistrationStore();
+        this.notificationRepository = new NotificationStore();
     }
 
     /**
@@ -66,7 +66,7 @@ public class OrganizerLotteryManager {
         registrationRepository.getRegistrationsForEventByStatus(
                 eventId,
                 RegistrationStatus.WAITLISTED.getValue(),
-                new RegistrationRepository.RegistrationListCallback() {
+                new RegistrationStore.RegistrationListCallback() {
                     @Override
                     public void onSuccess(List<Registration> waitlistedRegistrations) {
                         if (waitlistedRegistrations.isEmpty()) {
@@ -87,7 +87,7 @@ public class OrganizerLotteryManager {
                         registrationRepository.updateManyStatuses(
                                 selectedIds,
                                 RegistrationStatus.INVITED.getValue(),
-                                new RegistrationRepository.SimpleCallback() {
+                                new RegistrationStore.SimpleCallback() {
                                     @Override
                                     public void onSuccess() {
                                         sendInvitedNotifications(eventId, selected, callback);
@@ -117,7 +117,7 @@ public class OrganizerLotteryManager {
         registrationRepository.getRegistrationsForEventByStatus(
                 eventId,
                 RegistrationStatus.WAITLISTED.getValue(),
-                new RegistrationRepository.RegistrationListCallback() {
+                new RegistrationStore.RegistrationListCallback() {
                     @Override
                     public void onSuccess(List<Registration> waitlistedRegistrations) {
                         if (waitlistedRegistrations.isEmpty()) {
@@ -131,7 +131,7 @@ public class OrganizerLotteryManager {
                         registrationRepository.updateRegistrationStatus(
                                 selectedReplacement.getId(),
                                 RegistrationStatus.INVITED.getValue(),
-                                new RegistrationRepository.SimpleCallback() {
+                                new RegistrationStore.SimpleCallback() {
                                     @Override
                                     public void onSuccess() {
                                         List<Registration> singleResult = new ArrayList<>();
@@ -174,7 +174,7 @@ public class OrganizerLotteryManager {
         registrationRepository.updateRegistrationStatus(
                 oldRegistrationId,
                 removalStatus.getValue(),
-                new RegistrationRepository.SimpleCallback() {
+                new RegistrationStore.SimpleCallback() {
                     @Override
                     public void onSuccess() {
                         drawReplacement(eventId, callback);
@@ -208,7 +208,7 @@ public class OrganizerLotteryManager {
             notificationRepository.sendNotificationToUser(
                     registration.getUserId(),
                     notification,
-                    new NotificationRepository.SimpleCallback() {
+                    new NotificationStore.SimpleCallback() {
                         @Override
                         public void onSuccess() {
                             completed[0]++;
@@ -237,7 +237,7 @@ public class OrganizerLotteryManager {
         notificationRepository.sendNotificationToUser(
                 replacement.getUserId(),
                 notification,
-                new NotificationRepository.SimpleCallback() {
+                new NotificationStore.SimpleCallback() {
                     @Override
                     public void onSuccess() {
                         List<Registration> result = new ArrayList<>();
