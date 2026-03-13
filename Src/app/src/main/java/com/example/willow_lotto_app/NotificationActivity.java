@@ -2,17 +2,46 @@ package com.example.willow_lotto_app;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class NotificationActivity extends AppCompatActivity {
+
+    private RecyclerView notificationsRecycler;
+    private TextView notificationsEmpty;
+    private NotificationAdapter adapter;
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notifications);
+
+        notificationsRecycler = findViewById(R.id.notifications_recycler);
+        notificationsEmpty = findViewById(R.id.notifications_empty);
+
+        adapter = new NotificationAdapter();
+        notificationsRecycler.setLayoutManager(new LinearLayoutManager(this));
+        notificationsRecycler.setAdapter(adapter);
+
+        db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
+
+        loadNotifications();
 
         BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
         bottomNav.setSelectedItemId(R.id.nav_notifications);
@@ -42,5 +71,52 @@ public class NotificationActivity extends AppCompatActivity {
 
             return false;
         });
+    }
+
+    private void loadNotifications() {
+        if (mAuth.getCurrentUser() == null) {
+            notificationsEmpty.setVisibility(View.VISIBLE);
+            notificationsEmpty.setText("You must be signed in to view notifications.");
+            return;
+        }
+
+        String uid = mAuth.getCurrentUser().getUid();
+
+        db.collection("users")
+                .document(uid)
+                .collection("notifications")
+                .orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<UserNotificationItem> items = new ArrayList<>();
+
+                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        UserNotificationItem item = new UserNotificationItem();
+                        item.setId(doc.getId());
+                        item.setEventId(getSafeString(doc, "eventId"));
+                        item.setTitle(getSafeString(doc, "title"));
+                        item.setMessage(getSafeString(doc, "message"));
+                        item.setType(getSafeString(doc, "type"));
+
+                        Boolean read = doc.getBoolean("read");
+                        item.setRead(read != null && read);
+
+                        item.setCreatedAt(doc.getTimestamp("createdAt"));
+                        items.add(item);
+                    }
+
+                    adapter.setNotifications(items);
+                    notificationsEmpty.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
+                })
+                .addOnFailureListener(e -> {
+                    notificationsEmpty.setVisibility(View.VISIBLE);
+                    notificationsEmpty.setText("Could not load notifications.");
+                    Toast.makeText(this, "Failed to load notifications.", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private String getSafeString(QueryDocumentSnapshot doc, String field) {
+        Object value = doc.get(field);
+        return value == null ? "" : value.toString();
     }
 }

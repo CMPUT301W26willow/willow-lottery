@@ -106,8 +106,13 @@ public class ProfileActivity extends AppCompatActivity {
                 .limit(1)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (queryDocumentSnapshots.isEmpty()) {
+                    /*if (queryDocumentSnapshots.isEmpty()) {
                         Toast.makeText(this, "You have not created any events yet.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }*/
+                    if (queryDocumentSnapshots.isEmpty()) {
+                        Toast.makeText(this, "No organizer event found. Opening create event.", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(ProfileActivity.this, CreateEventActivity.class));
                         return;
                     }
 
