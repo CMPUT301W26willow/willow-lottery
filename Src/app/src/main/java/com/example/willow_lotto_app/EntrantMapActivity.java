@@ -32,9 +32,22 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 /**
- * Activity that displays a map with markers showing where entrants
- * joined the event waiting list from.
+ * EventQrActivity.java
+ *
+ * Displays a generated QR code for a newly created event and lets the organizer
+ * download the QR image for sharing.
+ *
+ * Role in application:
+ * - Controller/View layer for the post-event-creation QR flow.
+ * - Receives the event ID and event name by Intent.
+ * - Uses QRCodeHelper to generate a QR code that links back to the event.
+ *
+ * Outstanding issues:
+ * - QR generation depends on the helper utility and assumes a valid incoming event ID.
+ * - Download feedback is minimal and error handling for storage/media failures is basic.
+ * - There is no sharing intent yet; only download is supported.
  */
+
 public class EntrantMapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final String EVENT_ID = "event1";

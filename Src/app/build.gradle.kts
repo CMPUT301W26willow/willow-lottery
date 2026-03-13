@@ -57,6 +57,10 @@ dependencies {
     testImplementation(libs.junit)
     // Robolectric for running Android unit tests on the JVM
     testImplementation("org.robolectric:robolectric:4.16.1")
+    // Mockito to test items that require mocking to function
+    testImplementation("org.mockito:mockito-core:5.23.0")
+    androidTestImplementation("org.mockito:mockito-android:5.23.0")
+    //Junit ext and espresso to test intentions
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 }
