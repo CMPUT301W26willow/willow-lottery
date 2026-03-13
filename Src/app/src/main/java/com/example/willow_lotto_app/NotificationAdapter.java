@@ -11,6 +11,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * NotificationAdapter binds UserNotificationItem data to the RecyclerView rows
+ * shown in NotificationActivity.
+ *
+ * Role in application:
+ * - Acts as the adapter layer between the notification model and the RecyclerView UI.
+ * - Inflates item_notification.xml and fills each card with notification data.
+ *
+ * Current limitations / outstanding issues:
+ * - Notifications are display-only for now.
+ * - There is no click handling yet for opening related events.
+ * - Dates are displayed using the default Date.toString() format and may be reformatted later.
+ */
+
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.NotificationViewHolder> {
 
     private final List<UserNotificationItem> notifications = new ArrayList<>();

@@ -1,5 +1,17 @@
 package com.example.willow_lotto_app;
 
+/**
+ * Enum representing the supported registration states used throughout the lottery workflow.
+ *
+ * Role in application:
+ * - Standardizes status values stored in Firestore registration documents.
+ * - Provides safe conversion between enum values and Firestore string values.
+ *
+ * Outstanding issues:
+ * - Unknown or null values currently default to WAITLISTED, which is convenient
+ *   for robustness but may hide malformed data during debugging.
+ */
+
 public enum RegistrationStatus {
     WAITLISTED("waitlisted"),
     INVITED("invited"),
