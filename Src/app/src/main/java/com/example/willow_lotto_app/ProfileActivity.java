@@ -61,13 +61,8 @@ public class ProfileActivity extends AppCompatActivity {
         saveButton.setOnClickListener(v -> saveProfile());
         cancelButton.setOnClickListener(v -> finish());
         deleteButton.setOnClickListener(v -> confirmDeleteProfile());
-        organizerDashboardButton.setOnClickListener(
-                v -> startActivity(new Intent(this, OrganizerDashboardActivity.class)));
-
-        // click listener for Organizer Dashboard button
-        /*organizerDashboardButton.setOnClickListener(
-                v -> startActivity(new Intent(this, OrganizerDashboardActivity.class)));*/
-        //organizerDashboardButton.setOnClickListener(v -> openOrganizerDashboardForLatestEvent());
+        // Open the organizer dashboard for the latest event created by this user
+        organizerDashboardButton.setOnClickListener(v -> openOrganizerDashboardForLatestEvent());
         // click listener for Bottom Navigation to guide to diffrent navigation pages of the app
 
         bottomNav.setOnItemSelectedListener(item -> {
