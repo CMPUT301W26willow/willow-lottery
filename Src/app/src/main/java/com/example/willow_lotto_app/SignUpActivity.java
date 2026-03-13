@@ -47,11 +47,10 @@ public class SignUpActivity extends AppCompatActivity {
             String password = String.valueOf(passwordInput.getEditText().getText());
             String phone = "000-000-0000";
 
-            if(name.isEmpty() || email.isEmpty() || password.isEmpty() ){
-
-                if (name.isEmpty()){Toast.makeText(this, "Name required", Toast.LENGTH_SHORT).show();}
-                if (email.isEmpty()){Toast.makeText(this, "Email Required", Toast.LENGTH_SHORT).show();}
-                if (password.isEmpty()){Toast.makeText(this, "Password Invalid", Toast.LENGTH_SHORT).show();}
+            String error = validateSignUpInput(name, email, password);
+            if (error != null) {
+                Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+                return;
             }
 
             if (mAuth.getCurrentUser() == null) return;
@@ -76,6 +75,14 @@ public class SignUpActivity extends AppCompatActivity {
 
         });
 
+    }
+
+    /** Validates sign-up fields; returns first error message or null if valid. */
+    static String validateSignUpInput(String name, String email, String password) {
+        if (name == null || name.trim().isEmpty()) return "Name required";
+        if (email == null || email.trim().isEmpty()) return "Email Required";
+        if (password == null || password.trim().isEmpty()) return "Password Invalid";
+        return null;
     }
 
 }

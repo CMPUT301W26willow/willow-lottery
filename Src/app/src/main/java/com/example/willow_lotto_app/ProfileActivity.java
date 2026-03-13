@@ -202,8 +202,9 @@ public class ProfileActivity extends AppCompatActivity {
         String email = emailInput.getText().toString().trim();
         String phone = phoneInput.getText().toString().trim();
 
-        if (name.isEmpty() || email.isEmpty()) {
-            Toast.makeText(this, "Name and Email required", Toast.LENGTH_SHORT).show();
+        String error = validateProfileInput(name, email);
+        if (error != null) {
+            Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -227,24 +228,27 @@ public class ProfileActivity extends AppCompatActivity {
                         Toast.makeText(this, "Error Saving Profile", Toast.LENGTH_SHORT).show());
     }
 
+    /** Validates profile fields; returns error message or null if valid. */
+    static String validateProfileInput(String name, String email) {
+        if (name == null || name.trim().isEmpty() ||
+                email == null || email.trim().isEmpty()) {
+            return "Name and Email required";
+        }
+        return null;
+    }
     // Reads the registeredEvents array stored directly on the user's document,
     // then looks up each event name from the events collection
     private void showRegistrationHistory() {
-
         // Exit early if no user is signed in
         if (mAuth.getCurrentUser() == null) return;
-
         String uid = mAuth.getCurrentUser().getUid();
-
         // Read the user's own document
         db.collection("users")
                 .document(uid)
                 .get()
                 .addOnSuccessListener(userDoc -> {
-
                     // Pull the registeredEvents array directly off the user document
                     List<String> registeredEvents = (List<String>) userDoc.get("registeredEvents");
-
                     if (registeredEvents == null || registeredEvents.isEmpty()) {
                         new AlertDialog.Builder(this)
                                 .setTitle("Registration History")
@@ -253,11 +257,9 @@ public class ProfileActivity extends AppCompatActivity {
                                 .show();
                         return;
                     }
-
                     // Fetch each event document to get its name
                     StringBuilder history = new StringBuilder();
                     AtomicInteger remaining = new AtomicInteger(registeredEvents.size());
-
                     for (String eventId : registeredEvents) {
                         db.collection("events").document(eventId)
                                 .get()
@@ -265,7 +267,6 @@ public class ProfileActivity extends AppCompatActivity {
                                     String eventName = eventDoc.getString("name");
                                     history.append("• ").append(eventName != null ? eventName : eventId)
                                             .append("\n\n");
-
                                     // Show the dialog only once all event lookups are done
                                     if (remaining.decrementAndGet() == 0) {
                                         new AlertDialog.Builder(this)
