@@ -1,9 +1,20 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <!--
+        Bottom nav fix: With Material 3 theme, BottomNavigationView can draw labels on top of icons.
+        We override bottomNavigationStyle to use Material 2's layout (icon on top, label below) so
+        "Home", "Events", etc. appear under the icons. See Widget.Willow.BottomNavigationView below.
+        Author of change: devtiwari
+    -->
     <!-- Base application theme. -->
     <style name="Base.Theme.Willow_Lotto_app" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Use Material 2 bottom nav style so labels sit below icons (M3 can show label on top). -->
+        <item name="bottomNavigationStyle">@style/Widget.Willow.BottomNavigationView</item>
     </style>
 
     <style name="Theme.Willow_Lotto_app" parent="Base.Theme.Willow_Lotto_app" />
+
+    <!-- Material 2 layout: icon on top, label below. Fixes label-over-icon with Material 3 theme. -->
+    <style name="Widget.Willow.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView" />
 </resources>
