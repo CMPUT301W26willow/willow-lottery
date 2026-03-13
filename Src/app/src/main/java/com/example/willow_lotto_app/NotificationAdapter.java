@@ -26,10 +26,9 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     @NonNull
     @Override
     public NotificationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-//        View view = LayoutInflater.from(parent.getContext());
-//                .inflate(R.layout.item_notification, parent, false);
-//        return new NotificationViewHolder(view);
-        return null;
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_notification, parent, false);
+        return new NotificationViewHolder(view);
     }
 
     @Override
@@ -63,11 +62,11 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
         NotificationViewHolder(@NonNull View itemView) {
             super(itemView);
-//            titleText = itemView.findViewById(R.id.notification_title);
- //           messageText = itemView.findViewById(R.id.notification_message);
- //           typeText = itemView.findViewById(R.id.notification_type);
- //           dateText = itemView.findViewById(R.id.notification_date);
-//            readText = itemView.findViewById(R.id.notification_read_status);
+            titleText = itemView.findViewById(R.id.notification_title);
+            messageText = itemView.findViewById(R.id.notification_message);
+            typeText = itemView.findViewById(R.id.notification_type);
+            dateText = itemView.findViewById(R.id.notification_date);
+            readText = itemView.findViewById(R.id.notification_read_status);
         }
     }
 }
