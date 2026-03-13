@@ -1,3 +1,15 @@
+/**
+ * OrganizerDashboardActivity.java
+ *
+ *
+ * Displays the organizer dashboard screen, including the waiting list of entrants,
+ * lottery controls, geolocation toggle, and map view button.
+ *
+ * Role: Controller in the MVC pattern.
+ *
+ * Outstanding issues:
+ * - Event ID is passed via Intent but defaults to null if not provided.
+ */
 package com.example.willow_lotto_app;
 
 import android.content.Intent;
@@ -5,71 +17,41 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
-
-import android.widget.EditText;
 import java.util.List;
 
-
 /**
- * OrganizerDashboardActivity: This activity is used to display the organizer dashboard.
- * 
- * Features:
- * - Display the waiting list
- * - Display the create event button
- * - Display the back button
-  */
+ * Activity that shows the organizer dashboard including waiting list,
+ * lottery controls, geolocation toggle, and map view.
+ */
 public class OrganizerDashboardActivity extends AppCompatActivity {
-    // reference to the waiting list view
+
     private ListView waitingListView;
-    // reference to the array adapter
     private ArrayAdapter<String> adapter;
-    // reference to the array list of entrant names
     private ArrayList<String> entrantNames;
 
     public static final String EXTRA_EVENT_ID = "event_id";
     private EditText drawSizeInput;
-    /*private Button saveDrawSizeButton;*/
     private Button runLotteryButton;
     private Button drawReplacementButton;
+    private Switch geolocationSwitch;
 
     private String eventId;
     private OrganizerLotteryManager lotteryManager;
     private RegistrationStore registrationRepository;
     private FirebaseFirestore db;
 
-    // Called when the activity is created.
-    // Initializes the UI layout, connects all UI elements to the code,
-    // and sets up the waiting list.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        /*
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_organizer_dashboard);
-
-        Button createEventButton = findViewById(R.id.createEventButton);
-        Button backButton = findViewById(R.id.backToProfileButton);
-        // set the create event button to the create event activity
-        createEventButton.setOnClickListener(v -> startActivity(new Intent(this, CreateEventActivity.class)));
-        // set the back button to the finish method
-        backButton.setOnClickListener(v -> finish());
-        // get the waiting list view and set it to the waitingListView variable
-        waitingListView = findViewById(R.id.waitingListView);
-        entrantNames = new ArrayList<>();
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, entrantNames);
-        waitingListView.setAdapter(adapter);
-
-        loadWaitingList();
-         */
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_organizer_dashboard);
         db = FirebaseFirestore.getInstance();
@@ -83,49 +65,34 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
             finish();
             return;
         }
+
+        waitingListView = findViewById(R.id.waitingListView);
+        entrantNames = new ArrayList<>();
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, entrantNames);
+        waitingListView.setAdapter(adapter);
+
         drawSizeInput = findViewById(R.id.drawSizeInput);
-        /*saveDrawSizeButton = findViewById(R.id.saveDrawSizeButton);*/
         runLotteryButton = findViewById(R.id.runLotteryButton);
         drawReplacementButton = findViewById(R.id.drawReplacementButton);
+        geolocationSwitch = findViewById(R.id.geolocationSwitch);
 
-        /*saveDrawSizeButton.setOnClickListener(v -> saveDrawSize());*/
         runLotteryButton.setOnClickListener(v -> runLottery());
         drawReplacementButton.setOnClickListener(v -> drawReplacement());
 
         Button viewMapButton = findViewById(R.id.viewMapButton);
         viewMapButton.setOnClickListener(v -> startActivity(new Intent(this, EntrantMapActivity.class)));
 
+        geolocationSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> saveGeolocationSetting(isChecked));
+
         loadEventDrawSize();
         loadWaitingList();
+        loadGeolocationSetting();
     }
 
-    // Load the waiting list from the database
+    /**
+     * Loads the waiting list from Firebase using the registration repository.
+     */
     private void loadWaitingList() {
-        /*
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        db.collection("events")
-                .document("event1")
-                .collection("waitingList")
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    entrantNames.clear();
-                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                        String name = doc.getString("name");
-                        if (name != null) {
-                            entrantNames.add(name);
-                        }
-                    }
-                    adapter.notifyDataSetChanged();
-
-                    if (entrantNames.isEmpty()) {
-                        Toast.makeText(this, "No entrants yet.", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("Firestore", "Error getting waiting list", e);
-                    Toast.makeText(this, "Failed to load waiting list.", Toast.LENGTH_SHORT).show();
-                });*/
         registrationRepository.getRegistrationsForEventByStatus(
                 eventId,
                 RegistrationStatus.WAITLISTED.getValue(),
@@ -156,15 +123,15 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         );
     }
 
+    /**
+     * Loads the draw size for the event from Firestore and populates the input field.
+     */
     private void loadEventDrawSize() {
         db.collection("events")
                 .document(eventId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
-                    if (!documentSnapshot.exists()) {
-                        return;
-                    }
-
+                    if (!documentSnapshot.exists()) return;
                     Long drawSize = documentSnapshot.getLong("drawSize");
                     if (drawSize != null) {
                         drawSizeInput.setText(String.valueOf(drawSize.intValue()));
@@ -173,16 +140,19 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> Log.e("OrganizerDashboard", "Failed to load draw size", e));
     }
 
+    /**
+     * Loads user names from Firestore for a list of user IDs.
+     *
+     * @param userIds List of user IDs to fetch names for.
+     */
     private void loadUserNames(List<String> userIds) {
         entrantNames.clear();
-
         if (userIds.isEmpty()) {
             adapter.notifyDataSetChanged();
             return;
         }
 
         final int[] completed = {0};
-
         for (String userId : userIds) {
             db.collection("users")
                     .document(userId)
@@ -213,41 +183,50 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                     });
         }
     }
-/*
-    private void saveDrawSize() {
-        String input = drawSizeInput.getText().toString().trim();
 
-        if (input.isEmpty()) {
-            Toast.makeText(this, "Enter a draw size.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        int drawSize;
-        try {
-            drawSize = Integer.parseInt(input);
-        } catch (NumberFormatException e) {
-            Toast.makeText(this, "Draw size must be a number.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        lotteryManager.setDrawSize(eventId, drawSize, new OrganizerLotteryManager.SimpleCallback() {
-            @Override
-            public void onSuccess(String message) {
-                Toast.makeText(OrganizerDashboardActivity.this, message, Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                Toast.makeText(OrganizerDashboardActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+    /**
+     * Loads the current geolocation requirement setting for the event from Firestore
+     * and updates the switch UI accordingly.
+     */
+    private void loadGeolocationSetting() {
+        db.collection("events")
+                .document(eventId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Boolean geolocationRequired = documentSnapshot.getBoolean("geolocationRequired");
+                        if (geolocationRequired != null) {
+                            geolocationSwitch.setChecked(geolocationRequired);
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> Log.e("OrganizerDashboard", "Failed to load geolocation setting", e));
     }
 
- */
+    /**
+     * Saves the geolocation requirement setting for the event to Firestore.
+     *
+     * @param isEnabled Whether geolocation is required for the event.
+     */
+    private void saveGeolocationSetting(boolean isEnabled) {
+        db.collection("events")
+                .document(eventId)
+                .update("geolocationRequired", isEnabled)
+                .addOnSuccessListener(aVoid -> {
+                    String msg = isEnabled ? "Geolocation enabled" : "Geolocation disabled";
+                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("OrganizerDashboard", "Failed to save geolocation setting", e);
+                    Toast.makeText(this, "Failed to update geolocation setting", Toast.LENGTH_SHORT).show();
+                });
+    }
 
+    /**
+     * Runs the lottery for the event using the draw size input.
+     */
     private void runLottery() {
         String input = drawSizeInput.getText().toString().trim();
-
         if (input.isEmpty()) {
             Toast.makeText(this, "Enter a draw size first.", Toast.LENGTH_SHORT).show();
             return;
@@ -285,6 +264,9 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Draws a replacement entrant for the event lottery.
+     */
     private void drawReplacement() {
         lotteryManager.drawReplacement(eventId, new OrganizerLotteryManager.LotteryCallback() {
             @Override
