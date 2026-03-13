@@ -16,6 +16,15 @@ import com.google.firebase.firestore.SetOptions;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Email/password account registration screen.
+ *
+ * Responsibilities:
+ * - Implements 01.02.01 "Account Registration" by creating a Firebase Auth
+ *   user with email and password.
+ * - Seeds a profile document in the {@code users} collection so
+ *   {@link ProfileActivity} can load and update the same data later.
+ */
 public class SignUpActivity extends AppCompatActivity {
 
     //User Input UI elements
@@ -42,40 +51,51 @@ public class SignUpActivity extends AppCompatActivity {
 
         //OnclickListener to allow user to proceed
         signUpComplete.setOnClickListener(view -> {
-            String name = String.valueOf(nameInput.getEditText().getText());
-            String email = String.valueOf(emailInput.getEditText().getText());
+            String name = String.valueOf(nameInput.getEditText().getText()).trim();
+            String email = String.valueOf(emailInput.getEditText().getText()).trim();
             String password = String.valueOf(passwordInput.getEditText().getText());
             String phone = "000-000-0000";
 
-            if(name.isEmpty() || email.isEmpty() || password.isEmpty() ){
-
-                if (name.isEmpty()){Toast.makeText(this, "Name required", Toast.LENGTH_SHORT).show();}
-                if (email.isEmpty()){Toast.makeText(this, "Email Required", Toast.LENGTH_SHORT).show();}
-                if (password.isEmpty()){Toast.makeText(this, "Password Invalid", Toast.LENGTH_SHORT).show();}
+            String error = validateSignUpInput(name, email, password);
+            if (error != null) {
+                Toast.makeText(this, error, Toast.LENGTH_SHORT).show();
+                return;
             }
 
-            if (mAuth.getCurrentUser() == null) return;
-            String uid = mAuth.getCurrentUser().getUid();
+            mAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnSuccessListener(authResult -> {
+                        String uid = authResult.getUser().getUid();
 
-            //Mapping User Hashmap
-            Map<String,Object> user = new HashMap<>();
-            user.put("Name",name);
-            user.put("Email",email);
-            user.put("Password",password);
-            user.put("Phone",phone);
+                        //Mapping User Hashmap (keys match ProfileActivity expectations)
+                        Map<String, Object> user = new HashMap<>();
+                        user.put("name", name);
+                        user.put("email", email);
+                        user.put("phone", phone);
 
-
-
-            db.collection("users")
-                    .document(uid)
-                    .set(user, SetOptions.merge())
-                    .addOnSuccessListener(unused -> {
-                Toast.makeText(this, "Account Created", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(SignUpActivity.this, MainActivity.class));
-            }).addOnFailureListener(e -> Toast.makeText(this, "Error Creating Account", Toast.LENGTH_SHORT).show());
+                        db.collection("users")
+                                .document(uid)
+                                .set(user, SetOptions.merge())
+                                .addOnSuccessListener(unused -> {
+                                    Toast.makeText(this, "Account Created", Toast.LENGTH_SHORT).show();
+                                    startActivity(new Intent(SignUpActivity.this, MainActivity.class));
+                                    finish();
+                                })
+                                .addOnFailureListener(e ->
+                                        Toast.makeText(this, "Error Saving Profile", Toast.LENGTH_SHORT).show());
+                    })
+                    .addOnFailureListener(e ->
+                            Toast.makeText(this, "Error Creating Account: " + e.getMessage(), Toast.LENGTH_SHORT).show());
 
         });
 
+    }
+
+    /** Validates sign-up fields; returns first error message or null if valid. */
+    static String validateSignUpInput(String name, String email, String password) {
+        if (name == null || name.trim().isEmpty()) return "Name required";
+        if (email == null || email.trim().isEmpty()) return "Email Required";
+        if (password == null || password.trim().isEmpty()) return "Password Invalid";
+        return null;
     }
 
 }

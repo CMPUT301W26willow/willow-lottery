@@ -1,13 +1,16 @@
 package com.example.willow_lotto_app;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -26,10 +29,22 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.InputStream;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
-/** Create event form; uploads poster to Storage and saves event to Firestore. */
+/**
+ * Organizer "Create Event" form.
+ *
+ * Responsibilities:
+ * - Collects core event fields and validates required ones for
+ *   02.01.04 "Event Registration period" and event metadata.
+ * - Uploads an optional poster image to Firebase Storage and stores its URL
+ *   in the {@code events} document.
+ * - On success, navigates to {@link EventQrActivity} so organizers can
+ *   share a QR code for entrants to join.
+ */
 public class CreateEventActivity extends AppCompatActivity {
 
     private EditText nameInput;
@@ -40,6 +55,7 @@ public class CreateEventActivity extends AppCompatActivity {
     private SwitchCompat locationRequiredSwitch;
     private ImageView posterPreview;
     private View posterPlaceholder;
+    private View posterArea;
     private Button submitButton;
     private FirebaseFirestore db;
 
@@ -78,22 +94,60 @@ public class CreateEventActivity extends AppCompatActivity {
         locationRequiredSwitch = findViewById(R.id.create_event_location_required);
         posterPreview = findViewById(R.id.create_event_poster_preview);
         posterPlaceholder = findViewById(R.id.create_event_poster_placeholder);
+        posterArea = findViewById(R.id.create_event_poster_area);
         submitButton = findViewById(R.id.create_event_submit);
         db = FirebaseFirestore.getInstance();
 
-        findViewById(R.id.create_event_choose_file).setOnClickListener(v -> {
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("image/*");
-            pickImage.launch(Intent.createChooser(intent, "Select poster image"));
-        });
+        setupDatePickerField(registrationStartInput);
+        setupDatePickerField(registrationEndInput);
+        setupDatePickerField(eventDateInput);
+
+        View chooseFileButton = findViewById(R.id.create_event_choose_file);
+        View.OnClickListener openPicker = v -> openImagePicker();
+        chooseFileButton.setOnClickListener(openPicker);
+        posterArea.setOnClickListener(openPicker);
+        posterPlaceholder.setOnClickListener(openPicker);
 
         submitButton.setOnClickListener(v -> createEvent());
     }
 
-    /**
-     * Validates required event form fields. Returns the error message to show, or null if valid.
-     * Exposed for unit testing.
-     */
+    private void openImagePicker() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        pickImage.launch(Intent.createChooser(intent, "Select poster image"));
+    }
+
+    /** Attach a DatePickerDialog to the given date field. */
+    private void setupDatePickerField(EditText field) {
+        field.setInputType(InputType.TYPE_NULL);
+        field.setOnClickListener(v -> showDatePicker(field));
+        field.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                showDatePicker(field);
+            }
+        });
+    }
+
+    private void showDatePicker(EditText target) {
+        final Calendar cal = Calendar.getInstance();
+        int year = cal.get(Calendar.YEAR);
+        int month = cal.get(Calendar.MONTH);
+        int day = cal.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog dialog = new DatePickerDialog(
+                this,
+                (DatePicker view, int y, int m, int d) -> {
+                    String formatted = String.format(Locale.US, "%04d-%02d-%02d", y, m + 1, d);
+                    target.setText(formatted);
+                },
+                year,
+                month,
+                day
+        );
+        dialog.show();
+    }
+
+    /** Validates required event fields. Returns error message, or null if valid. */
     static String validateEventForm(String name, String description, String eventDate) {
         if (name == null || name.trim().isEmpty()) return "Event name is required";
         if (description == null || description.trim().isEmpty()) return "Description is required";

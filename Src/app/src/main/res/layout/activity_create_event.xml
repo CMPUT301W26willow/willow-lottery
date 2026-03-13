@@ -103,7 +103,9 @@
                 android:layout_height="120dp"
                 android:background="@drawable/input_background"
                 android:padding="16dp"
-                android:layout_marginBottom="8dp">
+                android:layout_marginBottom="8dp"
+                android:clickable="true"
+                android:focusable="true">
                 <LinearLayout
                     android:id="@+id/create_event_poster_placeholder"
                     android:layout_width="match_parent"
@@ -160,7 +162,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/event_date_hint"
-                android:inputType="date"
+                android:inputType="none"
+                android:focusable="false"
+                android:clickable="true"
                 android:background="@drawable/input_background"
                 android:padding="12dp"
                 android:layout_marginBottom="12dp"/>
@@ -176,7 +180,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/event_date_hint"
-                android:inputType="date"
+                android:inputType="none"
+                android:focusable="false"
+                android:clickable="true"
                 android:background="@drawable/input_background"
                 android:padding="12dp"
                 android:layout_marginBottom="16dp"/>
@@ -193,7 +199,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/event_date_hint"
-                android:inputType="date"
+                android:inputType="none"
+                android:focusable="false"
+                android:clickable="true"
                 android:background="@drawable/input_background"
                 android:padding="12dp"
                 android:layout_marginBottom="24dp"/>

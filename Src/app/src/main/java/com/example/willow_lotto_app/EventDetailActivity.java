@@ -22,7 +22,15 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Shows full event details, poster, registration dates, and join/leave waiting list. */
+/**
+ * Detailed view for a single event.
+ *
+ * Responsibilities:
+ * - Displays event metadata, poster, and registration period (02.01.04).
+ * - Implements 01.01.01 / 01.01.02 "Join/Leave Events" by letting the user
+ *   join or leave the waiting list for this event.
+ * - Supports deep links from QR codes (willow-lottery://event/{id}).
+ */
 public class EventDetailActivity extends AppCompatActivity {
 
     private static final String REGISTRATIONS_COLLECTION = "registrations";
@@ -53,7 +61,19 @@ public class EventDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_detail);
 
+        // Support both in-app navigation (EXTRA_EVENT_ID) and deep links via QR code
         eventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
+        if (eventId == null || eventId.isEmpty()) {
+            // Try to parse from custom URI: willow-lottery://event/{eventId}
+            Uri data = getIntent().getData();
+            if (data != null
+                    && "willow-lottery".equals(data.getScheme())
+                    && "event".equals(data.getHost())
+                    && data.getPathSegments() != null
+                    && !data.getPathSegments().isEmpty()) {
+                eventId = data.getPathSegments().get(0);
+            }
+        }
         if (eventId == null || eventId.isEmpty()) {
             Toast.makeText(this, "Event not found", Toast.LENGTH_SHORT).show();
             finish();
@@ -75,7 +95,7 @@ public class EventDetailActivity extends AppCompatActivity {
         nameView = findViewById(R.id.event_detail_name);
         dateView = findViewById(R.id.event_detail_date);
         descriptionView = findViewById(R.id.event_detail_description);
-        organizerView = findViewById(R.id.event_detail_organizer);
+        organizerView = findViewById(R.id.event_detail_organizer);        
         registrationDatesView = findViewById(R.id.event_detail_registration_dates);
         registrationOpensView = findViewById(R.id.event_detail_registration_opens);
         waitingListView = findViewById(R.id.event_detail_waiting_list);
@@ -119,9 +139,12 @@ public class EventDetailActivity extends AppCompatActivity {
         nameView.setText(event.getName() != null ? event.getName() : "");
         descriptionView.setText(event.getDescription() != null ? event.getDescription() : "");
 
-        organizerView.setText(getString(R.string.event_detail_organized_by,
+        String organizerLabel =
                 event.getOrganizerId() != null && !event.getOrganizerId().isEmpty()
-                        ? event.getOrganizerId() : "Organizer"));
+                        ? event.getOrganizerId()
+                        : "Organizer";
+        organizerView.setText(
+                getString(R.string.event_detail_organized_by, organizerLabel));
 
         dateView.setText(getString(R.string.event_detail_event_date,
                 event.getDate() != null ? event.getDate() : ""));

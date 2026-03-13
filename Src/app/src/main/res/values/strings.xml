@@ -59,6 +59,7 @@
     <string name="done">Done</string>
     <string name="event_join">Join</string>
     <string name="event_leave">Leave</string>
+    <string name="event_view_details">View Details</string>
     <string name="event_detail_title">Event Details</string>
     <string name="event_detail_registration_format">%1$s – %2$s</string>
     <string name="event_detail_no_registration_dates">Not set</string>

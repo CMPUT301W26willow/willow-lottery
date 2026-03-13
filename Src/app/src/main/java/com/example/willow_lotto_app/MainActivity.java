@@ -2,8 +2,6 @@ package com.example.willow_lotto_app;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,21 +22,20 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Full events list screen.
+ * Home screen for entrants.
  *
  * Responsibilities:
- * - Implements 01.01.03 "View events available to join" by listing all
- *   events from Firestore with an empty-state message when none exist.
- * - Connects join/leave interactions (01.01.01 / 01.01.02) via
- *   {@link EventsAdapter.OnJoinLeaveListener}.
- * - Opens {@link EventDetailActivity} for the selected event.
+ * - Implements 01.01.03 "View events available to join" by showing a
+ *   limited feed of events the user can browse.
+ * - Wires up bottom navigation to Events, Notifications, and Profile.
+ * - Delegates rendering of individual cards to {@link EventsAdapter}.
  */
-public class EventsActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity {
 
     private static final String REGISTRATIONS_COLLECTION = "registrations";
 
-    private RecyclerView eventsRecycler;
-    private TextView eventsEmpty;
+    BottomNavigationView bottomNav;
+    private RecyclerView homeEventsRecycler;
     private EventsAdapter adapter;
     private FirebaseFirestore db;
     private String currentUserId;
@@ -46,16 +43,14 @@ public class EventsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_events);
+        setContentView(R.layout.activity_main);
 
-        eventsRecycler = findViewById(R.id.events_recycler);
-        eventsEmpty = findViewById(R.id.events_empty);
-        BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
-        bottomNav.setSelectedItemId(R.id.nav_events);
-
+        bottomNav = findViewById(R.id.bottom_nav);
+        bottomNav.setSelectedItemId(R.id.nav_home);
+        homeEventsRecycler = findViewById(R.id.home_events_recycler);
         adapter = new EventsAdapter();
-        eventsRecycler.setLayoutManager(new LinearLayoutManager(this));
-        eventsRecycler.setAdapter(adapter);
+        homeEventsRecycler.setLayoutManager(new LinearLayoutManager(this));
+        homeEventsRecycler.setAdapter(adapter);
 
         db = FirebaseFirestore.getInstance();
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
@@ -71,46 +66,46 @@ public class EventsActivity extends AppCompatActivity {
                 reg.put("eventId", event.getId());
                 reg.put("userId", currentUserId);
                 db.collection(REGISTRATIONS_COLLECTION).document(docId).set(reg)
-                        .addOnSuccessListener(aVoid -> adapter.setEventJoined(event.getId(), true))
-                        .addOnFailureListener(e -> Toast.makeText(EventsActivity.this, "Could not join event", Toast.LENGTH_SHORT).show());
+                        .addOnSuccessListener(aVoid -> {
+                            adapter.setEventJoined(event.getId(), true);
+                        })
+                        .addOnFailureListener(e -> Toast.makeText(MainActivity.this, "Could not join event", Toast.LENGTH_SHORT).show());
             }
-
+            
             @Override
             public void onLeave(Event event) {
                 if (currentUserId == null) return;
                 String docId = event.getId() + "_" + currentUserId;
                 db.collection(REGISTRATIONS_COLLECTION).document(docId).delete()
                         .addOnSuccessListener(aVoid -> adapter.setEventJoined(event.getId(), false))
-                        .addOnFailureListener(e -> Toast.makeText(EventsActivity.this, "Could not leave event", Toast.LENGTH_SHORT).show());
+                        .addOnFailureListener(e -> Toast.makeText(MainActivity.this, "Could not leave event", Toast.LENGTH_SHORT).show());
             }
         });
         adapter.setOnEventClickListener(event -> {
-            Intent intent = new Intent(EventsActivity.this, EventDetailActivity.class);
+            Intent intent = new Intent(MainActivity.this, EventDetailActivity.class);
             intent.putExtra(EventDetailActivity.EXTRA_EVENT_ID, event.getId());
             startActivity(intent);
         });
         loadEvents();
 
         bottomNav.setOnItemSelectedListener(item -> {
+
             if (item.getItemId() == R.id.nav_home) {
-                startActivity(new Intent(this, MainActivity.class));
-                finish();
                 return true;
             }
 
             if (item.getItemId() == R.id.nav_events) {
+                startActivity(new Intent(this, EventsActivity.class));
                 return true;
             }
 
             if (item.getItemId() == R.id.nav_notifications) {
                 startActivity(new Intent(this, NotificationActivity.class));
-                finish();
                 return true;
             }
 
             if (item.getItemId() == R.id.nav_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
-                finish();
                 return true;
             }
 
@@ -118,9 +113,10 @@ public class EventsActivity extends AppCompatActivity {
         });
     }
 
-    // Load all events then user's joined IDs.
+    // Load events (limit 10) then current user's joined IDs.
     private void loadEvents() {
         db.collection("events")
+                .limit(10)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Event> list = new ArrayList<>();
@@ -135,20 +131,15 @@ public class EventsActivity extends AppCompatActivity {
                         list.add(event);
                     }
                     adapter.setEvents(list);
-                    eventsEmpty.setVisibility(list.isEmpty() ? View.VISIBLE : View.GONE);
                     if (currentUserId != null) {
                         loadJoinedEventIds(joined -> adapter.setJoinedEventIds(joined));
                     } else {
                         adapter.setJoinedEventIds(new HashSet<>());
                     }
-                })
-                .addOnFailureListener(e -> {
-                    adapter.setEvents(new ArrayList<>());
-                    eventsEmpty.setVisibility(View.VISIBLE);
-                    eventsEmpty.setText("Could not load events");
                 });
     }
 
+    // Query registrations where userId = currentUser → set of eventIds.
     private void loadJoinedEventIds(OnJoinedLoadedListener listener) {
         if (currentUserId == null) {
             listener.onLoaded(new HashSet<>());
@@ -177,4 +168,4 @@ public class EventsActivity extends AppCompatActivity {
         Object o = doc.get(field);
         return o != null ? o.toString() : "";
     }
-}
+    }

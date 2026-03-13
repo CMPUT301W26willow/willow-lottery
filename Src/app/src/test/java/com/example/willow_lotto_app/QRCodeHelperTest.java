@@ -5,16 +5,15 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 /**
- * Unit tests for {@link QRCodeHelper} payload logic (no Android APIs).
- * Bitmap generation is covered by UI/instrumentation or manual testing.
+ * Unit tests for {@link QRCodeHelper}.
+ * Only tests string payload generation (no Android Bitmap).
  */
 public class QRCodeHelperTest {
 
     @Test
     public void getEventQrPayload_nullId_usesEmptySuffix() {
         String payload = QRCodeHelper.getEventQrPayload(null);
-        assertEquals("Scheme should end with slash when id is null",
-                QRCodeHelper.SCHEME, payload);
+        assertEquals("willow-lottery://event/", payload);
     }
 
     @Test
@@ -24,9 +23,9 @@ public class QRCodeHelperTest {
     }
 
     @Test
-    public void getEventQrPayload_emptyString_appendsNothing() {
+    public void getEventQrPayload_emptyString_addsNothing() {
         String payload = QRCodeHelper.getEventQrPayload("");
-        assertEquals(QRCodeHelper.SCHEME, payload);
+        assertEquals("willow-lottery://event/", payload);
     }
 }
 

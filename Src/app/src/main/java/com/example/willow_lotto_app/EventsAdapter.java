@@ -1,49 +1,44 @@
 package com.example.willow_lotto_app;
 
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/** 
- *EventsAdapter
+/**
+ * RecyclerView adapter for event cards on Home and Events screens.
  *
- * RecyclerView adapter responsible for displaying a list of events in the UI.
- *
- * This adapter binds Event data to the item_event layout and manages
- * user interactions such as:
- *  - Joining an event
- *  - Leaving an event
- *  - Clicking an event to view more details
- *
- * The adapter does not directly handle database operations. Instead,
- * it communicates user actions through listener interfaces which are
- * implemented by the hosting activity (e.g., MainActivity).
-
-*/
+ * Responsibilities:
+ * - Binds Firestore-backed {@link Event} models to {@code item_event.xml}
+ *   cards, including poster, title, date, and short description.
+ * - Exposes callbacks for:
+ *   - Joining/leaving events (01.01.01 / 01.01.02) via
+ *     {@link OnJoinLeaveListener} (used in older flows).
+ *   - Opening detailed event view (01.01.03) via
+ *     {@link OnEventClickListener}.
+ */
 public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewHolder> {
-    /**
-     * Listener used to notify when the user presses Join or Leave.
-     * The activity using this adapter will implement the logic.
-     */
+
     public interface OnJoinLeaveListener {
         void onJoin(Event event);
         void onLeave(Event event);
     }
 
-    /**
-     * Listener used to notify when the user clicks on an event.
-     * The activity using this adapter will implement the logic.
-     */
     public interface OnEventClickListener {
         void onEventClick(Event event);
     }
@@ -54,7 +49,6 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
     private OnJoinLeaveListener joinLeaveListener;
     private OnEventClickListener eventClickListener;
 
-    // Set the events list
     public void setEvents(List<Event> events) {
         this.events.clear();
         if (events != null) {
@@ -63,7 +57,6 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         notifyDataSetChanged();
     }
 
-    // Set the joined event IDs
     public void setJoinedEventIds(Set<String> joinedEventIds) {
         this.joinedEventIds.clear();
         if (joinedEventIds != null) {
@@ -72,18 +65,15 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         notifyDataSetChanged();
     }
 
-    // Set the current user ID
     public void setCurrentUserId(String currentUserId) {
         this.currentUserId = currentUserId;
         notifyDataSetChanged();
     }
 
-    // Set the join leave listener
     public void setOnJoinLeaveListener(OnJoinLeaveListener listener) {
         this.joinLeaveListener = listener;
     }
 
-    // Set the event click listener
     public void setOnEventClickListener(OnEventClickListener listener) {
         this.eventClickListener = listener;
     }
@@ -109,24 +99,33 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
         Event event = events.get(position);
+        String posterUrl = event.getPosterUri();
+        if (posterUrl != null && !posterUrl.trim().isEmpty()) {
+            Uri uri = Uri.parse(posterUrl.trim());
+            RequestOptions options = new RequestOptions()
+                    .centerCrop()
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .placeholder(R.drawable.poster_placeholder)
+                    .error(R.drawable.poster_placeholder);
+            Glide.with(holder.itemView.getContext())
+                    .load(uri)
+                    .apply(options)
+                    .into(holder.poster);
+        } else {
+            holder.poster.setImageResource(R.drawable.poster_placeholder);
+        }
         holder.name.setText(event.getName() != null ? event.getName() : "");
         holder.date.setText(event.getDate() != null ? event.getDate() : "");
         holder.description.setText(event.getDescription() != null ? event.getDescription() : "");
 
-        boolean joined = event.getId() != null && joinedEventIds.contains(event.getId());
-        boolean canJoinLeave = currentUserId != null && joinLeaveListener != null;
-
-        holder.joinLeaveBtn.setEnabled(canJoinLeave);
+        // Home/Events list matches mockup: primary action is "View Details".
+        boolean canViewDetails = eventClickListener != null && event.getId() != null;
         holder.joinLeaveBtn.setVisibility(View.VISIBLE);
-        holder.joinLeaveBtn.setText(joined
-                ? holder.itemView.getContext().getString(R.string.event_leave)
-                : holder.itemView.getContext().getString(R.string.event_join));
+        holder.joinLeaveBtn.setEnabled(canViewDetails);
+        holder.joinLeaveBtn.setText(R.string.event_view_details);
         holder.joinLeaveBtn.setOnClickListener(v -> {
-            if (joinLeaveListener == null) return;
-            if (joined) {
-                joinLeaveListener.onLeave(event);
-            } else {
-                joinLeaveListener.onJoin(event);
+            if (eventClickListener != null && event.getId() != null) {
+                eventClickListener.onEventClick(event);
             }
         });
 
@@ -137,13 +136,13 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         });
     }
 
-    // Get the item count
     @Override
     public int getItemCount() {
         return events.size();
     }
 
     static class EventViewHolder extends RecyclerView.ViewHolder {
+        final ImageView poster;
         final TextView name;
         final TextView date;
         final TextView description;
@@ -151,6 +150,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
 
         EventViewHolder(View itemView) {
             super(itemView);
+            poster = itemView.findViewById(R.id.event_poster);
             name = itemView.findViewById(R.id.event_name);
             date = itemView.findViewById(R.id.event_date);
             description = itemView.findViewById(R.id.event_description);
