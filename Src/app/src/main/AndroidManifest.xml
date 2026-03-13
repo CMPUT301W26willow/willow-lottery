@@ -5,6 +5,9 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <meta-data
+        android:name="com.google.android.maps.v2.API_KEY"
+        android:value="AIzaSyDErr9U0sD14iNjpR2flkx2PkUKkN0mpS4"/>
 
     <application
         android:allowBackup="true"
@@ -15,6 +18,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Willow_Lotto_app">
+
+
+        <!-- App starts here -->
+
 
         <activity
             android:name=".EventActivity"
@@ -53,6 +60,7 @@
         <activity android:name=".EventDetailActivity" android:exported="false"/>
         <activity android:name=".SignUpActivity" android:exported="false"/>
         <activity android:name=".EditEventActivity" android:exported="false"/>
+        <activity android:name=".EntrantMapActivity" android:exported="false"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"

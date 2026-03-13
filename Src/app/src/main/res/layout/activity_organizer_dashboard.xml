@@ -51,9 +51,19 @@
         android:layout_height="match_parent"
 
         android:layout_below="@id/lotteryButtonsRow"
-        android:layout_above="@id/backToProfileButton"
+        android:layout_above="@id/viewMapButton"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/viewMapButton"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_above="@id/backToProfileButton"
+        android:layout_marginBottom="8dp"
+        android:text="View Entrant Map"
+        android:textColor="@android:color/white"
+        android:background="@drawable/button_primary_purple"/>
 
     <Button
         android:id="@+id/backToProfileButton"

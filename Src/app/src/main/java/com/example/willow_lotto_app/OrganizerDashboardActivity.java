@@ -71,6 +71,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         loadWaitingList();
          */
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_organizer_dashboard);
         db = FirebaseFirestore.getInstance();
         lotteryManager = new OrganizerLotteryManager();
         registrationRepository = new RegistrationStore();
@@ -90,6 +91,9 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         /*saveDrawSizeButton.setOnClickListener(v -> saveDrawSize());*/
         runLotteryButton.setOnClickListener(v -> runLottery());
         drawReplacementButton.setOnClickListener(v -> drawReplacement());
+
+        Button viewMapButton = findViewById(R.id.viewMapButton);
+        viewMapButton.setOnClickListener(v -> startActivity(new Intent(this, EntrantMapActivity.class)));
 
         loadEventDrawSize();
         loadWaitingList();
