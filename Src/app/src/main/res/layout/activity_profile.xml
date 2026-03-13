@@ -136,6 +136,15 @@
                 android:background="@color/design_default_color_error"
                 android:layout_marginBottom="24dp"/>
 
+            <Button
+                android:id="@+id/registerButton"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="Register History"
+                android:textColor="@android:color/white"
+                android:background="@drawable/button_primary_purple"
+                android:layout_marginBottom="20dp"/>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

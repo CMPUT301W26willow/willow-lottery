@@ -15,12 +15,19 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ProfileActivity extends AppCompatActivity {
 
     EditText nameInput, emailInput, phoneInput;
+<<<<<<< Updated upstream
     Button saveButton, cancelButton, organizerDashboardButton, deleteButton;
+=======
+    // Button UI references from the profile screen
+    Button saveButton, cancelButton, organizerDashboardButton, deleteButton, registerButton;    // refrences to the NAV( home, events, notifications, profile)
+>>>>>>> Stashed changes
     BottomNavigationView bottomNav;
 
     FirebaseAuth mAuth;
@@ -37,6 +44,7 @@ public class ProfileActivity extends AppCompatActivity {
         saveButton = findViewById(R.id.saveButton);
         deleteButton = findViewById(R.id.deleteProfileButton);
         cancelButton = findViewById(R.id.cancelButton);
+        registerButton = findViewById(R.id.registerButton);
         organizerDashboardButton = findViewById(R.id.organizerDashboardButton);
         bottomNav = findViewById(R.id.bottom_nav);
 
@@ -50,9 +58,18 @@ public class ProfileActivity extends AppCompatActivity {
         saveButton.setOnClickListener(v -> saveProfile());
         cancelButton.setOnClickListener(v -> finish());
         deleteButton.setOnClickListener(v -> confirmDeleteProfile());
+<<<<<<< Updated upstream
         organizerDashboardButton.setOnClickListener(
                 v -> startActivity(new Intent(this, OrganizerDashboardActivity.class)));
 
+=======
+        registerButton.setOnClickListener(v -> showRegistrationHistory());
+        // click listener for Organizer Dashboard button
+        /*organizerDashboardButton.setOnClickListener(
+                v -> startActivity(new Intent(this, OrganizerDashboardActivity.class)));*/
+        organizerDashboardButton.setOnClickListener(v -> openOrganizerDashboardForLatestEvent());
+        // click listener for Bottom Navigation to guide to diffrent navigation pages of the app
+>>>>>>> Stashed changes
         bottomNav.setOnItemSelectedListener(item -> {
 
             if (item.getItemId() == R.id.nav_home) {
@@ -113,6 +130,12 @@ public class ProfileActivity extends AppCompatActivity {
                 .show();
     }
 
+<<<<<<< Updated upstream
+=======
+    // Deletes the user's profile from Firestore and removes their
+    // Firebase authentication account. After successful deletion,
+    // the user is redirected to the LoginActivity screen.
+>>>>>>> Stashed changes
     private void deleteProfile() {
         if (mAuth.getCurrentUser() == null) return;
 
@@ -138,6 +161,13 @@ public class ProfileActivity extends AppCompatActivity {
                         Toast.makeText(this, "Failed to delete profile data: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
+<<<<<<< Updated upstream
+=======
+    // Saves or updates the user's profile information in Firestore.
+    // It collects the name, email, and phone from the input fields,
+    // validates required fields, and stores the data under the
+    // current user's UID in the "users" collection.
+>>>>>>> Stashed changes
     private void saveProfile() {
         String name = nameInput.getText().toString().trim();
         String email = emailInput.getText().toString().trim();
@@ -168,4 +198,67 @@ public class ProfileActivity extends AppCompatActivity {
                         Toast.makeText(this, "Error Saving Profile", Toast.LENGTH_SHORT).show());
     }
 
+    // Reads the registeredEvents array stored directly on the user's document,
+// then looks up each event name from the events collection
+    private void showRegistrationHistory() {
+
+        // Exit early if no user is signed in
+        if (mAuth.getCurrentUser() == null) return;
+
+        String uid = mAuth.getCurrentUser().getUid();
+
+        // Read the user's own document
+        db.collection("users")
+                .document(uid)
+                .get()
+                .addOnSuccessListener(userDoc -> {
+
+                    // Pull the registeredEvents array directly off the user document
+                    List<String> registeredEvents = (List<String>) userDoc.get("registeredEvents");
+
+                    if (registeredEvents == null || registeredEvents.isEmpty()) {
+                        new AlertDialog.Builder(this)
+                                .setTitle("Registration History")
+                                .setMessage("You have not registered for any events yet.")
+                                .setPositiveButton("OK", null)
+                                .show();
+                        return;
+                    }
+
+                    // Fetch each event document to get its name
+                    StringBuilder history = new StringBuilder();
+                    AtomicInteger remaining = new AtomicInteger(registeredEvents.size());
+
+                    for (String eventId : registeredEvents) {
+                        db.collection("events").document(eventId)
+                                .get()
+                                .addOnSuccessListener(eventDoc -> {
+                                    String eventName = eventDoc.getString("name");
+                                    history.append("• ").append(eventName != null ? eventName : eventId)
+                                            .append("\n\n");
+
+                                    // Show the dialog only once all event lookups are done
+                                    if (remaining.decrementAndGet() == 0) {
+                                        new AlertDialog.Builder(this)
+                                                .setTitle("Registration History")
+                                                .setMessage(history.toString().trim())
+                                                .setPositiveButton("OK", null)
+                                                .show();
+                                    }
+                                })
+                                .addOnFailureListener(e -> {
+                                    // If one event lookup fails, still count it as done
+                                    if (remaining.decrementAndGet() == 0) {
+                                        new AlertDialog.Builder(this)
+                                                .setTitle("Registration History")
+                                                .setMessage(history.toString().trim())
+                                                .setPositiveButton("OK", null)
+                                                .show();
+                                    }
+                                });
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Failed to load registration history", Toast.LENGTH_SHORT).show());
+    }
 }
