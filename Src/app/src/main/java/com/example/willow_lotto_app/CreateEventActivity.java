@@ -34,7 +34,17 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-/** Create event form; uploads poster to Storage and saves event to Firestore. */
+/**
+ * Organizer "Create Event" form.
+ *
+ * Responsibilities:
+ * - Collects core event fields and validates required ones for
+ *   02.01.04 "Event Registration period" and event metadata.
+ * - Uploads an optional poster image to Firebase Storage and stores its URL
+ *   in the {@code events} document.
+ * - On success, navigates to {@link EventQrActivity} so organizers can
+ *   share a QR code for entrants to join.
+ */
 public class CreateEventActivity extends AppCompatActivity {
 
     private EditText nameInput;

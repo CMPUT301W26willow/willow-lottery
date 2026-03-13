@@ -21,7 +21,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** Home screen: event list with join/leave and nav to Events, Notifications, Profile. */
+/**
+ * Home screen for entrants.
+ *
+ * Responsibilities:
+ * - Implements 01.01.03 "View events available to join" by showing a
+ *   limited feed of events the user can browse.
+ * - Wires up bottom navigation to Events, Notifications, and Profile.
+ * - Delegates rendering of individual cards to {@link EventsAdapter}.
+ */
 public class MainActivity extends AppCompatActivity {
 
     private static final String REGISTRATIONS_COLLECTION = "registrations";
@@ -160,4 +168,4 @@ public class MainActivity extends AppCompatActivity {
         Object o = doc.get(field);
         return o != null ? o.toString() : "";
     }
-}
+    }

@@ -16,6 +16,15 @@ import com.google.firebase.firestore.SetOptions;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Email/password account registration screen.
+ *
+ * Responsibilities:
+ * - Implements 01.02.01 "Account Registration" by creating a Firebase Auth
+ *   user with email and password.
+ * - Seeds a profile document in the {@code users} collection so
+ *   {@link ProfileActivity} can load and update the same data later.
+ */
 public class SignUpActivity extends AppCompatActivity {
 
     //User Input UI elements
@@ -42,8 +51,8 @@ public class SignUpActivity extends AppCompatActivity {
 
         //OnclickListener to allow user to proceed
         signUpComplete.setOnClickListener(view -> {
-            String name = String.valueOf(nameInput.getEditText().getText());
-            String email = String.valueOf(emailInput.getEditText().getText());
+            String name = String.valueOf(nameInput.getEditText().getText()).trim();
+            String email = String.valueOf(emailInput.getEditText().getText()).trim();
             String password = String.valueOf(passwordInput.getEditText().getText());
             String phone = "000-000-0000";
 
@@ -53,25 +62,29 @@ public class SignUpActivity extends AppCompatActivity {
                 return;
             }
 
-            if (mAuth.getCurrentUser() == null) return;
-            String uid = mAuth.getCurrentUser().getUid();
+            mAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnSuccessListener(authResult -> {
+                        String uid = authResult.getUser().getUid();
 
-            //Mapping User Hashmap
-            Map<String,Object> user = new HashMap<>();
-            user.put("Name",name);
-            user.put("Email",email);
-            user.put("Password",password);
-            user.put("Phone",phone);
+                        //Mapping User Hashmap (keys match ProfileActivity expectations)
+                        Map<String, Object> user = new HashMap<>();
+                        user.put("name", name);
+                        user.put("email", email);
+                        user.put("phone", phone);
 
-
-
-            db.collection("users")
-                    .document(uid)
-                    .set(user, SetOptions.merge())
-                    .addOnSuccessListener(unused -> {
-                Toast.makeText(this, "Account Created", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(SignUpActivity.this, MainActivity.class));
-            }).addOnFailureListener(e -> Toast.makeText(this, "Error Creating Account", Toast.LENGTH_SHORT).show());
+                        db.collection("users")
+                                .document(uid)
+                                .set(user, SetOptions.merge())
+                                .addOnSuccessListener(unused -> {
+                                    Toast.makeText(this, "Account Created", Toast.LENGTH_SHORT).show();
+                                    startActivity(new Intent(SignUpActivity.this, MainActivity.class));
+                                    finish();
+                                })
+                                .addOnFailureListener(e ->
+                                        Toast.makeText(this, "Error Saving Profile", Toast.LENGTH_SHORT).show());
+                    })
+                    .addOnFailureListener(e ->
+                            Toast.makeText(this, "Error Creating Account: " + e.getMessage(), Toast.LENGTH_SHORT).show());
 
         });
 

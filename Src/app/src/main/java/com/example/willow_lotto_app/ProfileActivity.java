@@ -19,6 +19,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Profile management screen for the signed-in user.
+ *
+ * Responsibilities:
+ * - Lets users view and edit basic profile fields backed by Firestore.
+ * - Provides navigation into organizer flows (create first event or open
+ *   {@link OrganizerDashboardActivity} for the latest event).
+ * - Exposes registration history for the user based on stored event IDs.
+ */
 public class ProfileActivity extends AppCompatActivity {
 
     //refrences to UI elements
@@ -106,21 +115,15 @@ public class ProfileActivity extends AppCompatActivity {
                 .limit(1)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    /*if (queryDocumentSnapshots.isEmpty()) {
-                        Toast.makeText(this, "You have not created any events yet.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }*/
                     if (queryDocumentSnapshots.isEmpty()) {
-                        Toast.makeText(this, "No organizer event found. Opening create event.", Toast.LENGTH_SHORT).show();
+                        // No events yet → take organizer to create their first one.
                         startActivity(new Intent(ProfileActivity.this, CreateEventActivity.class));
-                        return;
+                    } else {
+                        String eventId = queryDocumentSnapshots.getDocuments().get(0).getId();
+                        Intent intent = new Intent(ProfileActivity.this, OrganizerDashboardActivity.class);
+                        intent.putExtra(OrganizerDashboardActivity.EXTRA_EVENT_ID, eventId);
+                        startActivity(intent);
                     }
-
-                    String eventId = queryDocumentSnapshots.getDocuments().get(0).getId();
-
-                    Intent intent = new Intent(ProfileActivity.this, OrganizerDashboardActivity.class);
-                    intent.putExtra(OrganizerDashboardActivity.EXTRA_EVENT_ID, eventId);
-                    startActivity(intent);
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Could not open organizer dashboard.", Toast.LENGTH_SHORT).show());

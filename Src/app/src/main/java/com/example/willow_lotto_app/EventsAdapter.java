@@ -20,7 +20,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/** RecyclerView adapter for event list; supports join/leave and opening event detail. */
+/**
+ * RecyclerView adapter for event cards on Home and Events screens.
+ *
+ * Responsibilities:
+ * - Binds Firestore-backed {@link Event} models to {@code item_event.xml}
+ *   cards, including poster, title, date, and short description.
+ * - Exposes callbacks for:
+ *   - Joining/leaving events (01.01.01 / 01.01.02) via
+ *     {@link OnJoinLeaveListener} (used in older flows).
+ *   - Opening detailed event view (01.01.03) via
+ *     {@link OnEventClickListener}.
+ */
 public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewHolder> {
 
     public interface OnJoinLeaveListener {
