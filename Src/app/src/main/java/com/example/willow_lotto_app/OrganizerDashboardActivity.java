@@ -108,7 +108,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
     /**
      * Loads the waiting list from Firebase using the registration repository.
      */
-    private void loadWaitingList() {
+    public void loadWaitingList() {
         registrationRepository.getRegistrationsForEventByStatus(
                 eventId,
                 RegistrationStatus.WAITLISTED.getValue(),
