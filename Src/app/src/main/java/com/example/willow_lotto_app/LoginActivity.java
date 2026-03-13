@@ -69,6 +69,8 @@ public class LoginActivity extends AppCompatActivity {
         signUp = findViewById(R.id.loginSignUp);
 
         // Click listeners
+        // Guest path: create an anonymous Firebase user, ensure they have a Firestore
+        // profile, then send them to the main screen.
         continueAnon.setOnClickListener(view -> signInAnonymously());
         signIn.setOnClickListener(view -> checkUserProfile());
         signUp.setOnClickListener(view -> {startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
@@ -89,7 +91,9 @@ public class LoginActivity extends AppCompatActivity {
                             Log.d("FIREBASE_LOGIN", "UID: " + user.getUid());
                         }
 
-                        //checkUserProfile();
+                        // After anonymous sign-in, reuse the same profile check logic:
+                        // create a guest profile if missing, then go to MainActivity.
+                        checkUserProfile();
 
                     } else {
                         Log.e("FIREBASE_LOGIN", "Anonymous sign-in failed", task.getException());
