@@ -31,9 +31,21 @@ import java.util.List;
 import android.view.WindowManager;
 
 /**
- * Activity that shows the organizer dashboard including waiting list,
- * lottery controls, geolocation toggle, and map view.
+ * EntrantResponseManager.java
+ *
+ * Handles entrant response actions after a lottery invitation has been issued.
+ *
+ * Role in application:
+ * - Service/manager layer for updating invitation outcomes.
+ * - Changes registration status between invited, accepted, declined, and cancelled.
+ * - Keeps the event's registeredUsers array synchronized for compatibility with the current event data model.
+ *
+ * Outstanding issues:
+ * - This manager assumes the caller already knows the correct registration ID.
+ * - There is no built-in timeout or non-response handling yet.
+ * - Cancellation and acceptance logic still depends on the event's registeredUsers array, which may later be replaced by fully registration-driven queries.
  */
+
 public class OrganizerDashboardActivity extends AppCompatActivity {
 
     private ListView waitingListView;
