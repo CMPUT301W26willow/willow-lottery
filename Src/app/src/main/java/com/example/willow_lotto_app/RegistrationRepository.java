@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RegistrationRepository {
+public class RegistrationStore {
 
     public interface RegistrationListCallback {
         void onSuccess(List<Registration> registrations);
@@ -29,7 +29,7 @@ public class RegistrationRepository {
 
     private final FirebaseFirestore db;
 
-    public RegistrationRepository() {
+    public RegistrationStore() {
         this.db = FirebaseFirestore.getInstance();
     }
 
