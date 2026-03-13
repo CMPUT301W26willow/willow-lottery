@@ -32,6 +32,7 @@ public class SignUpActivity extends AppCompatActivity {
     Button signUpComplete;
     FirebaseAuth mAuth;
     FirebaseFirestore db;
+    String[] registeredEvents = new String[40];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +72,7 @@ public class SignUpActivity extends AppCompatActivity {
                         user.put("name", name);
                         user.put("email", email);
                         user.put("phone", phone);
+                        user.put("registeredEvents",registeredEvents);
 
                         db.collection("users")
                                 .document(uid)
