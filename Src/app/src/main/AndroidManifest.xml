@@ -57,7 +57,19 @@
         <activity android:name=".OrganizerDashboardActivity" android:exported="false"/>
         <activity android:name=".CreateEventActivity" android:exported="false"/>
         <activity android:name=".EventQrActivity" android:exported="false"/>
-        <activity android:name=".EventDetailActivity" android:exported="false"/>
+        <!-- Handles deep links like willow-lottery://event/{eventId} -->
+        <activity android:name=".EventDetailActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="willow-lottery"
+                    android:host="event" />
+            </intent-filter>
+        </activity>
         <activity android:name=".SignUpActivity" android:exported="false"/>
         <activity android:name=".EditEventActivity" android:exported="false"/>
         <activity android:name=".EntrantMapActivity" android:exported="false"/>

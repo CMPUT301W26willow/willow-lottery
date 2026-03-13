@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/backgroundGray">
 
     <TextView
         android:id="@+id/events_title"
@@ -14,7 +15,8 @@
         android:paddingBottom="8dp"
         android:text="Events"
         android:textSize="22sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:textColor="@color/textDark"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/events_recycler"
@@ -34,7 +36,7 @@
         android:visibility="gone"
         android:text="No events yet"
         android:textSize="16sp"
-        android:textColor="#666666" />
+        android:textColor="@color/textGray" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav"
