@@ -5,12 +5,12 @@ plugins {
 
 android {
     namespace = "com.example.willow_lotto_app"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.willow_lotto_app"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -25,6 +25,9 @@ android {
                 "proguard-rules.pro"
             )
         }
+    }
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -46,7 +49,11 @@ dependencies {
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.google.zxing:core:3.5.2")
     implementation("com.github.bumptech.glide:glide:4.16.0")
+
+    // Unit testing
     testImplementation(libs.junit)
+    // Robolectric for running Android unit tests on the JVM
+    testImplementation("org.robolectric:robolectric:4.16.1")
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 }
