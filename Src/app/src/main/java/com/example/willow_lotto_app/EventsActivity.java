@@ -23,7 +23,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/** Full events list with join/leave and tap-to-open event detail. */
+/**
+ * EventsActivity:
+ * This activity is used to display the events list.
+ * 
+ * Features:
+ * - Display the events list
+ * - Display the events empty view
+ * - Display the bottom navigation
+ * 
+ * Flow:
+ * 1. The user navigates to the events activity
+ * 2. The events list is displayed
+ * 3. The user can join or leave an event
+ * 4. The user can tap on an event to open the event detail activity
+ * 5. The event detail activity is displayed
+ * 6. The user can see the event details and join or leave the event
+  */
 public class EventsActivity extends AppCompatActivity {
 
     private static final String REGISTRATIONS_COLLECTION = "registrations";
@@ -111,6 +127,7 @@ public class EventsActivity extends AppCompatActivity {
 
     // Load all events then user's joined IDs.
     private void loadEvents() {
+        // load all events from the database
         db.collection("events")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -139,11 +156,14 @@ public class EventsActivity extends AppCompatActivity {
                 });
     }
 
+    // Load the joined event IDs from the database
     private void loadJoinedEventIds(OnJoinedLoadedListener listener) {
+
         if (currentUserId == null) {
             listener.onLoaded(new HashSet<>());
             return;
         }
+        // load the joined event IDs from the database
         db.collection(REGISTRATIONS_COLLECTION)
                 .whereEqualTo("userId", currentUserId)
                 .get()
@@ -158,11 +178,11 @@ public class EventsActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> listener.onLoaded(new HashSet<>()));
     }
-
+    // Interface for the joined event IDs loaded listener
     private interface OnJoinedLoadedListener {
         void onLoaded(Set<String> joinedEventIds);
     }
-
+    // Get the string value from the document snapshot
     private static String getString(QueryDocumentSnapshot doc, String field) {
         Object o = doc.get(field);
         return o != null ? o.toString() : "";

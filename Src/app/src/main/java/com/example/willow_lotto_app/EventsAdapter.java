@@ -14,14 +14,36 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/** RecyclerView adapter for event list; supports join/leave and opening event detail. */
-public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewHolder> {
+/** 
+ *EventsAdapter
+ *
+ * RecyclerView adapter responsible for displaying a list of events in the UI.
+ *
+ * This adapter binds Event data to the item_event layout and manages
+ * user interactions such as:
+ *  - Joining an event
+ *  - Leaving an event
+ *  - Clicking an event to view more details
+ *
+ * The adapter does not directly handle database operations. Instead,
+ * it communicates user actions through listener interfaces which are
+ * implemented by the hosting activity (e.g., MainActivity).
 
+*/
+public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewHolder> {
+    /**
+     * Listener used to notify when the user presses Join or Leave.
+     * The activity using this adapter will implement the logic.
+     */
     public interface OnJoinLeaveListener {
         void onJoin(Event event);
         void onLeave(Event event);
     }
 
+    /**
+     * Listener used to notify when the user clicks on an event.
+     * The activity using this adapter will implement the logic.
+     */
     public interface OnEventClickListener {
         void onEventClick(Event event);
     }
@@ -32,6 +54,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
     private OnJoinLeaveListener joinLeaveListener;
     private OnEventClickListener eventClickListener;
 
+    // Set the events list
     public void setEvents(List<Event> events) {
         this.events.clear();
         if (events != null) {
@@ -40,6 +63,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         notifyDataSetChanged();
     }
 
+    // Set the joined event IDs
     public void setJoinedEventIds(Set<String> joinedEventIds) {
         this.joinedEventIds.clear();
         if (joinedEventIds != null) {
@@ -48,15 +72,18 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         notifyDataSetChanged();
     }
 
+    // Set the current user ID
     public void setCurrentUserId(String currentUserId) {
         this.currentUserId = currentUserId;
         notifyDataSetChanged();
     }
 
+    // Set the join leave listener
     public void setOnJoinLeaveListener(OnJoinLeaveListener listener) {
         this.joinLeaveListener = listener;
     }
 
+    // Set the event click listener
     public void setOnEventClickListener(OnEventClickListener listener) {
         this.eventClickListener = listener;
     }
@@ -110,6 +137,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         });
     }
 
+    // Get the item count
     @Override
     public int getItemCount() {
         return events.size();
