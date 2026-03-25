@@ -1,15 +1,37 @@
 package com.example.willow_lotto_app;
 
+import android.util.Log;
+import android.widget.Toast;
+
 import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * OrganizerLotteryManager.java
+ *
+ * Implements the core organizer-side lottery logic for selecting entrants, drawing replacements, and sending notifications.
+ *
+ * Role in application:
+ * - Service/manager layer for organizer lottery operations.
+ * - Reads event draw size and registration state from Firestore.
+ * - Enforces capacity before inviting additional entrants.
+ * - Sends invitation and replacement notifications through NotificationStore.
+ *
+ * Outstanding issues:
+ * - Random selection currently relies on in-memory shuffling and does not yet include audit logging or deterministic reproducibility.
+ * - The manager depends on the registrations collection being populated with consistent status values.
+ * - Selected/cancelled/final-enrolled list screens are still separate UI concerns and are not managed directly here.
+ */
+
 public class OrganizerLotteryManager {
+
 
     public interface LotteryCallback {
         void onSuccess(String message, List<Registration> affectedRegistrations);
@@ -24,6 +46,7 @@ public class OrganizerLotteryManager {
     private final FirebaseFirestore db;
     private final RegistrationStore registrationRepository;
     private final NotificationStore notificationRepository;
+    private static final String TAG = "OrganizerLotteryManager";
 
     public OrganizerLotteryManager() {
         this.db = FirebaseFirestore.getInstance();
@@ -275,6 +298,7 @@ public class OrganizerLotteryManager {
                     "lottery_invited"
             );
 
+
             notificationRepository.sendNotificationToUser(
                     registration.getUserId(),
                     notification,
@@ -285,6 +309,7 @@ public class OrganizerLotteryManager {
                             if (completed[0] == total) {
                                 callback.onSuccess("Lottery draw completed successfully.", selected);
                             }
+                            System.out.print("Notification Sent");
                         }
 
                         @Override
@@ -313,6 +338,7 @@ public class OrganizerLotteryManager {
                         List<Registration> result = new ArrayList<>();
                         result.add(replacement);
                         callback.onSuccess("Replacement entrant selected successfully.", result);
+                        System.out.print("Notification Sent replacement");
                     }
 
                     @Override

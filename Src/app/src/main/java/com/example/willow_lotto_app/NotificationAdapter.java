@@ -1,5 +1,8 @@
 package com.example.willow_lotto_app;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,8 +13,25 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
+
 /**
+ * NotificationAdapter binds UserNotificationItem data to the RecyclerView rows
+ * shown in NotificationActivity.
+ *
+ * Role in application:
+ * - Acts as the adapter layer between the notification model and the RecyclerView UI.
+ * - Inflates item_notification.xml and fills each card with notification data.
+ *
+ * Current limitations / outstanding issues:
+ * - Notifications are display-only for now.
+ * - There is no click handling yet for opening related events.
+ * - Dates are displayed using the default Date.toString() format and may be reformatted later.
+ */
+
 public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.NotificationViewHolder> {
+
+
+
 
     private final List<UserNotificationItem> notifications = new ArrayList<>();
 
@@ -25,7 +45,6 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
     @NonNull
     @Override
-    /**
     public NotificationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_notification, parent, false);
@@ -60,7 +79,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         TextView typeText;
         TextView dateText;
         TextView readText;
-/**
+
         NotificationViewHolder(@NonNull View itemView) {
             super(itemView);
             titleText = itemView.findViewById(R.id.notification_title);
@@ -69,7 +88,5 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             dateText = itemView.findViewById(R.id.notification_date);
             readText = itemView.findViewById(R.id.notification_read_status);
         }
-
     }
 }
- **/

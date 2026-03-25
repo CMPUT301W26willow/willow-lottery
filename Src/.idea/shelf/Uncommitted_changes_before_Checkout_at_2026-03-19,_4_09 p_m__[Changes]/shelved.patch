@@ -1,0 +1,136 @@
+Index: .idea/deploymentTargetSelector.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project version=\"4\">\n  <component name=\"deploymentTargetSelector\">\n    <selectionStates>\n      <SelectionState runConfigName=\"app\">\n        <option name=\"selectionMode\" value=\"DROPDOWN\" />\n      </SelectionState>\n      <SelectionState runConfigName=\"OrganizerDashboardActivityTest\">\n        <option name=\"selectionMode\" value=\"DROPDOWN\" />\n      </SelectionState>\n      <SelectionState runConfigName=\"EditEventActivityTest\">\n        <option name=\"selectionMode\" value=\"DROPDOWN\" />\n      </SelectionState>\n      <SelectionState runConfigName=\"EditEventActivity\">\n        <option name=\"selectionMode\" value=\"DROPDOWN\" />\n      </SelectionState>\n      <SelectionState runConfigName=\"EditEventActivity (1)\">\n        <option name=\"selectionMode\" value=\"DROPDOWN\" />\n      </SelectionState>\n      <SelectionState runConfigName=\"EntrantMapActivityTest\">\n        <option name=\"selectionMode\" value=\"DROPDOWN\" />\n      </SelectionState>\n    </selectionStates>\n  </component>\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/deploymentTargetSelector.xml b/.idea/deploymentTargetSelector.xml
+--- a/.idea/deploymentTargetSelector.xml	(revision 60d3406846e8a2d3c135f307a6c4b1fa4be8ffd4)
++++ b/.idea/deploymentTargetSelector.xml	(date 1773426398046)
+@@ -11,13 +11,13 @@
+       <SelectionState runConfigName="EditEventActivityTest">
+         <option name="selectionMode" value="DROPDOWN" />
+       </SelectionState>
+-      <SelectionState runConfigName="EditEventActivity">
+-        <option name="selectionMode" value="DROPDOWN" />
+-      </SelectionState>
+       <SelectionState runConfigName="EditEventActivity (1)">
+         <option name="selectionMode" value="DROPDOWN" />
+       </SelectionState>
+       <SelectionState runConfigName="EntrantMapActivityTest">
++        <option name="selectionMode" value="DROPDOWN" />
++      </SelectionState>
++      <SelectionState runConfigName="GeolocationToggleTest">
+         <option name="selectionMode" value="DROPDOWN" />
+       </SelectionState>
+     </selectionStates>
+Index: app/src/main/java/com/example/willow_lotto_app/NotificationAdapter.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.willow_lotto_app;\n\nimport android.view.LayoutInflater;\nimport android.view.View;\nimport android.view.ViewGroup;\nimport android.widget.TextView;\n\nimport androidx.annotation.NonNull;\nimport androidx.recyclerview.widget.RecyclerView;\n\nimport java.util.ArrayList;\nimport java.util.List;\n/**\npublic class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.NotificationViewHolder> {\n\n    private final List<UserNotificationItem> notifications = new ArrayList<>();\n\n    public void setNotifications(List<UserNotificationItem> items) {\n        notifications.clear();\n        if (items != null) {\n            notifications.addAll(items);\n        }\n        notifyDataSetChanged();\n    }\n\n    @NonNull\n    @Override\n    /**\n    public NotificationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {\n        View view = LayoutInflater.from(parent.getContext())\n                .inflate(R.layout.item_notification, parent, false);\n        return new NotificationViewHolder(view);\n    }\n\n    @Override\n    public void onBindViewHolder(@NonNull NotificationViewHolder holder, int position) {\n        UserNotificationItem item = notifications.get(position);\n\n        holder.titleText.setText(item.getTitle() != null ? item.getTitle() : \"\");\n        holder.messageText.setText(item.getMessage() != null ? item.getMessage() : \"\");\n        holder.typeText.setText(item.getType() != null ? item.getType() : \"\");\n\n        if (item.getCreatedAt() != null) {\n            holder.dateText.setText(item.getCreatedAt().toDate().toString());\n        } else {\n            holder.dateText.setText(\"\");\n        }\n\n        holder.readText.setText(item.isRead() ? \"Read\" : \"Unread\");\n    }\n\n    @Override\n    public int getItemCount() {\n        return notifications.size();\n    }\n\n    static class NotificationViewHolder extends RecyclerView.ViewHolder {\n        TextView titleText;\n        TextView messageText;\n        TextView typeText;\n        TextView dateText;\n        TextView readText;\n/**\n        NotificationViewHolder(@NonNull View itemView) {\n            super(itemView);\n            titleText = itemView.findViewById(R.id.notification_title);\n            messageText = itemView.findViewById(R.id.notification_message);\n            typeText = itemView.findViewById(R.id.notification_type);\n            dateText = itemView.findViewById(R.id.notification_date);\n            readText = itemView.findViewById(R.id.notification_read_status);\n        }\n\n    }\n}\n **/
+===================================================================
+diff --git a/app/src/main/java/com/example/willow_lotto_app/NotificationAdapter.java b/app/src/main/java/com/example/willow_lotto_app/NotificationAdapter.java
+--- a/app/src/main/java/com/example/willow_lotto_app/NotificationAdapter.java	(revision 60d3406846e8a2d3c135f307a6c4b1fa4be8ffd4)
++++ b/app/src/main/java/com/example/willow_lotto_app/NotificationAdapter.java	(date 1773427707258)
+@@ -10,7 +10,7 @@
+ 
+ import java.util.ArrayList;
+ import java.util.List;
+-/**
++
+ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapter.NotificationViewHolder> {
+ 
+     private final List<UserNotificationItem> notifications = new ArrayList<>();
+@@ -25,7 +25,6 @@
+ 
+     @NonNull
+     @Override
+-    /**
+     public NotificationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+         View view = LayoutInflater.from(parent.getContext())
+                 .inflate(R.layout.item_notification, parent, false);
+@@ -60,7 +59,7 @@
+         TextView typeText;
+         TextView dateText;
+         TextView readText;
+-/**
++
+         NotificationViewHolder(@NonNull View itemView) {
+             super(itemView);
+             titleText = itemView.findViewById(R.id.notification_title);
+@@ -69,7 +68,5 @@
+             dateText = itemView.findViewById(R.id.notification_date);
+             readText = itemView.findViewById(R.id.notification_read_status);
+         }
+-
+     }
+-}
+- **/
+\ No newline at end of file
++}
+\ No newline at end of file
+Index: app/src/main/java/com/example/willow_lotto_app/NotificationStore.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.willow_lotto_app;\n\nimport com.google.firebase.firestore.FirebaseFirestore;\n\n\n    public interface SimpleCallback {\n        void onSuccess();\n        void onFailure(Exception e);\n    }\n\n    private final FirebaseFirestore db;\n\n        this.db = FirebaseFirestore.getInstance();\n    }\n\n    public void sendNotificationToUser(String userId, UserNotification notification, final SimpleCallback callback) {\n        db.collection(\"users\")\n                .document(userId)\n                .collection(\"notifications\")\n                .add(notification.toMap())\n                .addOnSuccessListener(documentReference -> callback.onSuccess())\n                .addOnFailureListener(callback::onFailure);\n    }\n}
+===================================================================
+diff --git a/app/src/main/java/com/example/willow_lotto_app/NotificationStore.java b/app/src/main/java/com/example/willow_lotto_app/NotificationStore.java
+--- a/app/src/main/java/com/example/willow_lotto_app/NotificationStore.java	(revision 60d3406846e8a2d3c135f307a6c4b1fa4be8ffd4)
++++ b/app/src/main/java/com/example/willow_lotto_app/NotificationStore.java	(date 1773426433370)
+@@ -2,6 +2,7 @@
+ 
+ import com.google.firebase.firestore.FirebaseFirestore;
+ 
++public class NotificationStore {
+ 
+     public interface SimpleCallback {
+         void onSuccess();
+@@ -10,6 +11,7 @@
+ 
+     private final FirebaseFirestore db;
+ 
++    public NotificationStore() {
+         this.db = FirebaseFirestore.getInstance();
+     }
+ 
+Index: app/src/main/java/com/example/willow_lotto_app/RegistrationStore.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.willow_lotto_app;\n\nimport androidx.annotation.NonNull;\n\nimport com.google.android.gms.tasks.OnFailureListener;\nimport com.google.android.gms.tasks.OnSuccessListener;\nimport com.google.firebase.Timestamp;\nimport com.google.firebase.firestore.DocumentSnapshot;\nimport com.google.firebase.firestore.FirebaseFirestore;\nimport com.google.firebase.firestore.QuerySnapshot;\nimport com.google.firebase.firestore.WriteBatch;\n\nimport java.util.ArrayList;\nimport java.util.HashMap;\nimport java.util.List;\nimport java.util.Map;\n\npublic class RegistrationRepository {\n\n    public interface RegistrationListCallback {\n        void onSuccess(List<Registration> registrations);\n        void onFailure(Exception e);\n    }\n\n    public interface RegistrationCallback {\n        void onSuccess(Registration registration);\n        void onFailure(Exception e);\n    }\n\n    public interface SimpleCallback {\n        void onSuccess();\n        void onFailure(Exception e);\n    }\n\n    private final FirebaseFirestore db;\n\n    public RegistrationRepository() {\n        this.db = FirebaseFirestore.getInstance();\n    }\n\n    public void createWaitlistRegistration(String eventId, String userId, final SimpleCallback callback) {\n        Registration registration = new Registration(\n                eventId,\n                userId,\n                RegistrationStatus.WAITLISTED.getValue()\n        );\n\n        db.collection(\"registrations\")\n                .add(registration.toMap())\n                .addOnSuccessListener(documentReference -> callback.onSuccess())\n                .addOnFailureListener(callback::onFailure);\n    }\n\n    public void getRegistrationsForEvent(String eventId, final RegistrationListCallback callback) {\n        db.collection(\"registrations\")\n                .whereEqualTo(\"eventId\", eventId)\n                .get()\n                .addOnSuccessListener(queryDocumentSnapshots -> {\n                    List<Registration> results = new ArrayList<>();\n                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {\n                        results.add(Registration.fromDocument(doc));\n                    }\n                    callback.onSuccess(results);\n                })\n                .addOnFailureListener(callback::onFailure);\n    }\n\n    public void getRegistrationsForEventByStatus(String eventId, String status, final RegistrationListCallback callback) {\n        db.collection(\"registrations\")\n                .whereEqualTo(\"eventId\", eventId)\n                .whereEqualTo(\"status\", status)\n                .get()\n                .addOnSuccessListener(queryDocumentSnapshots -> {\n                    List<Registration> results = new ArrayList<>();\n                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {\n                        results.add(Registration.fromDocument(doc));\n                    }\n                    callback.onSuccess(results);\n                })\n                .addOnFailureListener(callback::onFailure);\n    }\n\n    public void findRegistration(String eventId, String userId, final RegistrationCallback callback) {\n        db.collection(\"registrations\")\n                .whereEqualTo(\"eventId\", eventId)\n                .whereEqualTo(\"userId\", userId)\n                .limit(1)\n                .get()\n                .addOnSuccessListener(queryDocumentSnapshots -> {\n                    if (queryDocumentSnapshots.isEmpty()) {\n                        callback.onFailure(new Exception(\"Registration not found.\"));\n                        return;\n                    }\n\n                    DocumentSnapshot doc = queryDocumentSnapshots.getDocuments().get(0);\n                    callback.onSuccess(Registration.fromDocument(doc));\n                })\n                .addOnFailureListener(callback::onFailure);\n    }\n\n    public void updateRegistrationStatus(String registrationId, String newStatus, final SimpleCallback callback) {\n        Map<String, Object> updates = new HashMap<>();\n        updates.put(\"status\", newStatus);\n        updates.put(\"updatedAt\", Timestamp.now());\n\n        db.collection(\"registrations\")\n                .document(registrationId)\n                .update(updates)\n                .addOnSuccessListener(unused -> callback.onSuccess())\n                .addOnFailureListener(callback::onFailure);\n    }\n\n    public void updateManyStatuses(List<String> registrationIds, String newStatus, final SimpleCallback callback) {\n        WriteBatch batch = db.batch();\n\n        for (String id : registrationIds) {\n            Map<String, Object> updates = new HashMap<>();\n            updates.put(\"status\", newStatus);\n            updates.put(\"updatedAt\", Timestamp.now());\n\n            batch.update(db.collection(\"registrations\").document(id), updates);\n        }\n\n        batch.commit()\n                .addOnSuccessListener(unused -> callback.onSuccess())\n                .addOnFailureListener(callback::onFailure);\n    }\n}
+===================================================================
+diff --git a/app/src/main/java/com/example/willow_lotto_app/RegistrationStore.java b/app/src/main/java/com/example/willow_lotto_app/RegistrationStore.java
+--- a/app/src/main/java/com/example/willow_lotto_app/RegistrationStore.java	(revision 60d3406846e8a2d3c135f307a6c4b1fa4be8ffd4)
++++ b/app/src/main/java/com/example/willow_lotto_app/RegistrationStore.java	(date 1773427570599)
+@@ -1,13 +1,8 @@
+ package com.example.willow_lotto_app;
+ 
+-import androidx.annotation.NonNull;
+-
+-import com.google.android.gms.tasks.OnFailureListener;
+-import com.google.android.gms.tasks.OnSuccessListener;
+ import com.google.firebase.Timestamp;
+ import com.google.firebase.firestore.DocumentSnapshot;
+ import com.google.firebase.firestore.FirebaseFirestore;
+-import com.google.firebase.firestore.QuerySnapshot;
+ import com.google.firebase.firestore.WriteBatch;
+ 
+ import java.util.ArrayList;
+@@ -15,7 +10,7 @@
+ import java.util.List;
+ import java.util.Map;
+ 
+-public class RegistrationRepository {
++public class RegistrationStore {
+ 
+     public interface RegistrationListCallback {
+         void onSuccess(List<Registration> registrations);
+@@ -34,7 +29,7 @@
+ 
+     private final FirebaseFirestore db;
+ 
+-    public RegistrationRepository() {
++    public RegistrationStore() {
+         this.db = FirebaseFirestore.getInstance();
+     }
+ 

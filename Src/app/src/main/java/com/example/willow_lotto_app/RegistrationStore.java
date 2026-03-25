@@ -1,13 +1,8 @@
 package com.example.willow_lotto_app;
 
-import androidx.annotation.NonNull;
-
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.WriteBatch;
 
 import java.util.ArrayList;
@@ -15,7 +10,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RegistrationRepository {
+/**
+ * RegistrationStore.java
+ *
+ * Helper for reading and updating event registration documents
+ * in the top-level Firestore "registrations" collection.
+ *
+ * Role in application:
+ * - Repository/data-access layer for registration records.
+ * - Creates waitlist registrations.
+ * - Queries registrations by event and status.
+ * - Updates registration statuses individually or in batches.
+ *
+ * Outstanding issues:
+ * - This store does not yet enforce uniqueness for one user per event unless the
+ *   calling code checks for existing registrations first.
+ * - There is no delete method yet for removing registration documents entirely.
+ * - Firestore query assumptions depend on all join flows writing status consistently.
+ */
+
+public class RegistrationStore {
 
     public interface RegistrationListCallback {
         void onSuccess(List<Registration> registrations);
@@ -34,7 +48,7 @@ public class RegistrationRepository {
 
     private final FirebaseFirestore db;
 
-    public RegistrationRepository() {
+    public RegistrationStore() {
         this.db = FirebaseFirestore.getInstance();
     }
 

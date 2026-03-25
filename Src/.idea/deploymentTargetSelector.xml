@@ -11,9 +11,6 @@
       <SelectionState runConfigName="EditEventActivityTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="EditEventActivity">
-        <option name="selectionMode" value="DROPDOWN" />
-      </SelectionState>
       <SelectionState runConfigName="EditEventActivity (1)">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>

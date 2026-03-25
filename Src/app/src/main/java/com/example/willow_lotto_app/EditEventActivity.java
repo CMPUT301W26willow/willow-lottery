@@ -34,8 +34,29 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 /**
- * Activity that allows organizers to upload and update an event poster image.
+ * CreateEventActivity.java
+ *
+ * Allows organizers to create a new event by entering event metadata,
+ * selecting registration dates, optionally requiring geolocation, and
+ * optionally uploading a poster image.
+ *
+ * Role in application:
+ * - Controller/View layer for organizer event creation.
+ * - Writes new event documents to the Firestore "events" collection.
+ * - Uploads poster images to Firebase Storage and stores the resulting URL
+ *   in the related Firestore event document.
+ * - Navigates to EventQrActivity after successful creation so the organizer
+ *   can view and share the QR code for the new event.
+ *
+ * Outstanding issues:
+ * - The legacy subcollection creation block at the end of createEventInFirestore()
+ *   uses event.toString() instead of the real Firestore document ID and should be
+ *   removed or replaced.
+ * - Event limits / capacity are not configured here yet.
+ * - Validation currently requires event name, description, and event date, but
+ *   registration dates remain optional.
  */
+
 public class EditEventActivity extends AppCompatActivity {
 
     private static final String EVENT_ID = "event1"; // TODO: pass dynamically via Intent
