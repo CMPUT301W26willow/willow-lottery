@@ -3,7 +3,6 @@ package com.example.willow_lotto_app;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.util.Log;
@@ -11,16 +10,14 @@ import android.widget.Toast;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.example.willow_lotto_app.registration.Registration;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runner.manipulation.Ordering;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;

@@ -9,6 +9,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.willow_lotto_app.events.CreateEventActivity;
+import com.example.willow_lotto_app.events.EventsActivity;
+import com.example.willow_lotto_app.notification.NotificationActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;

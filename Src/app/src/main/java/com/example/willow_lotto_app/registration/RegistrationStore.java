@@ -1,4 +1,4 @@
-package com.example.willow_lotto_app;
+package com.example.willow_lotto_app.registration;
 
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;

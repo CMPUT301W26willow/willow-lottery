@@ -1,4 +1,4 @@
-package com.example.willow_lotto_app;
+package com.example.willow_lotto_app.events;
 
 import android.net.Uri;
 import android.view.LayoutInflater;
@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.willow_lotto_app.R;
 
 import java.util.ArrayList;
 import java.util.HashSet;

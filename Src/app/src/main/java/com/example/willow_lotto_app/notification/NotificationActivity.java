@@ -1,4 +1,4 @@
-package com.example.willow_lotto_app;
+package com.example.willow_lotto_app.notification;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +10,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.willow_lotto_app.MainActivity;
+import com.example.willow_lotto_app.ProfileActivity;
+import com.example.willow_lotto_app.R;
+import com.example.willow_lotto_app.events.EventsActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;

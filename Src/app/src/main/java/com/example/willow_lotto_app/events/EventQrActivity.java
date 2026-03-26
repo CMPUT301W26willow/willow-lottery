@@ -1,7 +1,6 @@
-package com.example.willow_lotto_app;
+package com.example.willow_lotto_app.events;
 
 import android.content.ContentValues;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
@@ -14,6 +13,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.willow_lotto_app.QRCodeHelper;
+import com.example.willow_lotto_app.R;
 import com.google.android.material.appbar.MaterialToolbar;
 
 import java.io.File;

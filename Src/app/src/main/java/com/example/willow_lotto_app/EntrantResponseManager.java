@@ -1,9 +1,9 @@
 package com.example.willow_lotto_app;
 
+import com.example.willow_lotto_app.registration.RegistrationStatus;
+import com.example.willow_lotto_app.registration.RegistrationStore;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.HashMap;
 
 public class EntrantResponseManager {
 

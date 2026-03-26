@@ -3,6 +3,8 @@ package com.example.willow_lotto_app;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import com.example.willow_lotto_app.events.CreateEventActivity;
+
 import org.junit.Test;
 
 /**
