@@ -3,6 +3,7 @@ package com.example.willow_lotto_app;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,14 +25,22 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Full events list screen.
+ * EventsActivity.java
+ *
+ * Author: Mehr Dhanda
+ *
+ * Full events list screen. Allows entrants to browse and search for events.
  *
  * Responsibilities:
  * - Implements 01.01.03 "View events available to join" by listing all
  *   events from Firestore with an empty-state message when none exist.
+ * - Implements search by keyword across event name, description, and location.
  * - Connects join/leave interactions (01.01.01 / 01.01.02) via
  *   {@link EventsAdapter.OnJoinLeaveListener}.
  * - Opens {@link EventDetailActivity} for the selected event.
+ *
+ * Outstanding issues:
+ * - Search is client-side only; does not query Firestore directly.
  */
 public class EventsActivity extends AppCompatActivity {
 
@@ -89,7 +98,23 @@ public class EventsActivity extends AppCompatActivity {
             intent.putExtra(EventDetailActivity.EXTRA_EVENT_ID, event.getId());
             startActivity(intent);
         });
+
         loadEvents();
+
+        SearchView searchView = findViewById(R.id.events_search);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                adapter.filter(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.filter(newText);
+                return true;
+            }
+        });
 
         bottomNav.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.nav_home) {
@@ -118,7 +143,10 @@ public class EventsActivity extends AppCompatActivity {
         });
     }
 
-    // Load all events then user's joined IDs.
+    /**
+     * Loads all events from Firestore and populates the RecyclerView.
+     * Also loads the user's joined event IDs to reflect join state.
+     */
     private void loadEvents() {
         db.collection("events")
                 .get()

@@ -21,16 +21,25 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * EventsAdapter.java
+ *
+ * Author: Mehr Dhanda
+ *
  * RecyclerView adapter for event cards on Home and Events screens.
+ * Supports keyword filtering across event name, description, and date.
  *
  * Responsibilities:
  * - Binds Firestore-backed {@link Event} models to {@code item_event.xml}
  *   cards, including poster, title, date, and short description.
+ * - Supports keyword search filtering via {@link #filter(String)}.
  * - Exposes callbacks for:
  *   - Joining/leaving events (01.01.01 / 01.01.02) via
- *     {@link OnJoinLeaveListener} (used in older flows).
+ *     {@link OnJoinLeaveListener}.
  *   - Opening detailed event view (01.01.03) via
  *     {@link OnEventClickListener}.
+ *
+ * Outstanding issues:
+ * - Search is client-side only; does not query Firestore directly.
  */
 public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewHolder> {
 
@@ -44,19 +53,32 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
     }
 
     private final List<Event> events = new ArrayList<>();
+    private final List<Event> allEvents = new ArrayList<>();
     private final Set<String> joinedEventIds = new HashSet<>();
     private String currentUserId;
     private OnJoinLeaveListener joinLeaveListener;
     private OnEventClickListener eventClickListener;
 
+    /**
+     * Sets the full list of events and resets the filter.
+     *
+     * @param events List of events to display.
+     */
     public void setEvents(List<Event> events) {
         this.events.clear();
+        this.allEvents.clear();
         if (events != null) {
             this.events.addAll(events);
+            this.allEvents.addAll(events);
         }
         notifyDataSetChanged();
     }
 
+    /**
+     * Sets the IDs of events the current user has joined.
+     *
+     * @param joinedEventIds Set of joined event IDs.
+     */
     public void setJoinedEventIds(Set<String> joinedEventIds) {
         this.joinedEventIds.clear();
         if (joinedEventIds != null) {
@@ -65,25 +87,68 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         notifyDataSetChanged();
     }
 
+    /**
+     * Sets the current user's ID for join/leave logic.
+     *
+     * @param currentUserId The current user's Firebase UID.
+     */
     public void setCurrentUserId(String currentUserId) {
         this.currentUserId = currentUserId;
         notifyDataSetChanged();
     }
 
+    /**
+     * Sets the listener for join/leave button interactions.
+     *
+     * @param listener The join/leave listener.
+     */
     public void setOnJoinLeaveListener(OnJoinLeaveListener listener) {
         this.joinLeaveListener = listener;
     }
 
+    /**
+     * Sets the listener for event card click interactions.
+     *
+     * @param listener The event click listener.
+     */
     public void setOnEventClickListener(OnEventClickListener listener) {
         this.eventClickListener = listener;
     }
 
-    /** Updates join state for one event and refreshes list. */
+    /**
+     * Updates join state for one event and refreshes the list.
+     *
+     * @param eventId The event ID to update.
+     * @param joined  Whether the user has joined the event.
+     */
     public void setEventJoined(String eventId, boolean joined) {
         if (joined) {
             joinedEventIds.add(eventId);
         } else {
             joinedEventIds.remove(eventId);
+        }
+        notifyDataSetChanged();
+    }
+
+    /**
+     * Filters events by keyword across name, description, and date fields.
+     *
+     * @param query The search keyword entered by the user.
+     */
+    public void filter(String query) {
+        events.clear();
+        if (query == null || query.trim().isEmpty()) {
+            events.addAll(allEvents);
+        } else {
+            String lower = query.toLowerCase().trim();
+            for (Event event : allEvents) {
+                boolean matchesName = event.getName() != null && event.getName().toLowerCase().contains(lower);
+                boolean matchesDescription = event.getDescription() != null && event.getDescription().toLowerCase().contains(lower);
+                boolean matchesDate = event.getDate() != null && event.getDate().toLowerCase().contains(lower);
+                if (matchesName || matchesDescription || matchesDate) {
+                    events.add(event);
+                }
+            }
         }
         notifyDataSetChanged();
     }
@@ -118,7 +183,6 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         holder.date.setText(event.getDate() != null ? event.getDate() : "");
         holder.description.setText(event.getDescription() != null ? event.getDescription() : "");
 
-        // Home/Events list matches mockup: primary action is "View Details".
         boolean canViewDetails = eventClickListener != null && event.getId() != null;
         holder.joinLeaveBtn.setVisibility(View.VISIBLE);
         holder.joinLeaveBtn.setEnabled(canViewDetails);
