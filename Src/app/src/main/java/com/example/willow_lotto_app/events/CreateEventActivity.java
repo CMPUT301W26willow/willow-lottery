@@ -191,7 +191,7 @@ public class CreateEventActivity extends AppCompatActivity {
      * @param eventDate   Event date entered by organizer.
      * @return Error message string, or null if valid.
      */
-    static String validateEventForm(String name, String description, String eventDate) {
+    public static String validateEventForm(String name, String description, String eventDate) {
         if (name == null || name.trim().isEmpty()) return "Event name is required";
         if (description == null || description.trim().isEmpty()) return "Description is required";
         if (eventDate == null || eventDate.trim().isEmpty()) return "Event date is required";
