@@ -18,11 +18,22 @@
         android:textStyle="bold"
         android:textColor="@color/textDark"/>
 
+    <SearchView
+        android:id="@+id/events_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/events_title"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:iconifiedByDefault="false"
+        android:queryHint="Search events..."/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/events_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/events_title"
+        android:layout_below="@id/events_search"
         android:layout_above="@id/bottom_nav"
         android:clipToPadding="false"
         android:paddingTop="8dp"
