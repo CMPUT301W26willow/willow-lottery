@@ -14,6 +14,8 @@ import static org.junit.Assert.assertNull;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.example.willow_lotto_app.events.CreateEventActivity;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

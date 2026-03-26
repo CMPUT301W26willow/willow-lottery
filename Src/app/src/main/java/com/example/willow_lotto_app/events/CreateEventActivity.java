@@ -1,4 +1,4 @@
-package com.example.willow_lotto_app;
+package com.example.willow_lotto_app.events;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
@@ -23,6 +23,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 
+import com.example.willow_lotto_app.R;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -190,7 +191,7 @@ public class CreateEventActivity extends AppCompatActivity {
      * @param eventDate   Event date entered by organizer.
      * @return Error message string, or null if valid.
      */
-    static String validateEventForm(String name, String description, String eventDate) {
+    public static String validateEventForm(String name, String description, String eventDate) {
         if (name == null || name.trim().isEmpty()) return "Event name is required";
         if (description == null || description.trim().isEmpty()) return "Description is required";
         if (eventDate == null || eventDate.trim().isEmpty()) return "Event date is required";

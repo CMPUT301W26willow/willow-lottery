@@ -4,6 +4,9 @@ package com.example.willow_lotto_app;
 import static org.junit.Assert.assertEquals;
 
 
+import com.example.willow_lotto_app.registration.Registration;
+import com.example.willow_lotto_app.registration.RegistrationStatus;
+
 import org.junit.Test;
 
 

@@ -1,8 +1,5 @@
-package com.example.willow_lotto_app;
+package com.example.willow_lotto_app.notification;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +7,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.willow_lotto_app.R;
 
 import java.util.ArrayList;
 import java.util.List;

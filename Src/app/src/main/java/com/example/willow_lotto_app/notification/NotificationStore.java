@@ -1,4 +1,4 @@
-package com.example.willow_lotto_app;
+package com.example.willow_lotto_app.notification;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 

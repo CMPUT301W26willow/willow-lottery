@@ -24,6 +24,10 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.willow_lotto_app.events.CreateEventActivity;
+import com.example.willow_lotto_app.registration.Registration;
+import com.example.willow_lotto_app.registration.RegistrationStatus;
+import com.example.willow_lotto_app.registration.RegistrationStore;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;

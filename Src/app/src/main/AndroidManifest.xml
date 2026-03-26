@@ -25,12 +25,12 @@
 
 
         <activity
-            android:name=".EventActivity"
+            android:name=".events.EventActivity"
             android:exported="false"
-            android:parentActivityName=".EventListActivity">
+            android:parentActivityName=".events.EventListActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".EventListActivity" />
+                android:value=".events.EventListActivity" />
         </activity>
 
 
@@ -52,14 +52,14 @@
 
         <!-- Main screens -->
         <activity android:name=".MainActivity" android:exported="false"/>
-        <activity android:name=".EventsActivity" android:exported="false"/>
-        <activity android:name=".NotificationActivity" android:exported="false"/>
+        <activity android:name=".events.EventsActivity" android:exported="false"/>
+        <activity android:name=".notification.NotificationActivity" android:exported="false"/>
         <activity android:name=".ProfileActivity" android:exported="false"/>
         <activity android:name=".OrganizerDashboardActivity" android:exported="false"/>
-        <activity android:name=".CreateEventActivity" android:exported="false"/>
-        <activity android:name=".EventQrActivity" android:exported="false"/>
+        <activity android:name=".events.CreateEventActivity" android:exported="false"/>
+        <activity android:name=".events.EventQrActivity" android:exported="false"/>
         <!-- Handles deep links like willow-lottery://event/{eventId} -->
-        <activity android:name=".EventDetailActivity" android:exported="true">
+        <activity android:name=".events.EventDetailActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -72,7 +72,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".SignUpActivity" android:exported="false"/>
-        <activity android:name=".EditEventActivity" android:exported="false"/>
+        <activity android:name=".events.EditEventActivity" android:exported="false"/>
         <activity android:name=".EntrantMapActivity" android:exported="false"/>
 
         <provider

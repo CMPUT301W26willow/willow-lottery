@@ -8,6 +8,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.willow_lotto_app.events.Event;
+import com.example.willow_lotto_app.events.EventDetailActivity;
+import com.example.willow_lotto_app.events.EventsActivity;
+import com.example.willow_lotto_app.events.EventsAdapter;
+import com.example.willow_lotto_app.notification.NotificationActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;

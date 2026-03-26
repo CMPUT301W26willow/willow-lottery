@@ -13,7 +13,7 @@
  * - Event ID is currently hardcoded as "event1". Should be passed dynamically via Intent.
  * - No image compression before upload.
  */
-package com.example.willow_lotto_app;
+package com.example.willow_lotto_app.events;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -29,6 +29,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.willow_lotto_app.R;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;

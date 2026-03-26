@@ -1,4 +1,4 @@
-package com.example.willow_lotto_app;
+package com.example.willow_lotto_app.registration;
 
 /**
  * Enum representing the supported registration states used throughout the lottery workflow.

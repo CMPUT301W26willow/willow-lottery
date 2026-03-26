@@ -1,13 +1,13 @@
 package com.example.willow_lotto_app;
 
-import android.util.Log;
-import android.widget.Toast;
-
+import com.example.willow_lotto_app.notification.NotificationStore;
+import com.example.willow_lotto_app.notification.UserNotification;
+import com.example.willow_lotto_app.registration.Registration;
+import com.example.willow_lotto_app.registration.RegistrationStatus;
+import com.example.willow_lotto_app.registration.RegistrationStore;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
