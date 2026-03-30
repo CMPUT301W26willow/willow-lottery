@@ -28,6 +28,8 @@
     <string name="admin_login_hint">admin@example.com</string>
     <string name="admin_password_title">Admin Password</string>
     <string name="admin_password_hint">Enter Admin Password</string>
+    <string name="admin_security_notice"> <b>Security Notice:</b> This area is restricted to authorised administrators only. All access attempts are logged and monitored.</string>
+    <string name="admin_access_button">Access Admin Panel</string>
 
     <string name="sign_up_title">Create an Account</string>
     <string name="sign_up_name_title">Name</string>
@@ -81,4 +83,8 @@
     <string name="event_detail_one_entry">One entry per device</string>
     <string name="event_join_waiting_list">Join Waiting List</string>
     <string name="event_joined_waiting_list">Joined Waiting List</string>
+
+
+
+
 </resources>

@@ -90,6 +90,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="348dp"
         android:width="300dp"
+        android:backgroundTint="@color/buttonBlue"
         android:text="@string/login_sign_in"
         android:textAlignment="center"
         app:layout_constraintEnd_toEndOf="parent"
@@ -114,12 +115,17 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:width="300dp"
+        android:backgroundTint="@color/backgroundGray"
         android:text="@string/login_continue_as_guest"
-        android:textAlignment="viewStart"
-        app:icon="@drawable/baseline_person_24"
+        android:textAlignment="textStart"
+        android:textColor="@color/textDark"
+        app:icon="@drawable/icon_profile_logo"
+        app:iconTint="@color/textDark"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/loginTextOr" />
+        app:layout_constraintTop_toBottomOf="@+id/loginTextOr"
+        app:strokeColor="@color/strokeGrey"
+        app:strokeWidth="1dp" />
 
 
     <TextView
@@ -130,7 +136,7 @@
         android:layout_marginTop="24dp"
         android:clickable="true"
         android:text="@string/login_sign_up"
-        android:textColor="#039BE5"
+        android:textColor="@android:color/holo_red_light"
         android:textSize="10sp"
         app:layout_constraintStart_toEndOf="@+id/loginDontHaveAccount"
         app:layout_constraintTop_toTopOf="@+id/progressBar" />
@@ -153,11 +159,15 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="68dp"
         android:width="300dp"
+        android:backgroundTint="@color/backgroundGray"
         android:text="@string/login_admin_dashboard"
+        android:textColor="@color/textDark"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.507"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/progressBar" />
+        app:layout_constraintTop_toBottomOf="@+id/progressBar"
+        app:strokeColor="@color/strokeGrey"
+        app:strokeWidth="1dp" />
 
     <ProgressBar
         android:id="@+id/progressBar"
