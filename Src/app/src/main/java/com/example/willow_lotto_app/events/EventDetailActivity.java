@@ -36,7 +36,7 @@ import java.util.Map;
  * - Displays event metadata, poster, and registration period (02.01.04).
  * - Implements 01.01.01 / 01.01.02 "Join/Leave Events" by letting the user
  *   join or leave the waiting list for this event.
- * - Implements 01:05:01 - 01:05:05
+ * - Implements 01.05.01 - 01.05.05
  * - Supports deep links from QR codes (willow-lottery://event/{id}).
  * @author Jasdeep Cheema and Dev Tiwari
  * @version 2.0
@@ -48,12 +48,18 @@ public class EventDetailActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_ID = "event_id";
 
     private FirebaseFirestore db;
+
+    // Added for the user story flow so this screen can work with the same
+    // registration logic used in the rest of the project.
     private RegistrationStore registrationStore;
     private EntrantResponseManager responseManager;
     private OrganizerLotteryManager lotteryManager;
 
     private String eventId;
     private String currentUserId;
+
+    // Added so the screen can track the exact registration and status
+    // instead of only checking whether a document exists.
     private String registrationId;
     private String currentStatus;
 
@@ -73,6 +79,9 @@ public class EventDetailActivity extends AppCompatActivity {
     private ImageView posterView;
     private View posterPlaceholder;
     private Button joinLeaveBtn;
+
+    // Added for US 01.05.02 and US 01.05.03.
+    // These buttons are only shown when the user has INVITED status.
     private Button acceptButton;
     private Button declineButton;
 
@@ -100,6 +109,8 @@ public class EventDetailActivity extends AppCompatActivity {
         }
 
         db = FirebaseFirestore.getInstance();
+
+        // Added to support the user-story logic directly inside EventDetailActivity.
         registrationStore = new RegistrationStore();
         responseManager = new EntrantResponseManager();
         lotteryManager = new OrganizerLotteryManager();
@@ -127,9 +138,12 @@ public class EventDetailActivity extends AppCompatActivity {
         posterView = findViewById(R.id.event_detail_poster);
         posterPlaceholder = findViewById(R.id.event_detail_poster_placeholder);
         joinLeaveBtn = findViewById(R.id.event_detail_join_leave_btn);
+
+        // Added buttons for invitation response flow.
         acceptButton = findViewById(R.id.event_detail_accept_btn);
         declineButton = findViewById(R.id.event_detail_decline_btn);
 
+        // Added listeners for the invited-user flow.
         acceptButton.setOnClickListener(v -> acceptInvitation());
         declineButton.setOnClickListener(v -> declineInvitation());
 
@@ -162,7 +176,8 @@ public class EventDetailActivity extends AppCompatActivity {
         event.setRegistrationEnd(getString(doc, "registrationEnd"));
         event.setPosterUri(getString(doc, "posterUri"));
 
-        // Support both waitlistLimit and older limit field names
+        // Changed so the screen supports both the newer "waitlistLimit" field
+        // and the older "limit" field already used elsewhere in the project.
         Integer waitlistLimit = getInt(doc, "waitlistLimit");
         if (waitlistLimit == null) {
             waitlistLimit = getInt(doc, "limit");
@@ -218,8 +233,10 @@ public class EventDetailActivity extends AppCompatActivity {
         loadWaitingListCount();
     }
 
-    // US 01.05.04
-    // Count only waitlisted registrations, not all registrations.
+    // Changed for US 01.05.04.
+    // The old version counted every registration for the event.
+    // This version counts only WAITLISTED registrations, which is the actual
+    // waiting-list number the story asks for.
     private void loadWaitingListCount() {
         db.collection(REGISTRATIONS_COLLECTION)
                 .whereEqualTo("eventId", eventId)
@@ -248,6 +265,8 @@ public class EventDetailActivity extends AppCompatActivity {
                 });
     }
 
+    // Still builds the criteria text, but this also supports US 01.05.05
+    // because the entrant can now see the lottery rules on the detail screen.
     private void buildLotteryCriteria() {
         Integer drawSize = event.getDrawSize();
         StringBuilder sb = new StringBuilder();
@@ -259,6 +278,9 @@ public class EventDetailActivity extends AppCompatActivity {
         lotteryBulletsView.setText(sb.toString());
     }
 
+    // Changed so the screen reads not only whether the registration exists,
+    // but also what the user's current status is.
+    // That status is needed for invited / accepted / declined / cancelled states.
     private void checkJoinedAndUpdateButton() {
         if (currentUserId == null) {
             joined = false;
@@ -292,6 +314,8 @@ public class EventDetailActivity extends AppCompatActivity {
                 });
     }
 
+    // Changed so button behavior now depends on registration status,
+    // not only on whether the registration document exists.
     private void updateJoinLeaveButton() {
         joinLeaveBtn.setVisibility(View.VISIBLE);
         joinLeaveBtn.setEnabled(true);
@@ -310,8 +334,9 @@ public class EventDetailActivity extends AppCompatActivity {
             return;
         }
 
-        // US 01.05.02 and US 01.05.03
-        // Invited users should see Accept and Decline instead of Join/Leave.
+        // Added for US 01.05.02 and US 01.05.03.
+        // Invited users should not see the normal join/leave button.
+        // They should instead get Accept and Decline.
         if (RegistrationStatus.INVITED.getValue().equals(currentStatus)) {
             joinLeaveBtn.setVisibility(View.GONE);
             acceptButton.setVisibility(View.VISIBLE);
@@ -319,28 +344,34 @@ public class EventDetailActivity extends AppCompatActivity {
             return;
         }
 
+        // Added so accepted users no longer look like normal waitlisted users.
         if (RegistrationStatus.ACCEPTED.getValue().equals(currentStatus)) {
             joinLeaveBtn.setText("Invitation Accepted");
             joinLeaveBtn.setEnabled(false);
             return;
         }
 
+        // Added so declined users no longer look like normal waitlisted users.
         if (RegistrationStatus.DECLINED.getValue().equals(currentStatus)) {
             joinLeaveBtn.setText("Invitation Declined");
             joinLeaveBtn.setEnabled(false);
             return;
         }
 
+        // Added for cancelled state handling.
         if (RegistrationStatus.CANCELLED.getValue().equals(currentStatus)) {
             joinLeaveBtn.setText("Registration Cancelled");
             joinLeaveBtn.setEnabled(false);
             return;
         }
 
+        // Existing joined / waitlisted state still ends here.
         joinLeaveBtn.setText(R.string.event_joined_waiting_list);
         joinLeaveBtn.setOnClickListener(v -> leaveEvent());
     }
 
+    // Same basic join logic as before, but now explicitly writes WAITLISTED status
+    // so the rest of the project can use consistent registration-state logic.
     private void joinEvent() {
         if (currentUserId == null) return;
         String docId = eventId + "_" + currentUserId;
@@ -361,6 +392,8 @@ public class EventDetailActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> Toast.makeText(this, "Could not join event", Toast.LENGTH_SHORT).show());
     }
 
+    // Same basic leave logic as before, with local UI state reset added
+    // so the new status-based button logic updates immediately.
     private void leaveEvent() {
         if (currentUserId == null) return;
         String docId = eventId + "_" + currentUserId;
@@ -376,8 +409,8 @@ public class EventDetailActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> Toast.makeText(this, "Could not leave event", Toast.LENGTH_SHORT).show());
     }
 
-    // US 01.05.02
-    // Allow an invited entrant to accept the invitation.
+    // Added for US 01.05.02.
+    // Invited users can now accept the invitation directly from this screen.
     private void acceptInvitation() {
         if (registrationId == null) {
             Toast.makeText(this, "Registration not found", Toast.LENGTH_SHORT).show();
@@ -404,11 +437,8 @@ public class EventDetailActivity extends AppCompatActivity {
         );
     }
 
-    // US 01.05.03
-    // Allow an invited entrant to decline the invitation.
-    //
-    // US 01.05.01
-    // After declining, trigger replacement logic so another waitlisted entrant can be chosen.
+    // Added for US 01.05.03.
+    // Also completes US 01.05.01 because declining triggers replacement selection.
     private void declineInvitation() {
         if (registrationId == null) {
             Toast.makeText(this, "Registration not found", Toast.LENGTH_SHORT).show();
