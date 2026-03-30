@@ -22,6 +22,13 @@
     <string name="login_admin_dashboard">Admin Access</string>
     <string name="login_sign_up">Sign Up</string>
 
+    <string name="admin_back_button">Back to Sign In</string>
+    <string name="admin_access_title">Admin Access</string>
+    <string name="admin_login_title">Admin Email</string>
+    <string name="admin_login_hint">admin@example.com</string>
+    <string name="admin_password_title">Admin Password</string>
+    <string name="admin_password_hint">Enter Admin Password</string>
+
     <string name="sign_up_title">Create an Account</string>
     <string name="sign_up_name_title">Name</string>
     <string name="sign_up_name_hint">Enter your name</string>
