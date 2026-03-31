@@ -43,6 +43,23 @@
     <string name="organizer_dashboard_screen_body">Organizer tools will live here.</string>
     <string name="back_to_profile">Back to Profile</string>
 
+    <string name="admin_panel_title">Admin Dashboard</string>
+    <string name="admin_panel_profile_button">Profile</string>
+    <string name="admin_panel_moderation_title">Platform Moderation</string>
+    <string name="admin_panel_search">Search events, users, images</string>
+    <string name="admin_panel_platform_title">Platform Overview</string>
+    <string name="admin_panel_management">Management</string>
+    <string name="admin_panel_event_title">Total Events</string>
+    <string name="admin_panel_user_title">Total Users</string>
+    <string name="admin_panel_waitlist_title">Waiting List Entries</string>
+    <string name="admin_panel_notif_title">Notifications Sent</string>
+    <string name="admin_panel_event_browse">Browse Events</string>
+    <string name="admin_panel_event_subhead">View and Moderate all Events</string>
+    <string name="admin_panel_profile_browse">Browse Profiles</string>
+    <string name="admin_panel_profile_subhead">Manage User Profiles</string>
+    <string name="admin_panel_image_browse">Browse Images</string>
+    <string name="admin_panel_image_subhead">Review Uploaded Images</string>
+
     <string name="create_event">Create event</string>
     <string name="create_event_title">Create Event</string>
     <string name="event_name_label">Event Name *</string>
