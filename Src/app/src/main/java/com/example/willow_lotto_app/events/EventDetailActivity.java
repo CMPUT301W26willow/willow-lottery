@@ -265,8 +265,7 @@ public class EventDetailActivity extends AppCompatActivity {
                 });
     }
 
-    // Still builds the criteria text, but this also supports US 01.05.05
-    // because the entrant can now see the lottery rules on the detail screen.
+    //  US 01.05.05
     private void buildLotteryCriteria() {
         Integer drawSize = event.getDrawSize();
         StringBuilder sb = new StringBuilder();
@@ -334,9 +333,8 @@ public class EventDetailActivity extends AppCompatActivity {
             return;
         }
 
-        // Added for US 01.05.02 and US 01.05.03.
-        // Invited users should not see the normal join/leave button.
-        // They should instead get Accept and Decline.
+        // US 01.05.02 and US 01.05.03.
+        // Invited users get Accept and Decline.
         if (RegistrationStatus.INVITED.getValue().equals(currentStatus)) {
             joinLeaveBtn.setVisibility(View.GONE);
             acceptButton.setVisibility(View.VISIBLE);
@@ -344,14 +342,14 @@ public class EventDetailActivity extends AppCompatActivity {
             return;
         }
 
-        // Added so accepted users no longer look like normal waitlisted users.
+        // accepted users
         if (RegistrationStatus.ACCEPTED.getValue().equals(currentStatus)) {
             joinLeaveBtn.setText("Invitation Accepted");
             joinLeaveBtn.setEnabled(false);
             return;
         }
 
-        // Added so declined users no longer look like normal waitlisted users.
+        // declined users
         if (RegistrationStatus.DECLINED.getValue().equals(currentStatus)) {
             joinLeaveBtn.setText("Invitation Declined");
             joinLeaveBtn.setEnabled(false);
@@ -365,13 +363,12 @@ public class EventDetailActivity extends AppCompatActivity {
             return;
         }
 
-        // Existing joined / waitlisted state still ends here.
-        joinLeaveBtn.setText(R.string.event_joined_waiting_list);
+        // Existing joined / waitlisted state
+        joinLeaveBtn.setText("Leave Waiting List");
         joinLeaveBtn.setOnClickListener(v -> leaveEvent());
     }
 
-    // Same basic join logic as before, but now explicitly writes WAITLISTED status
-    // so the rest of the project can use consistent registration-state logic.
+    // basic join logic , explicitly writes WAITLISTED status
     private void joinEvent() {
         if (currentUserId == null) return;
         String docId = eventId + "_" + currentUserId;
@@ -392,8 +389,8 @@ public class EventDetailActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> Toast.makeText(this, "Could not join event", Toast.LENGTH_SHORT).show());
     }
 
-    // Same basic leave logic as before, with local UI state reset added
-    // so the new status-based button logic updates immediately.
+    // leave logic
+    // status-based button logic updates immediately.
     private void leaveEvent() {
         if (currentUserId == null) return;
         String docId = eventId + "_" + currentUserId;
@@ -438,7 +435,7 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     // Added for US 01.05.03.
-    // Also completes US 01.05.01 because declining triggers replacement selection.
+    // US 01.05.01 declining triggers replacement selection.
     private void declineInvitation() {
         if (registrationId == null) {
             Toast.makeText(this, "Registration not found", Toast.LENGTH_SHORT).show();
