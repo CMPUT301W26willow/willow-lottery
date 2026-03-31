@@ -24,14 +24,6 @@
         <!-- App starts here -->
 
 
-        <activity
-            android:name=".events.EventActivity"
-            android:exported="false"
-            android:parentActivityName=".events.EventListActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".events.EventListActivity" />
-        </activity>
 
 
         <activity

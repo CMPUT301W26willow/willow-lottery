@@ -15,6 +15,7 @@ import com.example.willow_lotto_app.MainActivity;
 import com.example.willow_lotto_app.notification.NotificationActivity;
 import com.example.willow_lotto_app.ProfileActivity;
 import com.example.willow_lotto_app.R;
+import com.example.willow_lotto_app.registration.RegistrationStatus;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -83,6 +84,7 @@ public class EventsActivity extends AppCompatActivity {
                 Map<String, Object> reg = new HashMap<>();
                 reg.put("eventId", event.getId());
                 reg.put("userId", currentUserId);
+                reg.put("status", RegistrationStatus.WAITLISTED.getValue());
                 db.collection(REGISTRATIONS_COLLECTION).document(docId).set(reg)
                         .addOnSuccessListener(aVoid -> adapter.setEventJoined(event.getId(), true))
                         .addOnFailureListener(e -> Toast.makeText(EventsActivity.this, "Could not join event", Toast.LENGTH_SHORT).show());

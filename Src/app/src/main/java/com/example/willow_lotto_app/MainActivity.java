@@ -13,6 +13,7 @@ import com.example.willow_lotto_app.events.EventDetailActivity;
 import com.example.willow_lotto_app.events.EventsActivity;
 import com.example.willow_lotto_app.events.EventsAdapter;
 import com.example.willow_lotto_app.notification.NotificationActivity;
+import com.example.willow_lotto_app.registration.RegistrationStatus;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -70,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
                 Map<String, Object> reg = new HashMap<>();
                 reg.put("eventId", event.getId());
                 reg.put("userId", currentUserId);
+                reg.put("status", RegistrationStatus.WAITLISTED.getValue());
                 db.collection(REGISTRATIONS_COLLECTION).document(docId).set(reg)
                         .addOnSuccessListener(aVoid -> {
                             adapter.setEventJoined(event.getId(), true);

@@ -14,14 +14,19 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.willow_lotto_app.EntrantResponseManager;
+import com.example.willow_lotto_app.OrganizerLotteryManager;
 import com.example.willow_lotto_app.R;
+import com.example.willow_lotto_app.registration.Registration;
 import com.example.willow_lotto_app.registration.RegistrationStatus;
+import com.example.willow_lotto_app.registration.RegistrationStore;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,7 +36,11 @@ import java.util.Map;
  * - Displays event metadata, poster, and registration period (02.01.04).
  * - Implements 01.01.01 / 01.01.02 "Join/Leave Events" by letting the user
  *   join or leave the waiting list for this event.
+ * - Implements 01.05.01 - 01.05.05
  * - Supports deep links from QR codes (willow-lottery://event/{id}).
+ * @author Jasdeep Cheema and Dev Tiwari
+ * @version 2.0
+ * @since 30/03/2026
  */
 public class EventDetailActivity extends AppCompatActivity {
 
@@ -39,8 +48,21 @@ public class EventDetailActivity extends AppCompatActivity {
     public static final String EXTRA_EVENT_ID = "event_id";
 
     private FirebaseFirestore db;
+
+    // Added for the user story flow so this screen can work with the same
+    // registration logic used in the rest of the project.
+    private RegistrationStore registrationStore;
+    private EntrantResponseManager responseManager;
+    private OrganizerLotteryManager lotteryManager;
+
     private String eventId;
     private String currentUserId;
+
+    // Added so the screen can track the exact registration and status
+    // instead of only checking whether a document exists.
+    private String registrationId;
+    private String currentStatus;
+
     private Event event;
     private boolean joined;
     private int waitingListCount;
@@ -58,6 +80,11 @@ public class EventDetailActivity extends AppCompatActivity {
     private View posterPlaceholder;
     private Button joinLeaveBtn;
 
+    // Added for US 01.05.02 and US 01.05.03.
+    // These buttons are only shown when the user has INVITED status.
+    private Button acceptButton;
+    private Button declineButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,7 +93,6 @@ public class EventDetailActivity extends AppCompatActivity {
         // Support both in-app navigation (EXTRA_EVENT_ID) and deep links via QR code
         eventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
         if (eventId == null || eventId.isEmpty()) {
-            // Try to parse from custom URI: willow-lottery://event/{eventId}
             Uri data = getIntent().getData();
             if (data != null
                     && "willow-lottery".equals(data.getScheme())
@@ -83,6 +109,12 @@ public class EventDetailActivity extends AppCompatActivity {
         }
 
         db = FirebaseFirestore.getInstance();
+
+        // Added to support the user-story logic directly inside EventDetailActivity.
+        registrationStore = new RegistrationStore();
+        responseManager = new EntrantResponseManager();
+        lotteryManager = new OrganizerLotteryManager();
+
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         }
@@ -97,7 +129,7 @@ public class EventDetailActivity extends AppCompatActivity {
         nameView = findViewById(R.id.event_detail_name);
         dateView = findViewById(R.id.event_detail_date);
         descriptionView = findViewById(R.id.event_detail_description);
-        organizerView = findViewById(R.id.event_detail_organizer);        
+        organizerView = findViewById(R.id.event_detail_organizer);
         registrationDatesView = findViewById(R.id.event_detail_registration_dates);
         registrationOpensView = findViewById(R.id.event_detail_registration_opens);
         waitingListView = findViewById(R.id.event_detail_waiting_list);
@@ -106,6 +138,14 @@ public class EventDetailActivity extends AppCompatActivity {
         posterView = findViewById(R.id.event_detail_poster);
         posterPlaceholder = findViewById(R.id.event_detail_poster_placeholder);
         joinLeaveBtn = findViewById(R.id.event_detail_join_leave_btn);
+
+        // Added buttons for invitation response flow.
+        acceptButton = findViewById(R.id.event_detail_accept_btn);
+        declineButton = findViewById(R.id.event_detail_decline_btn);
+
+        // Added listeners for the invited-user flow.
+        acceptButton.setOnClickListener(v -> acceptInvitation());
+        declineButton.setOnClickListener(v -> declineInvitation());
 
         loadEvent();
     }
@@ -135,7 +175,15 @@ public class EventDetailActivity extends AppCompatActivity {
         event.setRegistrationStart(getString(doc, "registrationStart"));
         event.setRegistrationEnd(getString(doc, "registrationEnd"));
         event.setPosterUri(getString(doc, "posterUri"));
-        event.setLimit(getInt(doc, "limit"));
+
+        // Changed so the screen supports both the newer "waitlistLimit" field
+        // and the older "limit" field already used elsewhere in the project.
+        Integer waitlistLimit = getInt(doc, "waitlistLimit");
+        if (waitlistLimit == null) {
+            waitlistLimit = getInt(doc, "limit");
+        }
+        event.setLimit(waitlistLimit);
+
         event.setDrawSize(getInt(doc, "drawSize"));
 
         nameView.setText(event.getName() != null ? event.getName() : "");
@@ -185,14 +233,19 @@ public class EventDetailActivity extends AppCompatActivity {
         loadWaitingListCount();
     }
 
-    // Query registrations for this event to show count and limit.
+    // Changed for US 01.05.04.
+    // The old version counted every registration for the event.
+    // This version counts only WAITLISTED registrations, which is the actual
+    // waiting-list number the story asks for.
     private void loadWaitingListCount() {
         db.collection(REGISTRATIONS_COLLECTION)
                 .whereEqualTo("eventId", eventId)
+                .whereEqualTo("status", RegistrationStatus.WAITLISTED.getValue())
                 .get()
                 .addOnSuccessListener(snap -> {
                     waitingListCount = snap != null ? snap.size() : 0;
                     waitingListView.setText(getString(R.string.event_detail_waiting_list_count, waitingListCount));
+
                     Integer limit = event.getLimit();
                     if (limit != null && limit > 0) {
                         limitView.setVisibility(View.VISIBLE);
@@ -200,6 +253,7 @@ public class EventDetailActivity extends AppCompatActivity {
                     } else {
                         limitView.setVisibility(View.GONE);
                     }
+
                     buildLotteryCriteria();
                     checkJoinedAndUpdateButton();
                 })
@@ -211,6 +265,8 @@ public class EventDetailActivity extends AppCompatActivity {
                 });
     }
 
+    // Still builds the criteria text, but this also supports US 01.05.05
+    // because the entrant can now see the lottery rules on the detail screen.
     private void buildLotteryCriteria() {
         Integer drawSize = event.getDrawSize();
         StringBuilder sb = new StringBuilder();
@@ -222,37 +278,100 @@ public class EventDetailActivity extends AppCompatActivity {
         lotteryBulletsView.setText(sb.toString());
     }
 
+    // Changed so the screen reads not only whether the registration exists,
+    // but also what the user's current status is.
+    // That status is needed for invited / accepted / declined / cancelled states.
     private void checkJoinedAndUpdateButton() {
         if (currentUserId == null) {
-            joinLeaveBtn.setEnabled(false);
-            joinLeaveBtn.setText(R.string.event_join_waiting_list);
+            joined = false;
+            registrationId = null;
+            currentStatus = null;
+            updateJoinLeaveButton();
             return;
         }
+
         db.collection(REGISTRATIONS_COLLECTION)
                 .document(eventId + "_" + currentUserId)
                 .get()
                 .addOnSuccessListener(doc -> {
                     joined = doc != null && doc.exists();
+
+                    if (joined && doc != null) {
+                        registrationId = doc.getId();
+                        currentStatus = doc.getString("status");
+                    } else {
+                        registrationId = null;
+                        currentStatus = null;
+                    }
+
                     updateJoinLeaveButton();
                 })
                 .addOnFailureListener(e -> {
                     joined = false;
+                    registrationId = null;
+                    currentStatus = null;
                     updateJoinLeaveButton();
                 });
     }
 
+    // Changed so button behavior now depends on registration status,
+    // not only on whether the registration document exists.
     private void updateJoinLeaveButton() {
+        joinLeaveBtn.setVisibility(View.VISIBLE);
         joinLeaveBtn.setEnabled(true);
-        joinLeaveBtn.setText(joined ? R.string.event_joined_waiting_list : R.string.event_join_waiting_list);
-        joinLeaveBtn.setOnClickListener(v -> {
-            if (joined) {
-                leaveEvent();
-            } else {
-                joinEvent();
-            }
-        });
+        acceptButton.setVisibility(View.GONE);
+        declineButton.setVisibility(View.GONE);
+
+        if (currentUserId == null) {
+            joinLeaveBtn.setEnabled(false);
+            joinLeaveBtn.setText(R.string.event_join_waiting_list);
+            return;
+        }
+
+        if (!joined) {
+            joinLeaveBtn.setText(R.string.event_join_waiting_list);
+            joinLeaveBtn.setOnClickListener(v -> joinEvent());
+            return;
+        }
+
+        // Added for US 01.05.02 and US 01.05.03.
+        // Invited users should not see the normal join/leave button.
+        // They should instead get Accept and Decline.
+        if (RegistrationStatus.INVITED.getValue().equals(currentStatus)) {
+            joinLeaveBtn.setVisibility(View.GONE);
+            acceptButton.setVisibility(View.VISIBLE);
+            declineButton.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        // Added so accepted users no longer look like normal waitlisted users.
+        if (RegistrationStatus.ACCEPTED.getValue().equals(currentStatus)) {
+            joinLeaveBtn.setText("Invitation Accepted");
+            joinLeaveBtn.setEnabled(false);
+            return;
+        }
+
+        // Added so declined users no longer look like normal waitlisted users.
+        if (RegistrationStatus.DECLINED.getValue().equals(currentStatus)) {
+            joinLeaveBtn.setText("Invitation Declined");
+            joinLeaveBtn.setEnabled(false);
+            return;
+        }
+
+        // Added for cancelled state handling.
+        if (RegistrationStatus.CANCELLED.getValue().equals(currentStatus)) {
+            joinLeaveBtn.setText("Registration Cancelled");
+            joinLeaveBtn.setEnabled(false);
+            return;
+        }
+
+        // Existing joined / waitlisted state still ends here.
+        joinLeaveBtn.setText(R.string.event_joined_waiting_list);
+        joinLeaveBtn.setOnClickListener(v -> leaveEvent());
     }
 
+    // Same basic join logic as before, but now explicitly writes WAITLISTED status
+    // so the rest of the project can use consistent registration-state logic.
     private void joinEvent() {
         if (currentUserId == null) return;
         String docId = eventId + "_" + currentUserId;
@@ -260,9 +379,12 @@ public class EventDetailActivity extends AppCompatActivity {
         reg.put("eventId", eventId);
         reg.put("userId", currentUserId);
         reg.put("status", RegistrationStatus.WAITLISTED.getValue());
+
         db.collection(REGISTRATIONS_COLLECTION).document(docId).set(reg)
                 .addOnSuccessListener(aVoid -> {
                     joined = true;
+                    registrationId = docId;
+                    currentStatus = RegistrationStatus.WAITLISTED.getValue();
                     waitingListCount++;
                     waitingListView.setText(getString(R.string.event_detail_waiting_list_count, waitingListCount));
                     updateJoinLeaveButton();
@@ -270,17 +392,78 @@ public class EventDetailActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> Toast.makeText(this, "Could not join event", Toast.LENGTH_SHORT).show());
     }
 
+    // Same basic leave logic as before, with local UI state reset added
+    // so the new status-based button logic updates immediately.
     private void leaveEvent() {
         if (currentUserId == null) return;
         String docId = eventId + "_" + currentUserId;
         db.collection(REGISTRATIONS_COLLECTION).document(docId).delete()
                 .addOnSuccessListener(aVoid -> {
                     joined = false;
+                    registrationId = null;
+                    currentStatus = null;
                     if (waitingListCount > 0) waitingListCount--;
                     waitingListView.setText(getString(R.string.event_detail_waiting_list_count, waitingListCount));
                     updateJoinLeaveButton();
                 })
                 .addOnFailureListener(e -> Toast.makeText(this, "Could not leave event", Toast.LENGTH_SHORT).show());
+    }
+
+    // Added for US 01.05.02.
+    // Invited users can now accept the invitation directly from this screen.
+    private void acceptInvitation() {
+        if (registrationId == null) {
+            Toast.makeText(this, "Registration not found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        responseManager.acceptInvitation(
+                registrationId,
+                eventId,
+                currentUserId,
+                new EntrantResponseManager.SimpleCallback() {
+                    @Override
+                    public void onSuccess(String message) {
+                        currentStatus = RegistrationStatus.ACCEPTED.getValue();
+                        updateJoinLeaveButton();
+                        Toast.makeText(EventDetailActivity.this, message, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        Toast.makeText(EventDetailActivity.this, "Could not accept invitation", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+    }
+
+    // Added for US 01.05.03.
+    // Also completes US 01.05.01 because declining triggers replacement selection.
+    private void declineInvitation() {
+        if (registrationId == null) {
+            Toast.makeText(this, "Registration not found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        lotteryManager.replaceDeclinedOrCancelledEntrant(
+                eventId,
+                registrationId,
+                RegistrationStatus.DECLINED,
+                new OrganizerLotteryManager.LotteryCallback() {
+                    @Override
+                    public void onSuccess(String message, List<Registration> affectedRegistrations) {
+                        currentStatus = RegistrationStatus.DECLINED.getValue();
+                        updateJoinLeaveButton();
+                        loadWaitingListCount();
+                        Toast.makeText(EventDetailActivity.this, message, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        Toast.makeText(EventDetailActivity.this, "Could not decline invitation", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
     }
 
     /** Returns doc field as string, or "". */

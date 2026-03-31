@@ -1,6 +1,9 @@
 package com.example.willow_lotto_app.events;
 
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.willow_lotto_app.registration.Registration;
+import com.example.willow_lotto_app.registration.RegistrationStatus;
+import com.example.willow_lotto_app.registration.RegistrationStore;
+
 import java.util.List;
 
 /**
@@ -12,39 +15,61 @@ import java.util.List;
  */
 public class EventWaitlist {
 
-    private List<String> waitingList; // Local cache of user IDs
-    private FirebaseFirestore db;
+    private List<Registration> waitingList; // Local cache of waitlisted registrations
+    private RegistrationStore registrationStore;
 
     /**
-     * Lazy-loading getter for the Firestore instance.
-     * @return the active FirebaseFirestore instance
+     * getter for the RegistrationStore instance.
+     * @return the active RegistrationStore instance
      */
-    private FirebaseFirestore getDb(){
-        if(db == null) db = FirebaseFirestore.getInstance();
-        return db;
+    private RegistrationStore getRegistrationStore(){
+        if(registrationStore == null) registrationStore = new RegistrationStore();
+        return registrationStore;
     }
 
     /**
      * Global method to update an entrant's status from outside the Activity.
-     * @param eventId the specific document ID for the event
-     * @param userId the specific document ID for the user
+     * @param registrationId the specific registration document ID for the user
      * @param status the new status string to apply (e.g., "accepted", "declined")
+     * @param callback callback used to report success or failure
      */
-    public void updateStatus(String eventId, String userId, String status){
-        // Reference the nested 'entrants' collection via the parent 'events' document
-        getDb().collection("events")
-                .document(eventId)
-                .collection("entrants")
-                .document(userId)
-                // Apply the new status value to the document field
-                .update("status", status);
+    public void updateStatus(String registrationId, String status, RegistrationStore.SimpleCallback callback){
+        // Update the matching registration document in the top-level registrations collection
+        getRegistrationStore().updateRegistrationStatus(registrationId, status, callback);
+    }
+
+    /**
+     * Loads all waitlisted registrations for the specific event.
+     * @param eventId the specific document ID for the event
+     * @param callback callback returning the list of waitlisted registrations
+     */
+    public void loadWaitingList(String eventId, RegistrationStore.RegistrationListCallback callback){
+        // US 01.05.04
+        // Load all waitlisted registrations for the event so the UI can show
+        // the total number of entrants currently on the waiting list.
+        getRegistrationStore().getRegistrationsForEventByStatus(
+                eventId,
+                RegistrationStatus.WAITLISTED.getValue(),
+                callback
+        );
+    }
+
+    /**
+     * Loads the registration for the current user for this event.
+     * @param eventId the specific document ID for the event
+     * @param userId the specific Firebase UID for the current user
+     * @param callback callback returning the matching registration document
+     */
+    public void findUserRegistration(String eventId, String userId, RegistrationStore.RegistrationCallback callback){
+        // Find the single registration document matching the current event and user
+        getRegistrationStore().findRegistration(eventId, userId, callback);
     }
 
     /**
      * Sets the local cache of the waiting list for this event.
-     * @param list a List of user ID strings currently waiting
+     * @param list a List of Registration objects currently waiting
      */
-    public void setLocalWaitingList(List<String> list){
+    public void setLocalWaitingList(List<Registration> list){
         waitingList = list;
     }
 
@@ -53,6 +78,8 @@ public class EventWaitlist {
      * @return the integer count of entrants on the waiting list, or 0 if null
      */
     public int getWaitingCount(){
+        // US 01.05.04
+        // Return the total number of entrants currently on the waiting list.
         return waitingList != null ? waitingList.size() : 0;
     }
 }
