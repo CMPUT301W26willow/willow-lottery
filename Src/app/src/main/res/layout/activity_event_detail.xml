@@ -212,15 +212,25 @@
                     <Button
                         android:id="@+id/event_detail_accept_btn"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@drawable/button_primary_blue"
                         android:text="Accept Invitation"
+                        android:textColor="@android:color/white"
+                        android:textAllCaps="false"
+                        android:textSize="16sp"
                         android:visibility="gone" />
 
                     <Button
                         android:id="@+id/event_detail_decline_btn"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="8dp"
+                        android:backgroundTint="#D32F2F"
                         android:text="Decline Invitation"
+                        android:textColor="@android:color/white"
+                        android:textAllCaps="false"
+                        android:textSize="16sp"
                         android:visibility="gone" />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
