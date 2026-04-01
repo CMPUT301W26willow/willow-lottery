@@ -40,12 +40,11 @@ import java.util.Map;
 
 /**
  * Detailed view for a single event.
- *
  * Responsibilities:
  * - Displays event metadata, poster, and registration period (02.01.04).
  * - Implements 01.01.01 / 01.01.02 "Join/Leave Events" by letting the user
  *   join or leave the waiting list for this event.
- * - Implements 01.05.01 - 01.05.05
+ * - Implements 01.05.01 - 01.05.07
  * - Supports deep links from QR codes (willow-lottery://event/{id}).
  * @author Jasdeep Cheema and Dev Tiwari
  * @version 2.0
@@ -179,12 +178,7 @@ public class EventDetailActivity extends AppCompatActivity {
         loadEvent();
     }
 
-    /**
-     * Loads the selected event document from Firestore.
-     * If loading fails, the activity closes after showing an error message.
-     *
-     * @since 30/03/2026
-     */
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -283,6 +277,12 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     // Load event doc then waiting-list count and join state.
+    /**
+     * Loads the selected event document from Firestore.
+     * If loading fails, the activity closes after showing an error message.
+     *
+     * @since 30/03/2026
+     */
     private void loadEvent() {
         db.collection("events").document(eventId).get()
                 .addOnSuccessListener(this::applyEventDoc)
@@ -523,11 +523,7 @@ public class EventDetailActivity extends AppCompatActivity {
             joinLeaveBtn.setEnabled(false);
             return;
         }
-
-        // Existing joined / waitlisted state
-        joinLeaveBtn.setText("Leave Waiting List");
-        joinLeaveBtn.setOnClickListener(v -> leaveEvent());
-
+        // US 1:05:07
         // CHANGED: private-event invitation state
         // User has been invited to join the private waiting list, so show Accept/Decline.
         if (RegistrationStatus.PRIVATE_INVITED.getValue().equals(currentStatus)) {
@@ -536,6 +532,12 @@ public class EventDetailActivity extends AppCompatActivity {
             declineButton.setVisibility(View.VISIBLE);
             return;
         }
+
+        // Existing joined / waitlisted state
+        joinLeaveBtn.setText("Leave Waiting List");
+        joinLeaveBtn.setOnClickListener(v -> leaveEvent());
+
+
     }
 
 
@@ -598,6 +600,7 @@ public class EventDetailActivity extends AppCompatActivity {
      * @since 30/03/2026
      */
     private void acceptInvitation() {
+        // US 1:05:07
         // CHANGED: accepting a private-event invitation moves the entrant onto the waiting list
         if (RegistrationStatus.PRIVATE_INVITED.getValue().equals(currentStatus)) {
             registrationStore.updateRegistrationStatus(
@@ -660,6 +663,7 @@ public class EventDetailActivity extends AppCompatActivity {
      * @since 30/03/2026
      */
     private void declineInvitation() {
+        // US 1:05:07
         // CHANGED: declining a private-event invite just marks it declined
         if (RegistrationStatus.PRIVATE_INVITED.getValue().equals(currentStatus)) {
             registrationStore.updateRegistrationStatus(
