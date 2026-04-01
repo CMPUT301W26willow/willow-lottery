@@ -249,6 +249,7 @@ public class OrganizerLotteryManager {
         });
     }
 
+
     /**
      * US 02.05.03
      * First mark the old user as declined/cancelled, then draw replacement.
@@ -269,8 +270,13 @@ public class OrganizerLotteryManager {
                 removalStatus.getValue(),
                 new RegistrationStore.SimpleCallback() {
                     @Override
-                    public void onSuccess() {
-                        drawReplacement(eventId, callback);
+                    public void onSuccess() { //if the entrant was cancelled, notify them before drawing a replacement
+                        // if declined draw replacement
+                        if (removalStatus == RegistrationStatus.CANCELLED) {
+                            sendCancelledNotification(eventId, oldRegistrationId, callback);
+                        } else {
+                            drawReplacement(eventId, callback);
+                        }
                     }
 
                     @Override
@@ -349,6 +355,64 @@ public class OrganizerLotteryManager {
         );
     }
 
+    private void sendCancelledNotification(String eventId, String oldRegistrationId, final LotteryCallback callback) {
+        /**
+         * Send the entrant a cancelled notification
+         */
+        registrationRepository.getRegistrationsForEvent(eventId, new RegistrationStore.RegistrationListCallback() {
+            @Override
+            public void onSuccess(List<Registration> registrations) {
+                // Search through the registrations to find a cancelled one
+                // get the userID
+                String userId = null;
+                for (Registration r : registrations) {
+                    if (r.getId().equals(oldRegistrationId)) {
+                        userId = r.getUserId();
+                        break;
+                    }
+                }
+
+                //if user registration is not found skip the notification
+                // continue to draw
+
+                if (userId == null) {
+                    drawReplacement(eventId, callback);
+                    return;
+                }
+
+                final String finalUserId = userId;
+                // send the notification to the cancelled entrants notification subcollection
+                UserNotification notification = new UserNotification(
+                        eventId,
+                        "Your registration was cancelled",
+                        "Unfortunately, your registration for this event has been cancelled.",
+                        "lottery_cancelled"
+                );
+
+                notificationRepository.sendNotificationToUser(
+                        finalUserId,
+                        notification,
+                        new NotificationStore.SimpleCallback() {
+                            @Override
+                            public void onSuccess() {
+                                System.out.print("Cancellation notification sent");
+                                drawReplacement(eventId, callback);
+                            }
+
+                            @Override
+                            public void onFailure(Exception e) {
+                                drawReplacement(eventId, callback);
+                            }
+                        }
+                );
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                drawReplacement(eventId, callback);
+            }
+        });
+    }
     private void getEventDrawSize(String eventId, final DrawSizeCallback callback) {
         db.collection("events")
                 .document(eventId)
