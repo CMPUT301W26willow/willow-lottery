@@ -24,6 +24,7 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.auth.User;
 
 import java.util.HashMap;
 import java.util.List;
@@ -150,7 +151,12 @@ public class EventDetailActivity extends AppCompatActivity {
         loadEvent();
     }
 
-    // Load event doc then waiting-list count and join state.
+    /**
+     * Loads the selected event document from Firestore.
+     * If loading fails, the activity closes after showing an error message.
+     *
+     * @since 30/03/2026
+     */
     private void loadEvent() {
         db.collection("events").document(eventId).get()
                 .addOnSuccessListener(this::applyEventDoc)
@@ -160,6 +166,12 @@ public class EventDetailActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Applies the loaded Firestore event document to the local event model
+     * and updates the detail screen UI.
+     *
+     * @param doc Firestore document containing the selected event data
+     */
     private void applyEventDoc(DocumentSnapshot doc) {
         if (doc == null || !doc.exists()) {
             Toast.makeText(this, "Event not found", Toast.LENGTH_SHORT).show();
@@ -237,6 +249,12 @@ public class EventDetailActivity extends AppCompatActivity {
     // The old version counted every registration for the event.
     // This version counts only WAITLISTED registrations, which is the actual
     // waiting-list number the story asks for.
+    /**
+     * Loads the number of entrants currently on the waiting list for the event.
+     * Only registrations with WAITLISTED status are counted.
+     *
+     * @since 30/03/2026
+     */
     private void loadWaitingListCount() {
         db.collection(REGISTRATIONS_COLLECTION)
                 .whereEqualTo("eventId", eventId)
@@ -266,6 +284,11 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     //  US 01.05.05
+    /**
+     * Builds and displays the lottery criteria summary shown to the entrant.
+     *
+     * @since 30/03/2026
+     */
     private void buildLotteryCriteria() {
         Integer drawSize = event.getDrawSize();
         StringBuilder sb = new StringBuilder();
@@ -280,6 +303,12 @@ public class EventDetailActivity extends AppCompatActivity {
     // Changed so the screen reads not only whether the registration exists,
     // but also what the user's current status is.
     // That status is needed for invited / accepted / declined / cancelled states.
+    /**
+     * Loads the current user's registration for this event and updates the button UI
+     * based on whether the user is registered and what their current status is.
+     *
+     * @since 30/03/2026
+     */
     private void checkJoinedAndUpdateButton() {
         if (currentUserId == null) {
             joined = false;
@@ -315,6 +344,12 @@ public class EventDetailActivity extends AppCompatActivity {
 
     // Changed so button behavior now depends on registration status,
     // not only on whether the registration document exists.
+    /**
+     * Updates the main action buttons shown on the event detail screen
+     * based on the entrant's current registration status.
+     *
+     * @since 30/03/2026
+     */
     private void updateJoinLeaveButton() {
         joinLeaveBtn.setVisibility(View.VISIBLE);
         joinLeaveBtn.setEnabled(true);
@@ -366,9 +401,25 @@ public class EventDetailActivity extends AppCompatActivity {
         // Existing joined / waitlisted state
         joinLeaveBtn.setText("Leave Waiting List");
         joinLeaveBtn.setOnClickListener(v -> leaveEvent());
+
+        // CHANGED: private-event invitation state
+        // User has been invited to join the private waiting list, so show Accept/Decline.
+        if (RegistrationStatus.PRIVATE_INVITED.getValue().equals(currentStatus)) {
+            joinLeaveBtn.setVisibility(View.GONE);
+            acceptButton.setVisibility(View.VISIBLE);
+            declineButton.setVisibility(View.VISIBLE);
+            return;
+        }
     }
 
+
     // basic join logic , explicitly writes WAITLISTED status
+    /**
+     * Adds the current user to the waiting list for this event.
+     * A new registration document is created with WAITLISTED status.
+     *
+     * @since 30/03/2026
+     */
     private void joinEvent() {
         if (currentUserId == null) return;
         String docId = eventId + "_" + currentUserId;
@@ -391,6 +442,11 @@ public class EventDetailActivity extends AppCompatActivity {
 
     // leave logic
     // status-based button logic updates immediately.
+    /**
+     * Removes the current user from the waiting list for this event.
+     *
+     * @since 30/03/2026
+     */
     private void leaveEvent() {
         if (currentUserId == null) return;
         String docId = eventId + "_" + currentUserId;
@@ -408,7 +464,41 @@ public class EventDetailActivity extends AppCompatActivity {
 
     // Added for US 01.05.02.
     // Invited users can now accept the invitation directly from this screen.
+    /**
+     * Accepts the current invitation shown to the entrant.
+     * This supports both private-event waiting-list invitations and
+     * regular invitation acceptance flow.
+     *
+     * @since 30/03/2026
+     */
     private void acceptInvitation() {
+        // CHANGED: accepting a private-event invitation moves the entrant onto the waiting list
+        if (RegistrationStatus.PRIVATE_INVITED.getValue().equals(currentStatus)) {
+            registrationStore.updateRegistrationStatus(
+                    registrationId,
+                    RegistrationStatus.WAITLISTED.getValue(),
+                    new RegistrationStore.SimpleCallback() {
+                        @Override
+                        public void onSuccess() {
+                            currentStatus = RegistrationStatus.WAITLISTED.getValue();
+                            joined = true;
+                            loadWaitingListCount();
+                            updateJoinLeaveButton();
+                            Toast.makeText(EventDetailActivity.this,
+                                    "You joined the private event waiting list.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            Toast.makeText(EventDetailActivity.this,
+                                    "Could not accept invitation.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+            );
+            return;
+        }
         if (registrationId == null) {
             Toast.makeText(this, "Registration not found", Toast.LENGTH_SHORT).show();
             return;
@@ -436,7 +526,39 @@ public class EventDetailActivity extends AppCompatActivity {
 
     // Added for US 01.05.03.
     // US 01.05.01 declining triggers replacement selection.
+    /**
+     * Declines the current invitation shown to the entrant.
+     * This supports both private-event invitation decline and
+     * regular decline-with-replacement logic.
+     *
+     * @since 30/03/2026
+     */
     private void declineInvitation() {
+        // CHANGED: declining a private-event invite just marks it declined
+        if (RegistrationStatus.PRIVATE_INVITED.getValue().equals(currentStatus)) {
+            registrationStore.updateRegistrationStatus(
+                    registrationId,
+                    RegistrationStatus.DECLINED.getValue(),
+                    new RegistrationStore.SimpleCallback() {
+                        @Override
+                        public void onSuccess() {
+                            currentStatus = RegistrationStatus.DECLINED.getValue();
+                            updateJoinLeaveButton();
+                            Toast.makeText(EventDetailActivity.this,
+                                    "You declined the private event invitation.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            Toast.makeText(EventDetailActivity.this,
+                                    "Could not decline invitation.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+            );
+            return;
+        }
         if (registrationId == null) {
             Toast.makeText(this, "Registration not found", Toast.LENGTH_SHORT).show();
             return;
