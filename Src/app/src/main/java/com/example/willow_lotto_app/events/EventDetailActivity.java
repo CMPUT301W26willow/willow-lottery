@@ -4,11 +4,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
@@ -23,8 +26,13 @@ import com.example.willow_lotto_app.registration.RegistrationStore;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +53,9 @@ import java.util.Map;
 public class EventDetailActivity extends AppCompatActivity {
 
     private static final String REGISTRATIONS_COLLECTION = "registrations";
+    /** Subcollection under each {@code events/{eventId}} document. */
+    private static final String COMMENTS_SUBCOLLECTION = "comments";
+    private static final int COMMENTS_PAGE_LIMIT = 50;
     public static final String EXTRA_EVENT_ID = "event_id";
 
     private FirebaseFirestore db;
@@ -84,6 +95,13 @@ public class EventDetailActivity extends AppCompatActivity {
     // These buttons are only shown when the user has INVITED status.
     private Button acceptButton;
     private Button declineButton;
+
+    private RecyclerView commentsRecyclerView;
+    private TextView commentsEmptyView;
+    private EditText commentInput;
+    private Button postCommentButton;
+    private EventCommentsAdapter commentsAdapter;
+    private ListenerRegistration commentsListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,11 +161,118 @@ public class EventDetailActivity extends AppCompatActivity {
         acceptButton = findViewById(R.id.event_detail_accept_btn);
         declineButton = findViewById(R.id.event_detail_decline_btn);
 
+        commentsRecyclerView = findViewById(R.id.event_detail_comments_list);
+        commentsEmptyView = findViewById(R.id.event_detail_comments_empty);
+        commentInput = findViewById(R.id.event_detail_comment_input);
+        postCommentButton = findViewById(R.id.event_detail_comment_post_btn);
+        commentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        commentsAdapter = new EventCommentsAdapter();
+        commentsRecyclerView.setAdapter(commentsAdapter);
+        postCommentButton.setOnClickListener(v -> postComment());
+
         // Added listeners for the invited-user flow.
         acceptButton.setOnClickListener(v -> acceptInvitation());
         declineButton.setOnClickListener(v -> declineInvitation());
 
+        updateCommentComposerState();
         loadEvent();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        attachCommentsListener();
+    }
+
+    @Override
+    protected void onStop() {
+        detachCommentsListener();
+        super.onStop();
+    }
+
+    private void attachCommentsListener() {
+        if (eventId == null || eventId.isEmpty()) {
+            return;
+        }
+        detachCommentsListener();
+        commentsListener = db.collection("events")
+                .document(eventId)
+                .collection(COMMENTS_SUBCOLLECTION)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .limit(COMMENTS_PAGE_LIMIT)
+                .addSnapshotListener((snap, error) -> {
+                    if (error != null || snap == null) {
+                        return;
+                    }
+                    List<EventComment> list = new ArrayList<>(snap.size());
+                    for (QueryDocumentSnapshot doc : snap) {
+                        list.add(EventComment.fromSnapshot(doc));
+                    }
+                    commentsAdapter.setComments(list);
+                    boolean empty = list.isEmpty();
+                    commentsEmptyView.setVisibility(empty ? View.VISIBLE : View.GONE);
+                });
+    }
+
+    private void detachCommentsListener() {
+        if (commentsListener != null) {
+            commentsListener.remove();
+            commentsListener = null;
+        }
+    }
+
+    private void updateCommentComposerState() {
+        boolean signedIn = currentUserId != null;
+        commentInput.setEnabled(signedIn);
+        postCommentButton.setEnabled(signedIn);
+        if (!signedIn) {
+            commentInput.setHint(getString(R.string.event_detail_comment_sign_in));
+        } else {
+            commentInput.setHint(getString(R.string.event_detail_comment_hint));
+        }
+    }
+
+    private void postComment() {
+        if (currentUserId == null) {
+            Toast.makeText(this, R.string.event_detail_comment_sign_in, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        String body = commentInput.getText() != null ? commentInput.getText().toString().trim() : "";
+        if (body.isEmpty()) {
+            return;
+        }
+
+        postCommentButton.setEnabled(false);
+        db.collection("users").document(currentUserId).get()
+                .addOnSuccessListener(userDoc -> {
+                    String authorName = userDoc != null ? userDoc.getString("name") : null;
+                    if (authorName == null || authorName.trim().isEmpty()) {
+                        authorName = "User";
+                    }
+                    Map<String, Object> comment = new HashMap<>();
+                    comment.put("authorId", currentUserId);
+                    comment.put("authorName", authorName.trim());
+                    comment.put("body", body);
+                    comment.put("createdAt", FieldValue.serverTimestamp());
+
+                    db.collection("events")
+                            .document(eventId)
+                            .collection(COMMENTS_SUBCOLLECTION)
+                            .add(comment)
+                            .addOnSuccessListener(ref -> {
+                                commentInput.setText("");
+                                Toast.makeText(this, R.string.event_detail_comment_posted, Toast.LENGTH_SHORT).show();
+                                postCommentButton.setEnabled(true);
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(this, R.string.event_detail_comment_failed, Toast.LENGTH_SHORT).show();
+                                postCommentButton.setEnabled(true);
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, R.string.event_detail_comment_failed, Toast.LENGTH_SHORT).show();
+                    postCommentButton.setEnabled(true);
+                });
     }
 
     // Load event doc then waiting-list count and join state.

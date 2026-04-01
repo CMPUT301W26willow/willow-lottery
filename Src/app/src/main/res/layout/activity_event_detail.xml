@@ -199,7 +199,58 @@
                         android:textColor="#666666"
                         android:textSize="14sp"
                         android:lineSpacingExtra="4dp"
-                        android:layout_marginBottom="24dp"/>
+                        android:layout_marginBottom="16dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/event_detail_comments_heading"
+                        android:textColor="@color/textDark"
+                        android:textStyle="bold"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="8dp"/>
+
+                    <TextView
+                        android:id="@+id/event_detail_comments_empty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/event_detail_comments_empty"
+                        android:textColor="#999999"
+                        android:textSize="13sp"
+                        android:layout_marginBottom="8dp"
+                        android:visibility="gone"/>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/event_detail_comments_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false"
+                        android:layout_marginBottom="12dp"/>
+
+                    <EditText
+                        android:id="@+id/event_detail_comment_input"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:hint="@string/event_detail_comment_hint"
+                        android:inputType="textMultiLine|textCapSentences"
+                        android:maxLength="2000"
+                        android:textColor="@color/textDark"
+                        android:textColorHint="#999999"
+                        android:textSize="14sp"
+                        android:background="@android:drawable/edit_text"
+                        android:padding="10dp"
+                        android:layout_marginBottom="8dp"/>
+
+                    <Button
+                        android:id="@+id/event_detail_comment_post_btn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/event_detail_comment_post"
+                        android:textAllCaps="false"
+                        android:background="@drawable/button_primary_purple"
+                        android:textColor="@android:color/white"
+                        android:layout_marginBottom="16dp"/>
 
                     <Button
                         android:id="@+id/event_detail_join_leave_btn"
