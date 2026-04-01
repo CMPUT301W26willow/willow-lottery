@@ -3,18 +3,14 @@ package com.example.willow_lotto_app.notification;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 /**
- * NotificationAdapter binds UserNotificationItem data to the RecyclerView rows shown in NotificationActivity.
+ * NotificationStore handles writing notification documents to Firestore.
  *
- * Role in application:
- * - Acts as the adapter layer between the notification model and the RecyclerView UI.
- * - Inflates item_notification.xml and fills each card with notification data.
- *
- * Current limitations / outstanding issues:
- * - Notifications are display-only for now.
- * - There is no click handling yet for opening related events.
- * - Dates are displayed using the default Date.toString() format and may be reformatted later.
+ * - Checks the user's notificationsEnabled preference before sending.
+ * - If the user has opted out, the notification is silently skipped.
+ * - If the user has opted in (or the field is absent), the notification
+ *   is written to users/{userId}/notifications.
+ *.
  */
-
 public class NotificationStore {
 
     public interface SimpleCallback {
@@ -28,7 +24,40 @@ public class NotificationStore {
         this.db = FirebaseFirestore.getInstance();
     }
 
+    /**
+     * Sends a notification to a user only if they have notifications enabled.
+     * First checks users/{userId}/notificationsEnabled in Firestore.
+     * If the field is absent, defaults to enabled so existing users
+     * who have not set a preference still receive notifications.
+     */
     public void sendNotificationToUser(String userId, UserNotification notification, final SimpleCallback callback) {
+        db.collection("users")
+                .document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Boolean notificationsEnabled = documentSnapshot.getBoolean("notificationsEnabled");
+
+                        // Send if field is absent (default on) or explicitly true
+                        if (notificationsEnabled == null || notificationsEnabled) {
+                            sendToFirestore(userId, notification, callback);
+                        } else {
+                            // User has opted out, skip silently and report success
+                            callback.onSuccess();
+                        }
+                    } else {
+                        // User document not found, skip silently
+                        callback.onSuccess();
+                    }
+                })
+                .addOnFailureListener(callback::onFailure);
+    }
+
+    /**
+     * Writes the notification document to users/{userId}/notifications.
+     * Only called after confirming the user has notifications enabled.
+     */
+    private void sendToFirestore(String userId, UserNotification notification, final SimpleCallback callback) {
         db.collection("users")
                 .document(userId)
                 .collection("notifications")

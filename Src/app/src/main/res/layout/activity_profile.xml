@@ -37,9 +37,9 @@
                 android:background="@drawable/circle_primary"
                 android:padding="14dp"
                 android:src="@drawable/baseline_person_24"
-                android:tint="@android:color/white"
                 android:contentDescription="@string/profile_title"
-                android:layout_marginBottom="20dp"/>
+                android:layout_marginBottom="20dp"
+                app:tint="@android:color/white" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -124,6 +124,32 @@
                     android:text="@string/profile_cancel"
                     android:textColor="@color/primaryPurple"
                     android:background="@drawable/button_outline_purple"/>
+
+            </LinearLayout>
+            <!-- Notification opt-out toggle -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@android:color/white"
+                android:elevation="4dp"
+                android:padding="16dp"
+                android:layout_marginBottom="20dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Receive Notifications"
+                    android:textSize="16sp"
+                    android:textColor="@color/textDark"/>
+
+                <Switch
+                    android:id="@+id/notificationsOptInSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"/>
 
             </LinearLayout>
 
