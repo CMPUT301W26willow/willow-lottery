@@ -108,4 +108,10 @@
     <string name="event_detail_comment_sign_in">Sign in to comment.</string>
     <string name="event_detail_comment_posted">Comment posted</string>
     <string name="event_detail_comment_failed">Could not post comment</string>
+    <string name="event_detail_comment_reply">Reply</string>
+    <string name="event_detail_comment_show_replies">Show replies</string>
+    <string name="event_detail_comment_hide_replies">Hide replies</string>
+    <string name="event_detail_replying_to">Replying to %1$s</string>
+    <string name="event_detail_reply_cancel">Cancel</string>
+    <string name="event_detail_replies_load_failed">Could not load replies</string>
 </resources>

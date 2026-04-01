@@ -227,6 +227,34 @@
                         android:nestedScrollingEnabled="false"
                         android:layout_marginBottom="12dp"/>
 
+                    <LinearLayout
+                        android:id="@+id/event_detail_reply_banner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:visibility="gone"
+                        android:paddingBottom="8dp">
+
+                        <TextView
+                            android:id="@+id/event_detail_reply_banner_text"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textColor="@color/textDark"
+                            android:textSize="13sp" />
+
+                        <TextView
+                            android:id="@+id/event_detail_reply_banner_cancel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="?attr/selectableItemBackground"
+                            android:padding="8dp"
+                            android:text="@string/event_detail_reply_cancel"
+                            android:textColor="@color/primaryPurple"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+
                     <EditText
                         android:id="@+id/event_detail_comment_input"
                         android:layout_width="match_parent"

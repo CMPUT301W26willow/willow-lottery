@@ -29,6 +29,14 @@ public final class EventComment {
     private Timestamp createdAt;
 
     /**
+     * Empty string = top-level comment; non-empty = document id of parent comment (Option A).
+     */
+    private String parentCommentId;
+
+    /** Stored on new top-level comments; legacy docs may omit this field. */
+    public static final String TOP_LEVEL_PARENT_ID = "";
+
+    /**
      * Converts a Firestore {@link QueryDocumentSnapshot} into an {@code EventComment} object.
      *
      * @param doc The Firestore document snapshot to parse.
@@ -41,7 +49,17 @@ public final class EventComment {
         c.authorName = doc.getString("authorName");
         c.body = doc.getString("body");
         c.createdAt = doc.getTimestamp("createdAt");
+        c.parentCommentId = doc.getString("parentCommentId");
         return c;
+    }
+
+    public String getParentCommentId() {
+        return parentCommentId;
+    }
+
+    /** True if this comment is shown in the main list (not a reply row). */
+    public boolean isTopLevel() {
+        return parentCommentId == null || parentCommentId.isEmpty();
     }
 
     /**
