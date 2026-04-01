@@ -48,6 +48,22 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
  * - There is no sharing intent yet; only download is supported.
  */
 
+/**
+ * EntrantMapActivity.java
+ *
+ * Displays a Google Map with markers showing where entrants joined the waiting list for a specific event.
+ *
+ * Role in application:
+ * - Controller/View layer for organizer geolocation viewing.
+ * - Reads entrant location data from Firestore and renders markers on a Google Map.
+ *
+ * Outstanding issues:
+ * - The event ID is currently hardcoded as "event1" and should be passed by Intent.
+ * - This file still reads from the older events/{eventId}/waitingList structure instead
+ *   of the newer top-level registrations-based flow.
+ * - Marker clustering is not implemented, so dense areas may become visually crowded.
+ */
+
 public class EntrantMapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final String EVENT_ID = "event1";

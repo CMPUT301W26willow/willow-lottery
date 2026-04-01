@@ -16,6 +16,8 @@ import com.google.firebase.firestore.SetOptions;
 import java.util.HashMap;
 import java.util.Map;
 
+import java.util.Locale;
+
 /**
  * Email/password account registration screen.
  *
@@ -63,6 +65,10 @@ public class SignUpActivity extends AppCompatActivity {
                 return;
             }
 
+            checkBannedEmailBeforeSignUp(name, email, password, phone);
+
+            /*
+
             mAuth.createUserWithEmailAndPassword(email, password)
                     .addOnSuccessListener(authResult -> {
                         String uid = authResult.getUser().getUid();
@@ -73,6 +79,10 @@ public class SignUpActivity extends AppCompatActivity {
                         user.put("email", email);
                         user.put("phone", phone);
                         user.put("registeredEvents",registeredEvents);
+                        user.put("isOrganizer", false);
+                        user.put("organizerBanned", false);
+                        user.put("isDeleted", false);
+                        user.put("deletedByAdmin", false);
 
                         db.collection("users")
                                 .document(uid)
@@ -86,10 +96,73 @@ public class SignUpActivity extends AppCompatActivity {
                                         Toast.makeText(this, "Error Saving Profile", Toast.LENGTH_SHORT).show());
                     })
                     .addOnFailureListener(e ->
-                            Toast.makeText(this, "Error Creating Account: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                            Toast.makeText(this, "Error Creating Account: " + e.getMessage(), Toast.LENGTH_SHORT).show());*/
 
         });
 
+    }
+
+    /**
+     * Checks whether the email entered during sign-up has been banned by an administrator.
+     *
+     * If the email is banned, sign-up is stopped.
+     * If the email is not banned, the existing account creation logic runs.
+     *
+     * @param name entered name
+     * @param email entered email
+     * @param password entered password
+     * @param phone default phone value
+     */
+    private void checkBannedEmailBeforeSignUp(String name, String email, String password, String phone) {
+        String emailKey = email.toLowerCase(Locale.CANADA).trim();
+
+        db.collection("banned_emails")
+                .document(emailKey)
+                .get()
+                .addOnSuccessListener(document -> {
+                    if (document.exists()) {
+                        Toast.makeText(this, "This email is banned from signing up.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    /**
+                     * Account creation logic
+                     */
+                    mAuth.createUserWithEmailAndPassword(email, password)
+                            .addOnSuccessListener(authResult -> {
+                                String uid = authResult.getUser().getUid();
+
+                                // Mapping User Hashmap (keys match ProfileActivity expectations)
+                                Map<String, Object> user = new HashMap<>();
+                                user.put("name", name);
+                                user.put("email", email);
+                                user.put("phone", phone);
+                                user.put("registeredEvents", registeredEvents);
+
+                                /**
+                                 * Added moderation-related flags for admin flows.
+                                 */
+                                user.put("isOrganizer", false);
+                                user.put("organizerBanned", false);
+                                user.put("isDeleted", false);
+                                user.put("deletedByAdmin", false);
+
+                                db.collection("users")
+                                        .document(uid)
+                                        .set(user, SetOptions.merge())
+                                        .addOnSuccessListener(unused -> {
+                                            Toast.makeText(this, "Account Created", Toast.LENGTH_SHORT).show();
+                                            startActivity(new Intent(SignUpActivity.this, MainActivity.class));
+                                            finish();
+                                        })
+                                        .addOnFailureListener(e ->
+                                                Toast.makeText(this, "Error Saving Profile", Toast.LENGTH_SHORT).show());
+                            })
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(this, "Error Creating Account: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Could not verify sign-up eligibility.", Toast.LENGTH_SHORT).show());
     }
 
     /** Validates sign-up fields; returns first error message or null if valid. */
