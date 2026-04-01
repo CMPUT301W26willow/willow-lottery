@@ -14,6 +14,8 @@ import static org.junit.Assert.assertTrue;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.example.willow_lotto_app.notification.UserNotification;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -93,4 +95,99 @@ public class CancelledEntrantsActivityTest {
         String eventId = null;
         assertTrue("Event ID should be null or empty", eventId == null || eventId.trim().isEmpty());
     }
+
+    /**
+     * Verifies that a cancelled entrant notification has the correct title.
+     */
+    @Test
+    public void testCancelledNotificationHasCorrectTitle() {
+        String expectedTitle = "Your registration was cancelled";
+        UserNotification notification = new UserNotification(
+                "event1",
+                "Your registration was cancelled",
+                "Unfortunately, your registration for this event has been cancelled.",
+                "lottery_cancelled"
+        );
+        assertEquals(expectedTitle, notification.getTitle());
+    }
+
+    /**
+     * Verifies that a cancelled entrant notification has the correct message.
+     */
+    @Test
+    public void testCancelledNotificationHasCorrectMessage() {
+        String expectedMessage = "Unfortunately, your registration for this event has been cancelled.";
+        UserNotification notification = new UserNotification(
+                "event1",
+                "Your registration was cancelled",
+                "Unfortunately, your registration for this event has been cancelled.",
+                "lottery_cancelled"
+        );
+        assertEquals(expectedMessage, notification.getMessage());
+    }
+
+    /**
+     * Verifies that a cancelled entrant notification has the correct type.
+     */
+    @Test
+    public void testCancelledNotificationHasCorrectType() {
+        UserNotification notification = new UserNotification(
+                "event1",
+                "Your registration was cancelled",
+                "Unfortunately, your registration for this event has been cancelled.",
+                "lottery_cancelled"
+        );
+        assertEquals("lottery_cancelled", notification.getType());
+    }
+
+    /**
+     * Verifies that a cancelled entrant notification has the correct eventId.
+     */
+    @Test
+    public void testCancelledNotificationHasCorrectEventId() {
+        String expectedEventId = "event1";
+        UserNotification notification = new UserNotification(
+                expectedEventId,
+                "Your registration was cancelled",
+                "Unfortunately, your registration for this event has been cancelled.",
+                "lottery_cancelled"
+        );
+        assertEquals(expectedEventId, notification.getEventId());
+    }
+
+    /**
+     * Verifies that a cancelled notification toMap() contains all required fields.
+     */
+    @Test
+    public void testCancelledNotificationToMapContainsRequiredFields() {
+        UserNotification notification = new UserNotification(
+                "event1",
+                "Your registration was cancelled",
+                "Unfortunately, your registration for this event has been cancelled.",
+                "lottery_cancelled"
+        );
+        java.util.Map<String, Object> map = notification.toMap();
+        assertTrue("Map should contain eventId", map.containsKey("eventId"));
+        assertTrue("Map should contain title", map.containsKey("title"));
+        assertTrue("Map should contain message", map.containsKey("message"));
+        assertTrue("Map should contain type", map.containsKey("type"));
+        assertTrue("Map should contain read", map.containsKey("read"));
+        assertEquals(false, map.get("read"));
+    }
+
+    /**
+     * Verifies that a cancelled notification is marked as unread by default.
+     */
+    @Test
+    public void testCancelledNotificationIsUnreadByDefault() {
+        UserNotification notification = new UserNotification(
+                "event1",
+                "Your registration was cancelled",
+                "Unfortunately, your registration for this event has been cancelled.",
+                "lottery_cancelled"
+        );
+        java.util.Map<String, Object> map = notification.toMap();
+        assertEquals(false, map.get("read"));
+    }
 }
+

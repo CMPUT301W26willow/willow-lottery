@@ -22,6 +22,15 @@
     <string name="login_admin_dashboard">Admin Access</string>
     <string name="login_sign_up">Sign Up</string>
 
+    <string name="admin_back_button">Back to Sign In</string>
+    <string name="admin_access_title">Admin Access</string>
+    <string name="admin_login_title">Admin Email</string>
+    <string name="admin_login_hint">admin@example.com</string>
+    <string name="admin_password_title">Admin Password</string>
+    <string name="admin_password_hint">Enter Admin Password</string>
+    <string name="admin_security_notice"> <b>Security Notice:</b> This area is restricted to authorised administrators only. All access attempts are logged and monitored.</string>
+    <string name="admin_access_button">Access Admin Panel</string>
+
     <string name="sign_up_title">Create an Account</string>
     <string name="sign_up_name_title">Name</string>
     <string name="sign_up_name_hint">Enter your name</string>
@@ -33,6 +42,23 @@
     <string name="organizer_dashboard_screen_title">Organizer Dashboard</string>
     <string name="organizer_dashboard_screen_body">Organizer tools will live here.</string>
     <string name="back_to_profile">Back to Profile</string>
+
+    <string name="admin_panel_title">Admin Dashboard</string>
+    <string name="admin_panel_profile_button">Profile</string>
+    <string name="admin_panel_moderation_title">Platform Moderation</string>
+    <string name="admin_panel_search">Search events, users, images</string>
+    <string name="admin_panel_platform_title">Platform Overview</string>
+    <string name="admin_panel_management">Management</string>
+    <string name="admin_panel_event_title">Total Events</string>
+    <string name="admin_panel_user_title">Total Users</string>
+    <string name="admin_panel_waitlist_title">Waiting List Entries</string>
+    <string name="admin_panel_notif_title">Notifications Sent</string>
+    <string name="admin_panel_event_browse">Browse Events</string>
+    <string name="admin_panel_event_subhead">View and Moderate all Events</string>
+    <string name="admin_panel_profile_browse">Browse Profiles</string>
+    <string name="admin_panel_profile_subhead">Manage User Profiles</string>
+    <string name="admin_panel_image_browse">Browse Images</string>
+    <string name="admin_panel_image_subhead">Review Uploaded Images</string>
 
     <string name="create_event">Create event</string>
     <string name="create_event_title">Create Event</string>
@@ -74,4 +100,12 @@
     <string name="event_detail_one_entry">One entry per device</string>
     <string name="event_join_waiting_list">Join Waiting List</string>
     <string name="event_joined_waiting_list">Joined Waiting List</string>
+
+    <string name="event_detail_comments_heading">Comments</string>
+    <string name="event_detail_comments_empty">No comments yet. Be the first.</string>
+    <string name="event_detail_comment_hint">Write a comment…</string>
+    <string name="event_detail_comment_post">Post comment</string>
+    <string name="event_detail_comment_sign_in">Sign in to comment.</string>
+    <string name="event_detail_comment_posted">Comment posted</string>
+    <string name="event_detail_comment_failed">Could not post comment</string>
 </resources>
