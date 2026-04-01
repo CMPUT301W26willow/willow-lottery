@@ -81,6 +81,7 @@ public class PrivateEventInviteManager {
         this.notificationStore = new NotificationStore();
     }
 
+    // US 2:01:03
     /**
      * Searches users by name, email, or phone number for private event invites.
      *
@@ -109,6 +110,7 @@ public class PrivateEventInviteManager {
                 .addOnFailureListener(callback::onFailure);
     }
 
+    // US 01:05:06
     /**
      * Invites a specific user to a private event waiting list and sends
      * an in-app notification to that user.

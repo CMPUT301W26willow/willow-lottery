@@ -116,6 +116,28 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         loadEventDrawSize();
         loadWaitingList();
         loadGeolocationSetting();
+
+        // US 2:01:03
+        // CHANGED: initialize private-event invite manager and UI
+        privateEventInviteManager = new PrivateEventInviteManager();
+
+        searchEntrantInput = findViewById(R.id.searchEntrantInput);
+        searchEntrantButton = findViewById(R.id.searchEntrantButton);
+        inviteEntrantButton = findViewById(R.id.inviteEntrantButton);
+        searchResultsListView = findViewById(R.id.searchResultsListView);
+
+        searchResultNames = new ArrayList<>();
+        searchResultUserIds = new ArrayList<>();
+        searchResultsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, searchResultNames);
+        searchResultsListView.setAdapter(searchResultsAdapter);
+
+        searchEntrantButton.setOnClickListener(v -> searchEntrants());
+        inviteEntrantButton.setOnClickListener(v -> inviteSelectedEntrant());
+
+        searchResultsListView.setOnItemClickListener((parent, view, position, id) -> {
+            selectedUserId = searchResultUserIds.get(position);
+            Toast.makeText(this, "Selected: " + searchResultNames.get(position), Toast.LENGTH_SHORT).show();
+        });
     }
 
     /**
@@ -150,26 +172,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                     }
                 }
         );
-        // CHANGED: initialize private-event invite manager and UI
-        privateEventInviteManager = new PrivateEventInviteManager();
 
-        searchEntrantInput = findViewById(R.id.searchEntrantInput);
-        searchEntrantButton = findViewById(R.id.searchEntrantButton);
-        inviteEntrantButton = findViewById(R.id.inviteEntrantButton);
-        searchResultsListView = findViewById(R.id.searchResultsListView);
-
-        searchResultNames = new ArrayList<>();
-        searchResultUserIds = new ArrayList<>();
-        searchResultsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, searchResultNames);
-        searchResultsListView.setAdapter(searchResultsAdapter);
-
-        searchEntrantButton.setOnClickListener(v -> searchEntrants());
-        inviteEntrantButton.setOnClickListener(v -> inviteSelectedEntrant());
-
-        searchResultsListView.setOnItemClickListener((parent, view, position, id) -> {
-            selectedUserId = searchResultUserIds.get(position);
-            Toast.makeText(this, "Selected: " + searchResultNames.get(position), Toast.LENGTH_SHORT).show();
-        });
     }
 
     /**
@@ -365,6 +368,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         });
     }
 
+    // US 2:01:03
     // CHANGED: search entrants by name, phone, or email
     /**
      * Searches users by name, phone number, or email for private-event invitations.
@@ -415,6 +419,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         });
     }
 
+    // Us 2:01:03
     // CHANGED: send private-event invitation to the selected entrant
     /**
      * Sends a private-event invitation to the currently selected entrant.

@@ -139,6 +139,8 @@ public class RegistrationStore {
                 .addOnSuccessListener(unused -> callback.onSuccess())
                 .addOnFailureListener(callback::onFailure);
     }
+
+    // US 2:01:03
     // CHANGED: creates a private invitation registration instead of a normal waitlist join
     /**
      * Creates a private-event invitation registration for a specific user.
