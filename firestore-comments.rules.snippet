@@ -1,0 +1,15 @@
+// Paste inside: match /databases/{database}/documents { ... }
+// so comments work with EventDetailActivity (events/{eventId}/comments).
+
+match /events/{eventId}/comments/{commentId} {
+  allow read: if true;
+  allow create: if request.auth != null
+    && request.resource.data.authorId == request.auth.uid
+    && request.resource.data.authorName is string
+    && request.resource.data.authorName.size() > 0
+    && request.resource.data.authorName.size() <= 200
+    && request.resource.data.body is string
+    && request.resource.data.body.size() > 0
+    && request.resource.data.body.size() <= 2000;
+  allow update, delete: if false;
+}
