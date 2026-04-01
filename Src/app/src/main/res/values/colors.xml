@@ -6,6 +6,7 @@
     <color name="backgroundGray">#F5F5F7</color>
     <color name="textDark">#111827</color>
     <color name="textGray">#6B7280</color>
+    <color name="buttonBlue">#563cf6</color>
 
     <color name="primary">#2563EB</color>
     <color name="primaryDark">#1D4ED8</color>
@@ -15,4 +16,5 @@
     <color name="toolbarDark">#111827</color>
     <color name="accentBlue">#2563EB</color>
     <color name="iconGray">#9CA3AF</color>
+    <color name="strokeGrey">#aeafb9</color>
 </resources>

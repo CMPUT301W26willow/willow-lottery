@@ -69,6 +69,7 @@ public class LoginActivity extends AppCompatActivity {
         signUp = findViewById(R.id.loginSignUp);
 
         // Click listeners
+        adminDash.setOnClickListener(view -> {startActivity(new Intent(LoginActivity.this, AdminLoginActivity.class));});
         continueAnon.setOnClickListener(view -> signInAnonymously());
         signIn.setOnClickListener(view -> checkUserProfile());
         signUp.setOnClickListener(view -> {startActivity(new Intent(LoginActivity.this, SignUpActivity.class));
@@ -96,7 +97,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
     }
-    
+
     private void checkUserProfile() {
 
         FirebaseUser user = mAuth.getCurrentUser();

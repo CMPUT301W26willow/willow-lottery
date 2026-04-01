@@ -77,6 +77,7 @@ public class ProfileActivity extends AppCompatActivity {
         saveButton.setOnClickListener(v -> saveProfile());
         cancelButton.setOnClickListener(v -> finish());
         deleteButton.setOnClickListener(v -> confirmDeleteProfile());
+        registerButton.setOnClickListener(v->showRegistrationHistory());
         // Open the organizer dashboard for the latest event created by this user
         organizerDashboardButton.setOnClickListener(v -> openOrganizerDashboardForLatestEvent());
         adminDashboardButton.setOnClickListener(v -> openAdminDashboard());
