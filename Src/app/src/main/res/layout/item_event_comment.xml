@@ -38,4 +38,51 @@
         android:textColor="#666666"
         android:textSize="14sp"
         android:lineSpacingExtra="2dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <Button
+            android:id="@+id/event_comment_reply_btn"
+            style="?android:attr/borderlessButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="0dp"
+            android:minWidth="0dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="12dp"
+            android:text="@string/event_detail_comment_reply"
+            android:textAllCaps="false"
+            android:textColor="@color/primaryPurple"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/event_comment_toggle_replies"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:padding="8dp"
+            android:text="@string/event_detail_comment_show_replies"
+            android:textColor="@color/primaryPurple"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/event_comment_replies_loading"
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:visibility="gone" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/event_comment_replies_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:nestedScrollingEnabled="false"
+        android:visibility="gone" />
 </LinearLayout>

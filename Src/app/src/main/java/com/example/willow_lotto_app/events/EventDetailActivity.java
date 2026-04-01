@@ -34,6 +34,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,7 +56,9 @@ public class EventDetailActivity extends AppCompatActivity {
     private static final String REGISTRATIONS_COLLECTION = "registrations";
     /** Subcollection under each {@code events/{eventId}} document. */
     private static final String COMMENTS_SUBCOLLECTION = "comments";
-    private static final int COMMENTS_PAGE_LIMIT = 50;
+    /** Fetched then filtered client-side to top-level (legacy docs may lack parentCommentId). */
+    private static final int COMMENTS_FETCH_LIMIT = 100;
+    private static final int REPLIES_PAGE_LIMIT = 30;
     public static final String EXTRA_EVENT_ID = "event_id";
 
     private FirebaseFirestore db;
@@ -98,10 +101,15 @@ public class EventDetailActivity extends AppCompatActivity {
 
     private RecyclerView commentsRecyclerView;
     private TextView commentsEmptyView;
+    private View replyBanner;
+    private TextView replyBannerText;
+    private TextView replyBannerCancel;
     private EditText commentInput;
     private Button postCommentButton;
     private EventCommentsAdapter commentsAdapter;
     private ListenerRegistration commentsListener;
+    /** When non-null, next post is a reply to this top-level comment document id. */
+    private String replyingToCommentId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,12 +171,37 @@ public class EventDetailActivity extends AppCompatActivity {
 
         commentsRecyclerView = findViewById(R.id.event_detail_comments_list);
         commentsEmptyView = findViewById(R.id.event_detail_comments_empty);
+        replyBanner = findViewById(R.id.event_detail_reply_banner);
+        replyBannerText = findViewById(R.id.event_detail_reply_banner_text);
+        replyBannerCancel = findViewById(R.id.event_detail_reply_banner_cancel);
         commentInput = findViewById(R.id.event_detail_comment_input);
         postCommentButton = findViewById(R.id.event_detail_comment_post_btn);
         commentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        commentsAdapter = new EventCommentsAdapter();
+        commentsAdapter = new EventCommentsAdapter(new EventCommentsAdapter.ThreadListener() {
+            @Override
+            public void onReply(EventComment topLevel) {
+                replyingToCommentId = topLevel.getDocumentId();
+                replyBannerText.setText(getString(R.string.event_detail_replying_to, topLevel.resolveDisplayName()));
+                replyBanner.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onExpandReplies(EventCommentThread thread, int adapterPosition) {
+                if (thread.getReplies().isEmpty()) {
+                    loadRepliesForThread(thread, adapterPosition);
+                } else {
+                    commentsAdapter.notifyItemChanged(adapterPosition);
+                }
+            }
+
+            @Override
+            public void onCollapseReplies(int adapterPosition) {
+                commentsAdapter.notifyItemChanged(adapterPosition);
+            }
+        });
         commentsRecyclerView.setAdapter(commentsAdapter);
         postCommentButton.setOnClickListener(v -> postComment());
+        replyBannerCancel.setOnClickListener(v -> clearReplyTarget());
 
         // Added listeners for the invited-user flow.
         acceptButton.setOnClickListener(v -> acceptInvitation());
@@ -199,19 +232,87 @@ public class EventDetailActivity extends AppCompatActivity {
                 .document(eventId)
                 .collection(COMMENTS_SUBCOLLECTION)
                 .orderBy("createdAt", Query.Direction.DESCENDING)
-                .limit(COMMENTS_PAGE_LIMIT)
+                .limit(COMMENTS_FETCH_LIMIT)
                 .addSnapshotListener((snap, error) -> {
                     if (error != null || snap == null) {
                         return;
                     }
-                    List<EventComment> list = new ArrayList<>(snap.size());
+                    List<EventComment> topLevel = new ArrayList<>();
                     for (QueryDocumentSnapshot doc : snap) {
-                        list.add(EventComment.fromSnapshot(doc));
+                        EventComment c = EventComment.fromSnapshot(doc);
+                        if (c.isTopLevel()) {
+                            topLevel.add(c);
+                        }
                     }
-                    commentsAdapter.setComments(list);
-                    boolean empty = list.isEmpty();
-                    commentsEmptyView.setVisibility(empty ? View.VISIBLE : View.GONE);
+                    commentsAdapter.setThreads(mergeCommentThreads(topLevel));
+                    commentsEmptyView.setVisibility(topLevel.isEmpty() ? View.VISIBLE : View.GONE);
                 });
+    }
+
+    private List<EventCommentThread> mergeCommentThreads(List<EventComment> topLevelFromSnap) {
+        Map<String, EventCommentThread> prev = new LinkedHashMap<>();
+        for (EventCommentThread t : commentsAdapter.getThreads()) {
+            prev.put(t.getTop().getDocumentId(), t);
+        }
+        List<EventCommentThread> out = new ArrayList<>();
+        for (EventComment top : topLevelFromSnap) {
+            EventCommentThread thread = prev.get(top.getDocumentId());
+            if (thread == null) {
+                thread = new EventCommentThread(top);
+            } else {
+                thread.setTop(top);
+            }
+            out.add(thread);
+        }
+        return out;
+    }
+
+    private void loadRepliesForThread(EventCommentThread thread, int adapterPosition) {
+        String parentId = thread.getTop().getDocumentId();
+        thread.setLoadingReplies(true);
+        commentsAdapter.notifyItemChanged(adapterPosition);
+        db.collection("events")
+                .document(eventId)
+                .collection(COMMENTS_SUBCOLLECTION)
+                .whereEqualTo("parentCommentId", parentId)
+                .orderBy("createdAt", Query.Direction.ASCENDING)
+                .limit(REPLIES_PAGE_LIMIT)
+                .get()
+                .addOnSuccessListener(snap -> {
+                    thread.getReplies().clear();
+                    if (snap != null) {
+                        for (QueryDocumentSnapshot doc : snap) {
+                            thread.getReplies().add(EventComment.fromSnapshot(doc));
+                        }
+                    }
+                    thread.setLoadingReplies(false);
+                    commentsAdapter.notifyItemChanged(adapterPosition);
+                })
+                .addOnFailureListener(e -> {
+                    thread.setLoadingReplies(false);
+                    commentsAdapter.notifyItemChanged(adapterPosition);
+                    Toast.makeText(this, R.string.event_detail_replies_load_failed, Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void clearReplyTarget() {
+        replyingToCommentId = null;
+        replyBanner.setVisibility(View.GONE);
+    }
+
+    /** If that thread is expanded, reload replies so the new post shows up. */
+    private void refreshRepliesIfExpanded(String topLevelCommentId) {
+        if (topLevelCommentId == null) {
+            return;
+        }
+        List<EventCommentThread> list = commentsAdapter.getThreads();
+        for (int i = 0; i < list.size(); i++) {
+            EventCommentThread t = list.get(i);
+            if (topLevelCommentId.equals(t.getTop().getDocumentId()) && t.isExpanded()) {
+                loadRepliesForThread(t, i);
+                break;
+            }
+        }
     }
 
     private void detachCommentsListener() {
@@ -227,6 +328,7 @@ public class EventDetailActivity extends AppCompatActivity {
         postCommentButton.setEnabled(signedIn);
         if (!signedIn) {
             commentInput.setHint(getString(R.string.event_detail_comment_sign_in));
+            replyBanner.setVisibility(View.GONE);
         } else {
             commentInput.setHint(getString(R.string.event_detail_comment_hint));
         }
@@ -254,6 +356,12 @@ public class EventDetailActivity extends AppCompatActivity {
                     comment.put("authorName", authorName.trim());
                     comment.put("body", body);
                     comment.put("createdAt", FieldValue.serverTimestamp());
+                    final String replyParentId = replyingToCommentId;
+                    if (replyParentId != null) {
+                        comment.put("parentCommentId", replyParentId);
+                    } else {
+                        comment.put("parentCommentId", EventComment.TOP_LEVEL_PARENT_ID);
+                    }
 
                     db.collection("events")
                             .document(eventId)
@@ -261,6 +369,8 @@ public class EventDetailActivity extends AppCompatActivity {
                             .add(comment)
                             .addOnSuccessListener(ref -> {
                                 commentInput.setText("");
+                                clearReplyTarget();
+                                refreshRepliesIfExpanded(replyParentId);
                                 Toast.makeText(this, R.string.event_detail_comment_posted, Toast.LENGTH_SHORT).show();
                                 postCommentButton.setEnabled(true);
                             })

@@ -10,6 +10,15 @@ match /events/{eventId}/comments/{commentId} {
     && request.resource.data.authorName.size() <= 200
     && request.resource.data.body is string
     && request.resource.data.body.size() > 0
-    && request.resource.data.body.size() <= 2000;
+    && request.resource.data.body.size() <= 2000
+    && request.resource.data.keys().hasAll(['parentCommentId'])
+    && request.resource.data.parentCommentId is string
+    && (
+      request.resource.data.parentCommentId == ""
+      || (
+        request.resource.data.parentCommentId.size() > 0
+        && request.resource.data.parentCommentId.size() <= 200
+      )
+    );
   allow update, delete: if false;
 }
