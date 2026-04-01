@@ -1,15 +1,4 @@
-/**
- * OrganizerDashboardActivity.java
- *
- *
- * Displays the organizer dashboard screen, including the waiting list of entrants,
- * lottery controls, geolocation toggle, and map view button.
- *
- * Role: Controller in the MVC pattern.
- *
- * Outstanding issues:
- * - Event ID is passed via Intent but defaults to null if not provided.
- */
+
 package com.example.willow_lotto_app;
 
 import android.content.Intent;
@@ -25,6 +14,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.willow_lotto_app.events.CreateEventActivity;
+import com.example.willow_lotto_app.events.PrivateEventInviteManager;
 import com.example.willow_lotto_app.registration.Registration;
 import com.example.willow_lotto_app.registration.RegistrationStatus;
 import com.example.willow_lotto_app.registration.RegistrationStore;
@@ -33,21 +23,17 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 import android.view.WindowManager;
-
 /**
- * EntrantResponseManager.java
+ * OrganizerDashboardActivity.java
  *
- * Handles entrant response actions after a lottery invitation has been issued.
  *
- * Role in application:
- * - Service/manager layer for updating invitation outcomes.
- * - Changes registration status between invited, accepted, declined, and cancelled.
- * - Keeps the event's registeredUsers array synchronized for compatibility with the current event data model.
+ * Displays the organizer dashboard screen, including the waiting list of entrants,
+ * lottery controls, geolocation toggle, and map view button.
+ *
+ * Role: Controller in the MVC pattern.
  *
  * Outstanding issues:
- * - This manager assumes the caller already knows the correct registration ID.
- * - There is no built-in timeout or non-response handling yet.
- * - Cancellation and acceptance logic still depends on the event's registeredUsers array, which may later be replaced by fully registration-driven queries.
+ * - Event ID is passed via Intent but defaults to null if not provided.
  */
 
 public class OrganizerDashboardActivity extends AppCompatActivity {
@@ -68,6 +54,17 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
     private OrganizerLotteryManager lotteryManager;
     private RegistrationStore registrationRepository;
     private FirebaseFirestore db;
+
+    // CHANGED: fields for private-event entrant search and invite
+    private EditText searchEntrantInput;
+    private Button searchEntrantButton;
+    private Button inviteEntrantButton;
+    private ListView searchResultsListView;
+    private ArrayAdapter<String> searchResultsAdapter;
+    private ArrayList<String> searchResultNames;
+    private ArrayList<String> searchResultUserIds;
+    private String selectedUserId;
+    private PrivateEventInviteManager privateEventInviteManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,6 +150,26 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                     }
                 }
         );
+        // CHANGED: initialize private-event invite manager and UI
+        privateEventInviteManager = new PrivateEventInviteManager();
+
+        searchEntrantInput = findViewById(R.id.searchEntrantInput);
+        searchEntrantButton = findViewById(R.id.searchEntrantButton);
+        inviteEntrantButton = findViewById(R.id.inviteEntrantButton);
+        searchResultsListView = findViewById(R.id.searchResultsListView);
+
+        searchResultNames = new ArrayList<>();
+        searchResultUserIds = new ArrayList<>();
+        searchResultsAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, searchResultNames);
+        searchResultsListView.setAdapter(searchResultsAdapter);
+
+        searchEntrantButton.setOnClickListener(v -> searchEntrants());
+        inviteEntrantButton.setOnClickListener(v -> inviteSelectedEntrant());
+
+        searchResultsListView.setOnItemClickListener((parent, view, position, id) -> {
+            selectedUserId = searchResultUserIds.get(position);
+            Toast.makeText(this, "Selected: " + searchResultNames.get(position), Toast.LENGTH_SHORT).show();
+        });
     }
 
     /**
@@ -254,6 +271,11 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Saves only the draw size value entered by the organizer.
+     *
+     * @since 31/03/2026
+     */
     private void saveDrawSizeOnly() {
         String input = drawSizeInput.getText().toString().trim();
 
@@ -343,5 +365,82 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         });
     }
 
+    // CHANGED: search entrants by name, phone, or email
+    /**
+     * Searches users by name, phone number, or email for private-event invitations.
+     *
+     * @since 31/03/2026
+     */
+    private void searchEntrants() {
+        String query = searchEntrantInput.getText().toString().trim();
+        if (query.isEmpty()) {
+            Toast.makeText(this, "Enter a name, phone, or email.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
+        privateEventInviteManager.searchUsers(query, new PrivateEventInviteManager.UserSearchCallback() {
+            @Override
+            public void onSuccess(List<com.google.firebase.firestore.DocumentSnapshot> users) {
+                searchResultNames.clear();
+                searchResultUserIds.clear();
+                selectedUserId = null;
+
+                for (com.google.firebase.firestore.DocumentSnapshot user : users) {
+                    String userId = user.getId();
+                    String name = user.getString("name");
+                    String email = user.getString("email");
+                    String phone = user.getString("phone");
+
+                    String display = (name != null ? name : "Unknown")
+                            + " | "
+                            + (email != null ? email : "No email")
+                            + " | "
+                            + (phone != null ? phone : "No phone");
+
+                    searchResultNames.add(display);
+                    searchResultUserIds.add(userId);
+                }
+
+                searchResultsAdapter.notifyDataSetChanged();
+
+                if (users.isEmpty()) {
+                    Toast.makeText(OrganizerDashboardActivity.this, "No matching entrants found.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(OrganizerDashboardActivity.this, "Search failed.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // CHANGED: send private-event invitation to the selected entrant
+    /**
+     * Sends a private-event invitation to the currently selected entrant.
+     *
+     * @since 31/03/2026
+     */
+    private void inviteSelectedEntrant() {
+        if (selectedUserId == null || selectedUserId.trim().isEmpty()) {
+            Toast.makeText(this, "Select an entrant first.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        privateEventInviteManager.inviteUserToPrivateEvent(
+                eventId,
+                selectedUserId,
+                new PrivateEventInviteManager.SimpleCallback() {
+                    @Override
+                    public void onSuccess(String message) {
+                        Toast.makeText(OrganizerDashboardActivity.this, message, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        Toast.makeText(OrganizerDashboardActivity.this, "Could not send invitation.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+    }
 }
