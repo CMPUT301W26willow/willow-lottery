@@ -144,7 +144,7 @@ public class ProfileActivity extends AppCompatActivity {
      * as an admin email.
      *
      * - If the user is not a hard-coded admin, show:
-     * "you do not have organizer permissions"
+     * "you do not have admin permissions"
      */
 
 
@@ -156,7 +156,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         String email = mAuth.getCurrentUser().getEmail();
         if (!AdminAccessUtil.isAdminEmail(email)) {
-            Toast.makeText(this, "you do not have organizer permissions", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "you do not have admin permissions", Toast.LENGTH_SHORT).show();
             return;
         }
 

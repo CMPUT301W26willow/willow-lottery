@@ -11,6 +11,8 @@ import com.example.willow_lotto_app.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import android.view.View;
+
 /**
  * Main dashboard for administrator-only actions.
  *
@@ -27,20 +29,19 @@ import com.google.firebase.auth.FirebaseUser;
  */
 
 public class AdminDashboardActivity extends AppCompatActivity{
-    private Button browseOrganizerProfilesButton;
-    private Button browseEntrantProfilesButton;
-    private Button browseEventsButton;
-    private Button browseImagesButton;
+    private View browseOrganizerProfilesCard;
+    private View browseEntrantProfilesCard;
+    private View browseEventsCard;
+    private View browseImagesCard;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_dashboard);
 
-        browseOrganizerProfilesButton = findViewById(R.id.browseOrganizerProfilesButton);
-        browseEntrantProfilesButton = findViewById(R.id.browseEntrantProfilesButton);
-        browseEventsButton = findViewById(R.id.browseEventsButton);
-        browseImagesButton = findViewById(R.id.browseImagesButton);
+
+        browseEventsCard = findViewById(R.id.adminPanelEventManageCard);
+        browseImagesCard = findViewById(R.id.adminPanelImageManageCard);
 
         if (!isCurrentUserAdmin()) {
             Toast.makeText(this, "You do not have organizer permissions", Toast.LENGTH_SHORT).show();
@@ -48,24 +49,12 @@ public class AdminDashboardActivity extends AppCompatActivity{
             return;
         }
 
-        browseOrganizerProfilesButton.setOnClickListener(v -> {
-            Intent intent = new Intent(this, AdminBrowseProfilesActivity.class);
-            intent.putExtra(AdminBrowseProfilesActivity.EXTRA_MODE,
-                    AdminBrowseProfilesActivity.MODE_ORGANIZERS);
-            startActivity(intent);
-        });
 
-        browseEntrantProfilesButton.setOnClickListener(v -> {
-            Intent intent = new Intent(this, AdminBrowseProfilesActivity.class);
-            intent.putExtra(AdminBrowseProfilesActivity.EXTRA_MODE,
-                    AdminBrowseProfilesActivity.MODE_ENTRANTS);
-            startActivity(intent);
-        });
 
-        browseEventsButton.setOnClickListener(v ->
+        browseEventsCard.setOnClickListener(v ->
                 startActivity(new Intent(this, AdminBrowseEventsActivity.class)));
 
-        browseImagesButton.setOnClickListener(v ->
+        browseImagesCard.setOnClickListener(v ->
                 startActivity(new Intent(this, AdminBrowseImagesActivity.class)));
     }
 
