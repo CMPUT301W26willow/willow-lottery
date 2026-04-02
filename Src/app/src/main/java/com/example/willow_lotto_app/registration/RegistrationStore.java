@@ -139,4 +139,31 @@ public class RegistrationStore {
                 .addOnSuccessListener(unused -> callback.onSuccess())
                 .addOnFailureListener(callback::onFailure);
     }
+
+    // US 2:01:03
+    // CHANGED: creates a private invitation registration instead of a normal waitlist join
+    /**
+     * Creates a private-event invitation registration for a specific user.
+     *
+     * @param eventId the private event ID
+     * @param userId the invited user ID
+     * @param callback callback used to report success or failure
+     * @since 31/03/2026
+     */
+    public void createPrivateInvitationRegistration(String eventId, String userId, final SimpleCallback callback) {
+        String docId = eventId + "_" + userId;
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("eventId", eventId);
+        data.put("userId", userId);
+        data.put("status", RegistrationStatus.PRIVATE_INVITED.getValue());
+        data.put("createdAt", Timestamp.now());
+        data.put("updatedAt", Timestamp.now());
+
+        db.collection("registrations")
+                .document(docId)
+                .set(data)
+                .addOnSuccessListener(unused -> callback.onSuccess())
+                .addOnFailureListener(callback::onFailure);
+    }
 }

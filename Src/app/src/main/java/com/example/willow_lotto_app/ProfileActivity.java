@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,6 +36,8 @@ import com.example.willow_lotto_app.admin.AdminDashboardActivity;
  * - Exposes registration history for the user based on stored event IDs.
  */
 public class ProfileActivity extends AppCompatActivity {
+
+    Switch notificationsOptInSwitch;
 
     //refrences to UI elements
     EditText nameInput, emailInput, phoneInput;
@@ -69,6 +72,12 @@ public class ProfileActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+
+        notificationsOptInSwitch = findViewById(R.id.notificationsOptInSwitch);
+        loadNotificationPreference();
+        notificationsOptInSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
+                saveNotificationPreference(isChecked));
+
 
         bottomNav.setSelectedItemId(R.id.nav_profile);
 
@@ -111,6 +120,40 @@ public class ProfileActivity extends AppCompatActivity {
             return false;
         });
     }
+
+    private void loadNotificationPreference() {
+        if (mAuth.getCurrentUser() == null) return;
+        String uid = mAuth.getCurrentUser().getUid();
+
+        db.collection("users")
+                .document(uid)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Boolean notificationsEnabled = documentSnapshot.getBoolean("notificationsEnabled");
+                        // If the field is absent (null), default the switch to ON
+                        notificationsOptInSwitch.setChecked(notificationsEnabled == null || notificationsEnabled);
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Failed to load notification preference.", Toast.LENGTH_SHORT).show());
+    }
+
+    private void saveNotificationPreference(boolean isEnabled) {
+        if (mAuth.getCurrentUser() == null) return;
+        String uid = mAuth.getCurrentUser().getUid();
+
+        db.collection("users")
+                .document(uid)
+                .update("notificationsEnabled", isEnabled)
+                .addOnSuccessListener(aVoid -> {
+                    String msg = isEnabled ? "Notifications enabled" : "Notifications disabled";
+                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Failed to update notification preference.", Toast.LENGTH_SHORT).show());
+    }
+
 
     private void openOrganizerDashboardForLatestEvent() {
         if (mAuth.getCurrentUser() == null) {

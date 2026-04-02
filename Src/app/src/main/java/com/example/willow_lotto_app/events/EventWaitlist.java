@@ -70,6 +70,7 @@ public class EventWaitlist {
      * @param list a List of Registration objects currently waiting
      */
     public void setLocalWaitingList(List<Registration> list){
+
         waitingList = list;
     }
 
