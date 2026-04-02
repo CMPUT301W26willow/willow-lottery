@@ -31,21 +31,22 @@
 
     <RelativeLayout
         android:id="@+id/AdminPanelProfileButton"
-        android:clickable="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:clickable="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.879"
         app:layout_constraintStart_toEndOf="@+id/adminPanelTitle"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="TouchTargetSizeCheck">
 
         <ImageView
             android:id="@+id/adminPanelProfileSettingImg"
-            app:tint="@color/textGray"
             android:layout_width="20dp"
             android:layout_height="20dp"
-            app:srcCompat="@drawable/profile_icon" />
+            app:srcCompat="@drawable/profile_icon"
+            app:tint="@color/textGray" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -176,7 +177,6 @@
         android:layout_height="75dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/adminPanelEventCard">
 

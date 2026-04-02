@@ -29,6 +29,16 @@
                 android:textColor="@color/textDark"
                 android:layout_marginBottom="16dp"/>
 
+            <Button
+                android:id="@+id/profileSignOutButton"
+                android:text="@string/profile_sign_out"
+                android:textColor="@color/accentBlue"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/backgroundGray"
+                />
+
             <ImageView
                 android:id="@+id/profile_avatar"
                 android:layout_width="64dp"
@@ -37,9 +47,9 @@
                 android:background="@drawable/circle_primary"
                 android:padding="14dp"
                 android:src="@drawable/baseline_person_24"
+                app:tint="@android:color/white"
                 android:contentDescription="@string/profile_title"
-                android:layout_marginBottom="20dp"
-                app:tint="@android:color/white" />
+                android:layout_marginBottom="20dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -113,7 +123,7 @@
                     android:layout_weight="1"
                     android:text="@string/profile_save_changes"
                     android:textColor="@android:color/white"
-                    android:background="@drawable/button_primary_purple"
+                    android:backgroundTint="@color/buttonBlue"
                     android:layout_marginEnd="12dp"/>
 
                 <Button
@@ -121,9 +131,9 @@
                     android:layout_width="0dp"
                     android:layout_height="50dp"
                     android:layout_weight="1"
+                    android:background="@drawable/button_outline_purple"
                     android:text="@string/profile_cancel"
-                    android:textColor="@color/primaryPurple"
-                    android:background="@drawable/button_outline_purple"/>
+                    android:textColor="@color/primaryPurple" />
 
             </LinearLayout>
             <LinearLayout
@@ -158,7 +168,7 @@
                 android:layout_height="50dp"
                 android:text="Delete Profile"
                 android:textColor="@android:color/white"
-                android:background="@color/design_default_color_error"
+                android:backgroundTint="@color/design_default_color_error"
                 android:layout_marginBottom="24dp"/>
 
             <Button
@@ -167,7 +177,7 @@
                 android:layout_height="50dp"
                 android:text="Register History"
                 android:textColor="@android:color/white"
-                android:background="@drawable/button_primary_purple"
+                android:backgroundTint="@color/buttonBlue"
                 android:layout_marginBottom="20dp"/>
 
             <LinearLayout
@@ -201,7 +211,7 @@
                     android:layout_height="48dp"
                     android:text="@string/organizer_dashboard_button"
                     android:textColor="@android:color/white"
-                    android:background="@drawable/button_primary_purple"/>
+                    android:backgroundTint="@color/buttonBlue"/>
 
                 <Button
                     android:id="@+id/adminDashboardButton"
@@ -209,6 +219,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:text="Go to Admin Dashboard"
+                    android:backgroundTint="@color/buttonBlue"
                     android:textAllCaps="false" />
 
             </LinearLayout>

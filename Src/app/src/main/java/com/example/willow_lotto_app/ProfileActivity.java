@@ -203,7 +203,7 @@ public class ProfileActivity extends AppCompatActivity {
                 .document(uid)
                 .get()
                 .addOnSuccessListener(document -> {
-                    String rawEmail = document.getString("email");
+                    String rawEmail = document.getString("Email");
                     String email = rawEmail == null ? null : rawEmail.trim().toLowerCase();
 
                     boolean isAdmin =
@@ -244,9 +244,9 @@ public class ProfileActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(document -> {
                     if (document.exists()) {
-                        String name = document.getString("name");
-                        String email = document.getString("email");
-                        String phone = document.getString("phone");
+                        String name = document.getString("Name");
+                        String email = document.getString("Email");
+                        String phone = document.getString("Phone");
 
                         if (name != null) nameInput.setText(name);
                         if (email != null) emailInput.setText(email);
@@ -318,9 +318,9 @@ public class ProfileActivity extends AppCompatActivity {
         String uid = mAuth.getCurrentUser().getUid();
 
         Map<String, Object> user = new HashMap<>();
-        user.put("name", name);
-        user.put("email", email);
-        user.put("phone", phone);
+        user.put("Name", name);
+        user.put("Email", email);
+        user.put("Phone", phone);
 
         db.collection("users")
                 .document(uid)

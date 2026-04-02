@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Willow_Lotto_app</string>
+
+    <string name="profile_sign_out">Sign Out</string>
     <string name="profile_title">Profile</string>
     <string name="profile_name_label">Name *</string>
     <string name="profile_email_label">Email *</string>
@@ -26,6 +28,7 @@
     <string name="admin_access_title">Admin Access</string>
     <string name="admin_login_title">Admin Email</string>
     <string name="admin_login_hint">admin@example.com</string>
+    <string name="admin_login_shield_description">A blue circle with a white shield in the centre</string>
     <string name="admin_password_title">Admin Password</string>
     <string name="admin_password_hint">Enter Admin Password</string>
     <string name="admin_security_notice"> <b>Security Notice:</b> This area is restricted to authorised administrators only. All access attempts are logged and monitored.</string>

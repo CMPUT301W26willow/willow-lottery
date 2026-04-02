@@ -29,6 +29,7 @@ public class NotificationStore {
      * First checks users/{userId}/notificationsEnabled in Firestore.
      * If the field is absent, defaults to enabled so existing users
      * who have not set a preference still receive notifications.
+     * if Notification successfully sent, will increment Statistics on the AdminDashboard
      */
     public void sendNotificationToUser(String userId, UserNotification notification, final SimpleCallback callback) {
         db.collection("users")
@@ -41,6 +42,9 @@ public class NotificationStore {
                         // Send if field is absent (default on) or explicitly true
                         if (notificationsEnabled == null || notificationsEnabled) {
                             sendToFirestore(userId, notification, callback);
+
+                            //incrementing Notification amount in adminDashboard
+                            db.collection("statStore").document("appStats").update("notificationsSent", +1);
                         } else {
                             // User has opted out, skip silently and report success
                             callback.onSuccess();
