@@ -65,9 +65,9 @@ public class SignUpActivity extends AppCompatActivity {
                 return;
             }
 
-            checkBannedEmailBeforeSignUp(name, email, password, phone);
+            /*checkBannedEmailBeforeSignUp(name, email, password, phone);*/
 
-            /*
+
 
             mAuth.createUserWithEmailAndPassword(email, password)
                     .addOnSuccessListener(authResult -> {
@@ -96,7 +96,7 @@ public class SignUpActivity extends AppCompatActivity {
                                         Toast.makeText(this, "Error Saving Profile", Toast.LENGTH_SHORT).show());
                     })
                     .addOnFailureListener(e ->
-                            Toast.makeText(this, "Error Creating Account: " + e.getMessage(), Toast.LENGTH_SHORT).show());*/
+                            Toast.makeText(this, "Error Creating Account: " + e.getMessage(), Toast.LENGTH_SHORT).show());
 
         });
 

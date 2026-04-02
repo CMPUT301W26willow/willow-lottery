@@ -154,13 +154,37 @@ public class ProfileActivity extends AppCompatActivity {
             return;
         }
 
-        String email = mAuth.getCurrentUser().getEmail();
-        if (!AdminAccessUtil.isAdminEmail(email)) {
-            Toast.makeText(this, "you do not have admin permissions", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        String uid = mAuth.getCurrentUser().getUid();
 
-        startActivity(new Intent(ProfileActivity.this, AdminDashboardActivity.class));
+        db.collection("users")
+                .document(uid)
+                .get()
+                .addOnSuccessListener(document -> {
+                    String rawEmail = document.getString("email");
+                    String email = rawEmail == null ? null : rawEmail.trim().toLowerCase();
+
+                    boolean isAdmin =
+                            email != null && (
+                                    email.equals("admin1@gmail.com") ||
+                                            email.equals("admin2@gmail.com") ||
+                                            email.equals("admin3@gmail.com")
+                            );
+
+                    Toast.makeText(
+                            this,
+                            "isAdmin=" + isAdmin,
+                            Toast.LENGTH_LONG
+                    ).show();
+
+                    if (!isAdmin) {
+                        Toast.makeText(this, "you do not have admin permissions", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    startActivity(new Intent(ProfileActivity.this, AdminDashboardActivity.class));
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Could not verify admin permissions", Toast.LENGTH_SHORT).show());
     }
 
     /**

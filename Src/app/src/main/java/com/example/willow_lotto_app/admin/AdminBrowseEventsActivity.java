@@ -101,8 +101,9 @@ public class AdminBrowseEventsActivity extends AppCompatActivity implements Admi
                         event.setPosterUri(doc.getString("posterUri"));
                         events.add(event);
                     }
+                    Toast.makeText(this, "Loaded events: " + events.size(), Toast.LENGTH_SHORT).show();
 
-                    adapter.notifyDataSetChanged();
+                    adapter.setEvents(events);
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Failed to load events", Toast.LENGTH_SHORT).show());

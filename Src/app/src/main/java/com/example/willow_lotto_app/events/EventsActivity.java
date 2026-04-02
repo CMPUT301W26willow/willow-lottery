@@ -159,6 +159,10 @@ public class EventsActivity extends AppCompatActivity {
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Event> list = new ArrayList<>();
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        Boolean isDeleted = doc.getBoolean("isDeleted");
+                        if (isDeleted != null && isDeleted) {
+                            continue;
+                        }
                         Event event = new Event();
                         event.setId(doc.getId());
                         event.setName(getString(doc, "name"));

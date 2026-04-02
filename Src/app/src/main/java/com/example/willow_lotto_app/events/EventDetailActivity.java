@@ -395,6 +395,8 @@ public class EventDetailActivity extends AppCompatActivity {
                 });
     }
 
+
+
     private void applyEventDoc(DocumentSnapshot doc) {
         if (doc == null || !doc.exists()) {
             Toast.makeText(this, "Event not found", Toast.LENGTH_SHORT).show();

@@ -87,12 +87,14 @@ public class AdminBrowseImagesActivity extends AppCompatActivity implements Admi
                             imageEvents.add(event);
                         }
                     }
+                    Toast.makeText(this, "Loaded images: " + imageEvents.size(), Toast.LENGTH_SHORT).show();
 
                     adapter.notifyDataSetChanged();
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Failed to load images", Toast.LENGTH_SHORT).show());
     }
+
 
     /**
      * Shows confirmation before removing an uploaded event image.
