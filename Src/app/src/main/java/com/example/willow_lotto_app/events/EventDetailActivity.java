@@ -90,7 +90,6 @@ public class EventDetailActivity extends AppCompatActivity {
     private TextView limitView;
     private TextView lotteryBulletsView;
     private ImageView posterView;
-    private View posterPlaceholder;
     private Button joinLeaveBtn;
 
     // Added for US 01.05.02 and US 01.05.03.
@@ -150,7 +149,6 @@ public class EventDetailActivity extends AppCompatActivity {
         limitView = findViewById(R.id.event_detail_limit);
         lotteryBulletsView = findViewById(R.id.event_detail_lottery_bullets);
         posterView = findViewById(R.id.event_detail_poster);
-        posterPlaceholder = findViewById(R.id.event_detail_poster_placeholder);
         joinLeaveBtn = findViewById(R.id.event_detail_join_leave_btn);
 
         // Added buttons for invitation response flow.
@@ -419,23 +417,22 @@ public class EventDetailActivity extends AppCompatActivity {
         }
 
         String posterUrl = event.getPosterUri();
+        int fallback = EventPlaceholderDrawables.forEventId(event.getId());
         if (posterUrl != null && !posterUrl.trim().isEmpty()) {
-            posterPlaceholder.setVisibility(View.GONE);
-            posterView.setVisibility(View.VISIBLE);
             Uri uri = Uri.parse(posterUrl.trim());
             RequestOptions options = new RequestOptions()
                     .centerCrop()
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .placeholder(R.drawable.poster_placeholder)
-                    .error(R.drawable.poster_placeholder);
+                    .placeholder(fallback)
+                    .error(fallback);
             Glide.with(this)
                     .load(uri)
                     .apply(options)
                     .transition(DrawableTransitionOptions.withCrossFade(200))
                     .into(posterView);
         } else {
-            posterView.setVisibility(View.GONE);
-            posterPlaceholder.setVisibility(View.VISIBLE);
+            Glide.with(this).clear(posterView);
+            posterView.setImageResource(fallback);
         }
         checkIfOrganizer();
         loadWaitingListCount();
