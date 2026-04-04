@@ -1,5 +1,7 @@
 package com.example.willow_lotto_app;
 
+import com.example.willow_lotto_app.registration.RegistrationStatus;
+
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 

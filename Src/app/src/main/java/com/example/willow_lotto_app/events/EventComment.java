@@ -3,13 +3,15 @@ package com.example.willow_lotto_app.events;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.util.Comparator;
+
 /**
  * Represents a single top-level comment associated with a specific event.
  * <p>
  * These documents are stored in the Firestore hierarchy at:
  * {@code events/{eventId}/comments/{commentId}}.
  * </p>
- * * @author Dev
+ * @author Dev Tiwari
  */
 public final class EventComment {
 
@@ -37,12 +39,36 @@ public final class EventComment {
     public static final String TOP_LEVEL_PARENT_ID = "";
 
     /**
+     * Sort order for reply lists: oldest first. Null timestamps sort before non-null.
+     */
+    public static Comparator<EventComment> createdTimeAscending() {
+        return (a, b) -> {
+            Timestamp ta = a.getCreatedAt();
+            Timestamp tb = b.getCreatedAt();
+            if (ta == null && tb == null) {
+                return 0;
+            }
+            if (ta == null) {
+                return -1;
+            }
+            if (tb == null) {
+                return 1;
+            }
+            int cmp = Long.compare(ta.getSeconds(), tb.getSeconds());
+            if (cmp != 0) {
+                return cmp;
+            }
+            return Integer.compare(ta.getNanoseconds(), tb.getNanoseconds());
+        };
+    }
+
+    /**
      * Converts a Firestore {@link QueryDocumentSnapshot} into an {@code EventComment} object.
      *
      * @param doc The Firestore document snapshot to parse.
      * @return A populated {@link EventComment} instance.
      */
-    static EventComment fromSnapshot(QueryDocumentSnapshot doc) {
+    public static EventComment fromSnapshot(QueryDocumentSnapshot doc) {
         EventComment c = new EventComment();
         c.documentId = doc.getId();
         c.authorId = doc.getString("authorId");
