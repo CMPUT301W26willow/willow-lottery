@@ -26,7 +26,6 @@ import com.example.willow_lotto_app.registration.RegistrationStore;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
@@ -34,8 +33,8 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.auth.User;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -59,6 +58,7 @@ public class EventDetailActivity extends AppCompatActivity {
     /** Fetched then filtered client-side to top-level (legacy docs may lack parentCommentId). */
     private static final int COMMENTS_FETCH_LIMIT = 100;
     private static final int REPLIES_PAGE_LIMIT = 30;
+
     public static final String EXTRA_EVENT_ID = "event_id";
 
     private FirebaseFirestore db;
@@ -116,18 +116,7 @@ public class EventDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_detail);
 
-        // Support both in-app navigation (EXTRA_EVENT_ID) and deep links via QR code
-        eventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
-        if (eventId == null || eventId.isEmpty()) {
-            Uri data = getIntent().getData();
-            if (data != null
-                    && "willow-lottery".equals(data.getScheme())
-                    && "event".equals(data.getHost())
-                    && data.getPathSegments() != null
-                    && !data.getPathSegments().isEmpty()) {
-                eventId = data.getPathSegments().get(0);
-            }
-        }
+        eventId = EventDetailIntentHelper.resolveEventId(getIntent());
         if (eventId == null || eventId.isEmpty()) {
             Toast.makeText(this, "Event not found", Toast.LENGTH_SHORT).show();
             finish();
@@ -245,27 +234,10 @@ public class EventDetailActivity extends AppCompatActivity {
                             topLevel.add(c);
                         }
                     }
-                    commentsAdapter.setThreads(mergeCommentThreads(topLevel));
+                    commentsAdapter.setThreads(
+                            EventCommentThreadMerge.merge(topLevel, commentsAdapter.getThreads()));
                     commentsEmptyView.setVisibility(topLevel.isEmpty() ? View.VISIBLE : View.GONE);
                 });
-    }
-
-    private List<EventCommentThread> mergeCommentThreads(List<EventComment> topLevelFromSnap) {
-        Map<String, EventCommentThread> prev = new LinkedHashMap<>();
-        for (EventCommentThread t : commentsAdapter.getThreads()) {
-            prev.put(t.getTop().getDocumentId(), t);
-        }
-        List<EventCommentThread> out = new ArrayList<>();
-        for (EventComment top : topLevelFromSnap) {
-            EventCommentThread thread = prev.get(top.getDocumentId());
-            if (thread == null) {
-                thread = new EventCommentThread(top);
-            } else {
-                thread.setTop(top);
-            }
-            out.add(thread);
-        }
-        return out;
     }
 
     private void loadRepliesForThread(EventCommentThread thread, int adapterPosition) {
@@ -276,7 +248,6 @@ public class EventDetailActivity extends AppCompatActivity {
                 .document(eventId)
                 .collection(COMMENTS_SUBCOLLECTION)
                 .whereEqualTo("parentCommentId", parentId)
-                .orderBy("createdAt", Query.Direction.ASCENDING)
                 .limit(REPLIES_PAGE_LIMIT)
                 .get()
                 .addOnSuccessListener(snap -> {
@@ -286,6 +257,7 @@ public class EventDetailActivity extends AppCompatActivity {
                             thread.getReplies().add(EventComment.fromSnapshot(doc));
                         }
                     }
+                    Collections.sort(thread.getReplies(), EventComment.createdTimeAscending());
                     thread.setLoadingReplies(false);
                     commentsAdapter.notifyItemChanged(adapterPosition);
                 })
@@ -340,29 +312,18 @@ public class EventDetailActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.event_detail_comment_sign_in, Toast.LENGTH_SHORT).show();
             return;
         }
-        String body = commentInput.getText() != null ? commentInput.getText().toString().trim() : "";
-        if (body.isEmpty()) {
+        if (!EventCommentPostValidator.hasNonEmptyBody(commentInput.getText())) {
             return;
         }
+        String body = commentInput.getText().toString().trim();
 
         postCommentButton.setEnabled(false);
         db.collection("users").document(currentUserId).get()
                 .addOnSuccessListener(userDoc -> {
                     String authorName = userDoc != null ? userDoc.getString("name") : null;
-                    if (authorName == null || authorName.trim().isEmpty()) {
-                        authorName = "User";
-                    }
-                    Map<String, Object> comment = new HashMap<>();
-                    comment.put("authorId", currentUserId);
-                    comment.put("authorName", authorName.trim());
-                    comment.put("body", body);
-                    comment.put("createdAt", FieldValue.serverTimestamp());
                     final String replyParentId = replyingToCommentId;
-                    if (replyParentId != null) {
-                        comment.put("parentCommentId", replyParentId);
-                    } else {
-                        comment.put("parentCommentId", EventComment.TOP_LEVEL_PARENT_ID);
-                    }
+                    Map<String, Object> comment = EventCommentDocument.newDraft(
+                            currentUserId, authorName, body, replyParentId);
 
                     db.collection("events")
                             .document(eventId)
