@@ -56,6 +56,7 @@ public class EventsActivity extends AppCompatActivity {
     private EventsAdapter adapter;
     private FirebaseFirestore db;
     private String currentUserId;
+    private android.widget.Button filterOpen, filterAvailable, filterDate, filterClear;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +67,34 @@ public class EventsActivity extends AppCompatActivity {
         eventsEmpty = findViewById(R.id.events_empty);
         BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
         bottomNav.setSelectedItemId(R.id.nav_events);
+
+        filterOpen = findViewById(R.id.filter_open);
+        filterAvailable = findViewById(R.id.filter_available);
+        filterDate = findViewById(R.id.filter_date);
+        filterClear = findViewById(R.id.filter_clear);
+
+        filterOpen.setOnClickListener(v -> {
+            adapter.filterByOpenStatus();
+            eventsEmpty.setVisibility(adapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
+            eventsEmpty.setText("No open events found");
+        });
+
+        filterAvailable.setOnClickListener(v -> {
+            adapter.filterByAvailability();
+            eventsEmpty.setVisibility(adapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
+            eventsEmpty.setText("No events with spots available");
+        });
+
+        filterDate.setOnClickListener(v -> {
+            adapter.filterByDate();
+            eventsEmpty.setVisibility(adapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
+        });
+
+        filterClear.setOnClickListener(v -> {
+            adapter.clearFilters();
+            eventsEmpty.setVisibility(adapter.getItemCount() == 0 ? View.VISIBLE : View.GONE);
+            eventsEmpty.setText("No events yet");
+        });
 
         adapter = new EventsAdapter();
         eventsRecycler.setLayoutManager(new LinearLayoutManager(this));
@@ -166,6 +195,15 @@ public class EventsActivity extends AppCompatActivity {
                         event.setDate(getString(doc, "date"));
                         event.setOrganizerId(getString(doc, "organizerId"));
                         event.setPosterUri(getString(doc, "posterUri"));
+                        event.setRegistrationEnd(getString(doc, "registrationEnd"));
+
+                        Long limit = doc.getLong("limit");
+                        if (limit != null) event.setLimit(limit.intValue());
+
+                        java.util.List<String> registeredUsers =
+                                (java.util.List<String>) doc.get("registeredUsers");
+                        event.setRegisteredUsers(registeredUsers);
+
                         list.add(event);
                     }
                     adapter.setEvents(list);
