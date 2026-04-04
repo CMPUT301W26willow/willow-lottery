@@ -413,6 +413,66 @@ public class OrganizerLotteryManager {
             }
         });
     }
+
+    /**
+     * Sends a notification to all entrants with WAITLISTED status for the event.
+     * Mirrors the pattern used by sendInvitedNotifications() but targets
+     * the waiting list instead of selected entrants.
+     */
+    public void notifyWaitlistedEntrants(String eventId, final LotteryCallback callback) {
+        registrationRepository.getRegistrationsForEventByStatus(
+                eventId,
+                RegistrationStatus.WAITLISTED.getValue(),
+                new RegistrationStore.RegistrationListCallback() {
+                    @Override
+                    public void onSuccess(List<Registration> waitlistedRegistrations) {
+                        if (waitlistedRegistrations.isEmpty()) {
+                            callback.onFailure(new Exception("No waitlisted entrants to notify."));
+                            return;
+                        }
+
+                        final int[] completed = {0};
+                        final int total = waitlistedRegistrations.size();
+
+                        for (Registration registration : waitlistedRegistrations) {
+                            UserNotification notification = new UserNotification(
+                                    eventId,
+                                    "You are on the waiting list!",
+                                    "You are currently on the waiting list for this event. We will notify you if a spot opens up.",
+                                    "waitlist_update"
+                            );
+
+                            notificationRepository.sendNotificationToUser(
+                                    registration.getUserId(),
+                                    notification,
+                                    new NotificationStore.SimpleCallback() {
+                                        @Override
+                                        public void onSuccess() {
+                                            completed[0]++;
+                                            if (completed[0] == total) {
+                                                callback.onSuccess(
+                                                        "Notified " + total + " waitlisted entrant(s).",
+                                                        waitlistedRegistrations
+                                                );
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onFailure(Exception e) {
+                                            callback.onFailure(e);
+                                        }
+                                    }
+                            );
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        callback.onFailure(e);
+                    }
+                }
+        );
+    }
     private void getEventDrawSize(String eventId, final DrawSizeCallback callback) {
         db.collection("events")
                 .document(eventId)

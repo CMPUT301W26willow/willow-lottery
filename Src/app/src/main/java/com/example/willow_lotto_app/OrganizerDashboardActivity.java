@@ -44,10 +44,12 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
 
     public static final String EXTRA_EVENT_ID = "event_id";
     private EditText drawSizeInput;
-    private Button createEventButton;
+    private Button createEventButton    ;
     private Button runLotteryButton;
     private Button drawReplacementButton;
     private Button backToProfileButton;
+
+    private Button notifyWaitlistButton;
     private Switch geolocationSwitch;
 
     private String eventId;
@@ -99,6 +101,8 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         drawReplacementButton = findViewById(R.id.drawReplacementButton);
         backToProfileButton = findViewById(R.id.backToProfileButton);
         geolocationSwitch = findViewById(R.id.geolocationSwitch);
+        notifyWaitlistButton = findViewById(R.id.notifyWaitlistButton);
+        notifyWaitlistButton.setOnClickListener(v -> notifyWaitingList());
 
         createEventButton.setOnClickListener(v ->
                 startActivity(new Intent(this, CreateEventActivity.class)));
@@ -190,6 +194,24 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                     }
                 })
                 .addOnFailureListener(e -> Log.e("OrganizerDashboard", "Failed to load draw size", e));
+    }
+
+    /**
+     * Sends a notification to all entrants currently on the waiting list.
+     * Called when the organizer taps the Notify Waiting List button.
+     */
+    private void notifyWaitingList() {
+        lotteryManager.notifyWaitlistedEntrants(eventId, new OrganizerLotteryManager.LotteryCallback() {
+            @Override
+            public void onSuccess(String message, List<Registration> affectedRegistrations) {
+                Toast.makeText(OrganizerDashboardActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(OrganizerDashboardActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**
