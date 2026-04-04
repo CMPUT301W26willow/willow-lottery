@@ -3,12 +3,18 @@ package com.example.willow_lotto_app;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.firebase.auth.FirebaseUser;
 
 import com.example.willow_lotto_app.events.CreateEventActivity;
 import com.example.willow_lotto_app.events.EventsActivity;
@@ -18,8 +24,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -37,7 +46,30 @@ import com.example.willow_lotto_app.admin.AdminDashboardActivity;
  */
 public class ProfileActivity extends AppCompatActivity {
 
+    private static final String REGISTRATIONS_COLLECTION = "registrations";
+
     Switch notificationsOptInSwitch;
+
+    private View profileFieldsView;
+    private View profileFieldsEdit;
+    private LinearLayout profileHeaderEditAction;
+    private ImageView profileHeaderEditIcon;
+    private TextView profileHeaderEditLabel;
+    private TextView profileSignOut;
+    private TextView profileCardName;
+    private TextView profileCardEmail;
+    private TextView profileCardPhone;
+    private TextView profileAccountMemberSince;
+    private TextView profileAccountEventsJoined;
+    private View profileGuestBanner;
+    private View profileDangerSection;
+    private View profileOrganizerSection;
+    private View profileAdminSection;
+
+    private String lastLoadedName = "";
+    private String lastLoadedEmail = "";
+    private String lastLoadedPhone = "";
+    private boolean editMode;
 
     //refrences to UI elements
     EditText nameInput, emailInput, phoneInput;
@@ -58,7 +90,22 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
-        //calling the resource folder for the UI elements
+        profileFieldsView = findViewById(R.id.profile_fields_view);
+        profileFieldsEdit = findViewById(R.id.profile_fields_edit);
+        profileHeaderEditAction = findViewById(R.id.profile_header_edit_action);
+        profileHeaderEditIcon = findViewById(R.id.profile_header_edit_icon);
+        profileHeaderEditLabel = findViewById(R.id.profile_header_edit_label);
+        profileSignOut = findViewById(R.id.profile_sign_out);
+        profileCardName = findViewById(R.id.profile_card_name_value);
+        profileCardEmail = findViewById(R.id.profile_card_email_value);
+        profileCardPhone = findViewById(R.id.profile_card_phone_value);
+        profileAccountMemberSince = findViewById(R.id.profile_account_member_since);
+        profileAccountEventsJoined = findViewById(R.id.profile_account_events_joined);
+        profileGuestBanner = findViewById(R.id.profile_guest_banner);
+        profileDangerSection = findViewById(R.id.profile_danger_section);
+        profileOrganizerSection = findViewById(R.id.profile_organizer_section);
+        profileAdminSection = findViewById(R.id.profile_admin_section);
+
         nameInput = findViewById(R.id.nameInput);
         emailInput = findViewById(R.id.emailInput);
         phoneInput = findViewById(R.id.phoneInput);
@@ -79,20 +126,29 @@ public class ProfileActivity extends AppCompatActivity {
         notificationsOptInSwitch.setOnCheckedChangeListener((buttonView, isChecked) ->
                 saveNotificationPreference(isChecked));
 
+        profileSignOut.setOnClickListener(v -> signOut());
+        profileHeaderEditAction.setOnClickListener(v -> {
+            if (editMode) {
+                cancelEdit();
+            } else {
+                enterEditMode();
+            }
+        });
 
         bottomNav.setSelectedItemId(R.id.nav_profile);
 
-        loadProfile(); // Load existing profile data when screen opens
+        applyGuestUiMode();
+        loadProfile();
+        loadAccountSummary();
 
         saveButton.setOnClickListener(v -> saveProfile());
-        cancelButton.setOnClickListener(v -> finish());
+        cancelButton.setOnClickListener(v -> cancelEdit());
         deleteButton.setOnClickListener(v -> confirmDeleteProfile());
-        registerButton.setOnClickListener(v->showRegistrationHistory());
-        // Open the organizer dashboard for the latest event created by this user
+        registerButton.setOnClickListener(v -> showRegistrationHistory());
         organizerDashboardButton.setOnClickListener(v -> openOrganizerDashboardForLatestEvent());
         organizerMyEventsButton.setOnClickListener(v -> openOrganizerMyEvents());
         adminDashboardButton.setOnClickListener(v -> openAdminDashboard());
-        registerButton.setOnClickListener(v -> showRegistrationHistory());
+        applyAdminEntryVisibility();
         // click listener for Bottom Navigation to guide to diffrent navigation pages of the app
 
         bottomNav.setOnItemSelectedListener(item -> {
@@ -121,6 +177,44 @@ public class ProfileActivity extends AppCompatActivity {
 
             return false;
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        applyAdminEntryVisibility();
+    }
+
+    /**
+     * Shows the admin dashboard entry only for signed-in, non-guest allow-listed emails.
+     */
+    private void applyAdminEntryVisibility() {
+        if (profileAdminSection == null || mAuth == null) {
+            return;
+        }
+        FirebaseUser u = mAuth.getCurrentUser();
+        boolean show = u != null && !u.isAnonymous() && AdminAccessUtil.isAdminEmail(u.getEmail());
+        profileAdminSection.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    /** Firebase anonymous sessions — same app features except profile Edit (full name shown as Guest). */
+    private boolean isGuestUser() {
+        return mAuth.getCurrentUser() != null && mAuth.getCurrentUser().isAnonymous();
+    }
+
+    private void applyGuestUiMode() {
+        if (!isGuestUser()) {
+            profileGuestBanner.setVisibility(View.GONE);
+            profileHeaderEditAction.setVisibility(View.VISIBLE);
+            return;
+        }
+        profileGuestBanner.setVisibility(View.VISIBLE);
+        profileHeaderEditAction.setVisibility(View.GONE);
+        profileFieldsEdit.setVisibility(View.GONE);
+        profileFieldsView.setVisibility(View.VISIBLE);
+        editMode = false;
+        profileHeaderEditIcon.setVisibility(View.VISIBLE);
+        profileHeaderEditLabel.setText(R.string.profile_edit);
     }
 
     private void loadNotificationPreference() {
@@ -193,78 +287,136 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * Opens the admin dashboard only if the current user's email is hard-coded
-     * as an admin email.
-     *
-     * - If the user is not a hard-coded admin, show:
-     * "you do not have admin permissions"
+     * Opens the admin dashboard when the signed-in Firebase Auth email is on the allow-list.
+     * Uses the same check as {@link AdminDashboardActivity} ({@link AdminAccessUtil#isAdminEmail(String)}).
+     * Profile previously read only Firestore {@code users.email}, which is often missing or stale after
+     * sign-in — that mismatch is what made admin access appear to “break”.
      */
-
-
     private void openAdminDashboard() {
         if (mAuth.getCurrentUser() == null) {
             Toast.makeText(this, "No signed-in user.", Toast.LENGTH_SHORT).show();
             return;
         }
-
-        String uid = mAuth.getCurrentUser().getUid();
-
-        db.collection("users")
-                .document(uid)
-                .get()
-                .addOnSuccessListener(document -> {
-                    String rawEmail = document.getString("email");
-                    String email = rawEmail == null ? null : rawEmail.trim().toLowerCase();
-
-                    boolean isAdmin =
-                            email != null && (
-                                    email.equals("admin1@gmail.com") ||
-                                            email.equals("admin2@gmail.com") ||
-                                            email.equals("admin3@gmail.com")
-                            );
-
-                    Toast.makeText(
-                            this,
-                            "isAdmin=" + isAdmin,
-                            Toast.LENGTH_LONG
-                    ).show();
-
-                    if (!isAdmin) {
-                        Toast.makeText(this, "you do not have admin permissions", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    startActivity(new Intent(ProfileActivity.this, AdminDashboardActivity.class));
-                })
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, "Could not verify admin permissions", Toast.LENGTH_SHORT).show());
+        String email = mAuth.getCurrentUser().getEmail();
+        if (AdminAccessUtil.isAdminEmail(email)) {
+            startActivity(new Intent(ProfileActivity.this, AdminDashboardActivity.class));
+        } else {
+            Toast.makeText(this, R.string.admin_permission_denied, Toast.LENGTH_SHORT).show();
+        }
     }
 
     /**
      * Loads the user profile by filling the login areas with information if it already exists
      */
     private void loadProfile() {
-        //Load existing profile data when screen opens
         if (mAuth.getCurrentUser() == null) return;
-        // Get the current user's UID
         String uid = mAuth.getCurrentUser().getUid();
-        //store the data in the database
         db.collection("users")
                 .document(uid)
                 .get()
                 .addOnSuccessListener(document -> {
                     if (document.exists()) {
-                        String name = document.getString("name");
-                        String email = document.getString("email");
-                        String phone = document.getString("phone");
-
-                        if (name != null) nameInput.setText(name);
-                        if (email != null) emailInput.setText(email);
-                        if (phone != null) phoneInput.setText(phone);
+                        if (isGuestUser()) {
+                            lastLoadedName = "";
+                            lastLoadedEmail = "";
+                            lastLoadedPhone = "";
+                        } else {
+                            String name = document.getString("name");
+                            String email = document.getString("email");
+                            String phone = document.getString("phone");
+                            lastLoadedName = name != null ? name : "";
+                            lastLoadedEmail = email != null ? email : "";
+                            lastLoadedPhone = phone != null ? phone : "";
+                        }
+                    } else {
+                        lastLoadedName = "";
+                        lastLoadedEmail = "";
+                        lastLoadedPhone = "";
                     }
+                    nameInput.setText(lastLoadedName);
+                    emailInput.setText(lastLoadedEmail);
+                    phoneInput.setText(lastLoadedPhone);
+                    applyCardValues(lastLoadedName, lastLoadedEmail, lastLoadedPhone);
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Failed to load profile", Toast.LENGTH_SHORT).show());
+    }
+
+    private void applyCardValues(String name, String email, String phone) {
+        if (isGuestUser()) {
+            profileCardName.setText(R.string.profile_guest_display_name);
+            profileCardEmail.setText(R.string.profile_guest_email_unavailable);
+            profileCardPhone.setText(R.string.profile_phone_not_set);
+            return;
+        }
+        profileCardName.setText(name != null && !name.isEmpty() ? name : "—");
+        profileCardEmail.setText(email != null && !email.isEmpty() ? email : "—");
+        if (phone != null && !phone.trim().isEmpty()) {
+            profileCardPhone.setText(phone);
+        } else {
+            profileCardPhone.setText(R.string.profile_phone_not_set);
+        }
+    }
+
+    private void enterEditMode() {
+        if (isGuestUser()) {
+            return;
+        }
+        nameInput.setText(lastLoadedName);
+        emailInput.setText(lastLoadedEmail);
+        phoneInput.setText(lastLoadedPhone);
+        setEditMode(true);
+    }
+
+    private void cancelEdit() {
+        nameInput.setText(lastLoadedName);
+        emailInput.setText(lastLoadedEmail);
+        phoneInput.setText(lastLoadedPhone);
+        setEditMode(false);
+    }
+
+    private void setEditMode(boolean editing) {
+        if (isGuestUser()) {
+            editing = false;
+        }
+        editMode = editing;
+        profileFieldsView.setVisibility(editing ? View.GONE : View.VISIBLE);
+        profileFieldsEdit.setVisibility(editing ? View.VISIBLE : View.GONE);
+        profileHeaderEditIcon.setVisibility(editing ? View.GONE : View.VISIBLE);
+        profileHeaderEditLabel.setText(editing ? R.string.profile_cancel_short : R.string.profile_edit);
+    }
+
+    private void signOut() {
+        mAuth.signOut();
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    private void loadAccountSummary() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) {
+            return;
+        }
+        if (isGuestUser()) {
+            profileAccountMemberSince.setText(R.string.profile_guest_session_label);
+        } else if (user.getMetadata() != null && user.getMetadata().getCreationTimestamp() > 0) {
+            long ts = user.getMetadata().getCreationTimestamp();
+            String formatted = new SimpleDateFormat("MMM yyyy", Locale.getDefault()).format(new Date(ts));
+            profileAccountMemberSince.setText(getString(R.string.profile_member_since, formatted));
+        } else {
+            profileAccountMemberSince.setText(R.string.profile_member_since_unknown);
+        }
+        String uid = user.getUid();
+        db.collection(REGISTRATIONS_COLLECTION)
+                .whereEqualTo("userId", uid)
+                .get()
+                .addOnSuccessListener(snap ->
+                        profileAccountEventsJoined.setText(
+                                getString(R.string.profile_events_joined, snap.size())))
+                .addOnFailureListener(e ->
+                        profileAccountEventsJoined.setText(getString(R.string.profile_events_joined, 0)));
     }
 
     /**
@@ -314,6 +466,9 @@ public class ProfileActivity extends AppCompatActivity {
      */
 
     private void saveProfile() {
+        if (isGuestUser()) {
+            return;
+        }
         String name = nameInput.getText().toString().trim();
         String email = emailInput.getText().toString().trim();
         String phone = phoneInput.getText().toString().trim();
@@ -336,9 +491,12 @@ public class ProfileActivity extends AppCompatActivity {
                 .document(uid)
                 .set(user, SetOptions.merge())
                 .addOnSuccessListener(unused -> {
+                    lastLoadedName = name;
+                    lastLoadedEmail = email;
+                    lastLoadedPhone = phone;
+                    applyCardValues(name, email, phone);
+                    setEditMode(false);
                     Toast.makeText(this, "Profile Updated", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(ProfileActivity.this, MainActivity.class));
-                    finish();
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Error Saving Profile", Toast.LENGTH_SHORT).show());

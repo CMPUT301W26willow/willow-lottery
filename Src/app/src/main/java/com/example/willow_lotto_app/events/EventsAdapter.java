@@ -1,6 +1,5 @@
 package com.example.willow_lotto_app.events;
 
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,9 +10,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.RequestOptions;
 import com.example.willow_lotto_app.R;
 
 import java.util.ArrayList;
@@ -230,23 +226,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
         Event event = events.get(position);
-        String posterUrl = event.getPosterUri();
-        int fallback = EventPlaceholderDrawables.forEventId(event.getId());
-        if (posterUrl != null && !posterUrl.trim().isEmpty()) {
-            Uri uri = Uri.parse(posterUrl.trim());
-            RequestOptions options = new RequestOptions()
-                    .centerCrop()
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .placeholder(fallback)
-                    .error(fallback);
-            Glide.with(holder.itemView.getContext())
-                    .load(uri)
-                    .apply(options)
-                    .into(holder.poster);
-        } else {
-            Glide.with(holder.itemView.getContext()).clear(holder.poster);
-            holder.poster.setImageResource(fallback);
-        }
+        EventPosterLoader.load(holder.itemView.getContext(), event.getPosterUri(), holder.poster, event.getId());
         holder.name.setText(event.getName() != null ? event.getName() : "");
         String dateStr = event.getDate() != null ? event.getDate() : "";
         holder.date.setText(dateStr.isEmpty() ? "—" : dateStr);

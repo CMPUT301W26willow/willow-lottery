@@ -1,6 +1,5 @@
 package com.example.willow_lotto_app.admin;
 
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,12 +10,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.RequestOptions;
 import com.example.willow_lotto_app.R;
 import com.example.willow_lotto_app.events.Event;
-import com.example.willow_lotto_app.events.EventPlaceholderDrawables;
+import com.example.willow_lotto_app.events.EventPosterLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,24 +77,7 @@ public class AdminImageAdapter extends RecyclerView.Adapter<AdminImageAdapter.Ad
         holder.imageTitleText.setText(event.getName() != null ? event.getName() : "Event Poster");
         holder.imageSubtitleText.setText(event.getDate() != null ? event.getDate() : "");
 
-        String posterUrl = event.getPosterUri();
-        int fallback = EventPlaceholderDrawables.forEventId(event.getId());
-        if (posterUrl != null && !posterUrl.trim().isEmpty()) {
-            Uri uri = Uri.parse(posterUrl.trim());
-            RequestOptions options = new RequestOptions()
-                    .centerCrop()
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .placeholder(fallback)
-                    .error(fallback);
-
-            Glide.with(holder.itemView.getContext())
-                    .load(uri)
-                    .apply(options)
-                    .into(holder.previewImage);
-        } else {
-            Glide.with(holder.itemView.getContext()).clear(holder.previewImage);
-            holder.previewImage.setImageResource(fallback);
-        }
+        EventPosterLoader.load(holder.itemView.getContext(), event.getPosterUri(), holder.previewImage, event.getId());
 
         holder.removeImageButton.setOnClickListener(v -> {
             if (listener != null) {

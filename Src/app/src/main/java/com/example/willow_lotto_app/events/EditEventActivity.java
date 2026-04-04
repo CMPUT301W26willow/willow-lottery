@@ -74,6 +74,16 @@ public class EditEventActivity extends AppCompatActivity {
 
         uploadPosterButton.setOnClickListener(v -> openImagePicker());
         backButton.setOnClickListener(v -> finish());
+
+        FirebaseFirestore.getInstance()
+                .collection("events")
+                .document(eventId)
+                .get()
+                .addOnSuccessListener(doc -> EventPosterLoader.load(
+                        this,
+                        doc.getString("posterUri"),
+                        eventPosterImageView,
+                        eventId));
     }
 
     @Override

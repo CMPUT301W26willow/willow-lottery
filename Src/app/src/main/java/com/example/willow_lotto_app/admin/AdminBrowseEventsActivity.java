@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.willow_lotto_app.R;
 import com.example.willow_lotto_app.events.Event;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
@@ -56,10 +57,24 @@ public class AdminBrowseEventsActivity extends AppCompatActivity implements Admi
      */
     private String adminEmail;
 
+    private String searchQueryNormalized = "";
+
+    private boolean screenReady;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!AdminUiHelper.requireAdminOrFinish(this)) {
+            return;
+        }
         setContentView(R.layout.activity_admin_browse_events);
+
+        searchQueryNormalized = AdminSearchTextUtil.normalizeQuery(
+                getIntent().getStringExtra(AdminIntentExtras.EXTRA_SEARCH_QUERY));
+
+        MaterialToolbar toolbar = findViewById(R.id.admin_events_toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
         recyclerView = findViewById(R.id.adminEventsRecycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -72,6 +87,15 @@ public class AdminBrowseEventsActivity extends AppCompatActivity implements Admi
         adapter = new AdminEventAdapter(events, this);
         recyclerView.setAdapter(adapter);
 
+        screenReady = true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!screenReady || isFinishing()) {
+            return;
+        }
         loadEvents();
     }
 
@@ -99,14 +123,26 @@ public class AdminBrowseEventsActivity extends AppCompatActivity implements Admi
                         event.setDate(doc.getString("date"));
                         event.setOrganizerId(doc.getString("organizerId"));
                         event.setPosterUri(doc.getString("posterUri"));
-                        events.add(event);
+                        if (eventMatchesSearch(event)) {
+                            events.add(event);
+                        }
                     }
-                    Toast.makeText(this, "Loaded events: " + events.size(), Toast.LENGTH_SHORT).show();
 
                     adapter.setEvents(events);
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Failed to load events", Toast.LENGTH_SHORT).show());
+    }
+
+    private boolean eventMatchesSearch(Event event) {
+        if (searchQueryNormalized.isEmpty()) {
+            return true;
+        }
+        return AdminSearchTextUtil.containsNormalized(event.getName(), searchQueryNormalized)
+                || AdminSearchTextUtil.containsNormalized(event.getDescription(), searchQueryNormalized)
+                || AdminSearchTextUtil.containsNormalized(event.getDate(), searchQueryNormalized)
+                || AdminSearchTextUtil.containsNormalized(event.getId(), searchQueryNormalized)
+                || AdminSearchTextUtil.containsNormalized(event.getOrganizerId(), searchQueryNormalized);
     }
 
     /**
