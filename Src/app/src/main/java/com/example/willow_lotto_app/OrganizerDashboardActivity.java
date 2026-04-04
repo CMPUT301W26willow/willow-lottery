@@ -22,6 +22,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import android.view.WindowManager;
 /**
  * OrganizerDashboardActivity.java
@@ -48,6 +49,8 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
     private Button runLotteryButton;
     private Button drawReplacementButton;
     private Button backToProfileButton;
+    private Button exportEntrantsCsvButton;
+    private Button notifyWaitlistButton;
     private Switch geolocationSwitch;
 
     private String eventId;
@@ -98,10 +101,16 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         runLotteryButton = findViewById(R.id.runLotteryButton);
         drawReplacementButton = findViewById(R.id.drawReplacementButton);
         backToProfileButton = findViewById(R.id.backToProfileButton);
+        exportEntrantsCsvButton = findViewById(R.id.exportEntrantsCsvButton);
         geolocationSwitch = findViewById(R.id.geolocationSwitch);
+        notifyWaitlistButton = findViewById(R.id.notifyWaitlistButton);
+        notifyWaitlistButton.setOnClickListener(v -> notifyWaitingList());
 
         createEventButton.setOnClickListener(v ->
                 startActivity(new Intent(this, CreateEventActivity.class)));
+
+        exportEntrantsCsvButton.setOnClickListener(v ->
+                OrganizerEntrantExportHelper.exportEntrantsCsv(this, eventId));
 
         backToProfileButton.setOnClickListener(v -> finish());
 
@@ -190,6 +199,24 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                     }
                 })
                 .addOnFailureListener(e -> Log.e("OrganizerDashboard", "Failed to load draw size", e));
+    }
+
+    /**
+     * Sends a notification to all entrants currently on the waiting list.
+     * Called when the organizer taps the Notify Waiting List button.
+     */
+    private void notifyWaitingList() {
+        lotteryManager.notifyWaitlistedEntrants(eventId, new OrganizerLotteryManager.LotteryCallback() {
+            @Override
+            public void onSuccess(String message, List<Registration> affectedRegistrations) {
+                Toast.makeText(OrganizerDashboardActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(OrganizerDashboardActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**
@@ -448,4 +475,5 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                 }
         );
     }
+
 }

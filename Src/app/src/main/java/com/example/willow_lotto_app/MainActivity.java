@@ -2,6 +2,9 @@ package com.example.willow_lotto_app;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -57,6 +60,24 @@ public class MainActivity extends AppCompatActivity {
         adapter = new EventsAdapter();
         homeEventsRecycler.setLayoutManager(new LinearLayoutManager(this));
         homeEventsRecycler.setAdapter(adapter);
+
+        EditText homeSearch = findViewById(R.id.home_search_input);
+        homeSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                adapter.filter(s != null ? s.toString() : "");
+            }
+        });
+        findViewById(R.id.home_filter_btn).setOnClickListener(v ->
+                startActivity(new Intent(MainActivity.this, EventsActivity.class)));
 
         db = FirebaseFirestore.getInstance();
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
@@ -133,6 +154,11 @@ public class MainActivity extends AppCompatActivity {
                         if (isDeleted != null && isDeleted) {
                             continue;
                         }
+                        // added to not run loop if event is private
+                        Boolean isPrivate = doc.getBoolean("isPrivate");
+                        if (isPrivate != null && isPrivate) {
+                            continue;
+                        }
                         Event event = new Event();
                         event.setId(doc.getId());
                         event.setName(getString(doc, "name"));
@@ -140,6 +166,9 @@ public class MainActivity extends AppCompatActivity {
                         event.setDate(getString(doc, "date"));
                         event.setOrganizerId(getString(doc, "organizerId"));
                         event.setPosterUri(getString(doc, "posterUri"));
+                        event.setRegistrationStart(getString(doc, "registrationStart"));
+                        event.setRegistrationEnd(getString(doc, "registrationEnd"));
+                        event.setRegisteredUsers(readStringList(doc, "registeredUsers"));
                         list.add(event);
                     }
                     adapter.setEvents(list);
@@ -181,4 +210,19 @@ public class MainActivity extends AppCompatActivity {
         Object o = doc.get(field);
         return o != null ? o.toString() : "";
     }
+
+    @SuppressWarnings("unchecked")
+    private static List<String> readStringList(QueryDocumentSnapshot doc, String field) {
+        List<String> out = new ArrayList<>();
+        Object o = doc.get(field);
+        if (!(o instanceof List)) {
+            return out;
+        }
+        for (Object x : (List<?>) o) {
+            if (x != null) {
+                out.add(x.toString());
+            }
+        }
+        return out;
     }
+}

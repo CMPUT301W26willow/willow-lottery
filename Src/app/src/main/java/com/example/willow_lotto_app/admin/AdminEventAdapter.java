@@ -1,6 +1,5 @@
 package com.example.willow_lotto_app.admin;
 
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,11 +10,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.RequestOptions;
 import com.example.willow_lotto_app.R;
 import com.example.willow_lotto_app.events.Event;
+import com.example.willow_lotto_app.events.EventPosterLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,25 +82,7 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ad
         holder.dateText.setText(event.getDate() != null ? event.getDate() : "");
         holder.descriptionText.setText(event.getDescription() != null ? event.getDescription() : "");
 
-        /**
-         * Load poster if one exists. Otherwise show the placeholder.
-         */
-        String posterUrl = event.getPosterUri();
-        if (posterUrl != null && !posterUrl.trim().isEmpty()) {
-            Uri uri = Uri.parse(posterUrl.trim());
-            RequestOptions options = new RequestOptions()
-                    .centerCrop()
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .placeholder(R.drawable.poster_placeholder)
-                    .error(R.drawable.poster_placeholder);
-
-            Glide.with(holder.itemView.getContext())
-                    .load(uri)
-                    .apply(options)
-                    .into(holder.posterImage);
-        } else {
-            holder.posterImage.setImageResource(R.drawable.poster_placeholder);
-        }
+        EventPosterLoader.load(holder.itemView.getContext(), event.getPosterUri(), holder.posterImage, event.getId());
 
         holder.deleteEventButton.setOnClickListener(v -> {
             if (listener != null) {

@@ -13,10 +13,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
 
+import android.content.Intent;
 import android.net.Uri;
 
-import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import com.example.willow_lotto_app.events.EditEventActivity;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,12 +49,13 @@ public class EditEventActivityTest {
     }
 
     /**
-     * Verifies that the storage path is correctly constructed from the event ID.
+     * Posters are stored in Firestore on {@code posterUri}; activities use this intent extra for the document id.
      */
     @Test
-    public void testStoragePathIsCorrect() {
-        String eventId = "event1";
-        String expectedPath = "events/" + eventId + "/poster.jpg";
-        assertEquals("events/event1/poster.jpg", expectedPath);
+    public void testEditEventIntentExtraKey() {
+        assertEquals("event_id", EditEventActivity.EXTRA_EVENT_ID);
+        Intent intent = new Intent();
+        intent.putExtra(EditEventActivity.EXTRA_EVENT_ID, "event1");
+        assertEquals("event1", intent.getStringExtra(EditEventActivity.EXTRA_EVENT_ID));
     }
 }

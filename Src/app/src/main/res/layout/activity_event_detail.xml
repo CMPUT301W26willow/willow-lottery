@@ -29,25 +29,13 @@
             android:orientation="vertical">
 
             <!-- Poster at top, full width -->
-            <FrameLayout
+            <ImageView
+                android:id="@+id/event_detail_poster"
                 android:layout_width="match_parent"
                 android:layout_height="220dp"
-                android:background="@color/borderGray">
-
-                <ImageView
-                    android:id="@+id/event_detail_poster"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:contentDescription="@string/event_poster"
-                    android:visibility="gone"/>
-
-                <View
-                    android:id="@+id/event_detail_poster_placeholder"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@color/borderGray"/>
-            </FrameLayout>
+                android:scaleType="centerCrop"
+                android:contentDescription="@string/event_poster"
+                android:src="@drawable/event_placeholder_1" />
 
             <!-- White card content -->
             <androidx.cardview.widget.CardView

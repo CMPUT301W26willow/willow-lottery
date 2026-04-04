@@ -1,5 +1,8 @@
 package com.example.willow_lotto_app.events;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 /**
  * Model class representing an event document stored in the Firestore "events" collection.
@@ -128,5 +131,22 @@ public class Event {
 
     public void setRegisteredUsers(java.util.List<String> registeredUsers) {
         this.registeredUsers = registeredUsers;
+    }
+
+    /**
+     * Whether the stored event date (expected {@code yyyy-MM-dd}) is strictly before today.
+     * Unknown or invalid dates are treated as not past.
+     */
+    public boolean isPastByEventDate() {
+        if (date == null || date.length() < 10) {
+            return false;
+        }
+        String key = date.substring(0, 10);
+        if (!key.matches("\\d{4}-\\d{2}-\\d{2}")) {
+            return false;
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        String today = sdf.format(Calendar.getInstance().getTime());
+        return key.compareTo(today) < 0;
     }
 }

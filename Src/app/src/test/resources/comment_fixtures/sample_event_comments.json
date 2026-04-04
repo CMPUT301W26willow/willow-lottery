@@ -1,0 +1,40 @@
+{
+  "eventId": "evt_willow_spring_gala_2026",
+  "eventTitle": "Willow Community Spring Gala",
+  "topLevelComments": [
+    {
+      "documentId": "cm_top_001",
+      "authorId": "usr_organizer_01",
+      "authorName": "Jordan Lee",
+      "body": "Doors open at 6:30 PM. Please bring your QR code from the waiting list confirmation.",
+      "parentCommentId": "",
+      "createdAtSeconds": 1712001600
+    },
+    {
+      "documentId": "cm_top_002",
+      "authorId": "usr_entrant_44",
+      "authorName": "Samira Khan",
+      "body": "Is there accessible parking near the venue?",
+      "parentCommentId": "",
+      "createdAtSeconds": 1712088000
+    }
+  ],
+  "replies": [
+    {
+      "documentId": "cm_rep_001",
+      "authorId": "usr_organizer_01",
+      "authorName": "Jordan Lee",
+      "body": "Yes — use the north lot; there are four accessible spaces by the main entrance.",
+      "parentCommentId": "cm_top_002",
+      "createdAtSeconds": 1712091600
+    },
+    {
+      "documentId": "cm_rep_002",
+      "authorId": "usr_entrant_12",
+      "authorName": "Chris Ortiz",
+      "body": "Thanks for confirming!",
+      "parentCommentId": "cm_top_002",
+      "createdAtSeconds": 1712095200
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 package com.example.willow_lotto_app;
 
+import com.example.willow_lotto_app.notification.UserNotification;
+
 import com.google.firebase.Timestamp;
 
 import org.junit.Test;

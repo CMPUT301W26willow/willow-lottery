@@ -1,6 +1,5 @@
 package com.example.willow_lotto_app.events;
 
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,9 +10,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.RequestOptions;
 import com.example.willow_lotto_app.R;
 
 import java.util.ArrayList;
@@ -131,6 +127,8 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         notifyDataSetChanged();
     }
 
+
+
     /**
      * Filters events by keyword across name, description, and date fields.
      *
@@ -154,6 +152,69 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         notifyDataSetChanged();
     }
 
+    /**
+     * Filters events to show which ones are open
+     * compars the end date to todays date
+     * events with no end date are treated as open
+     */
+
+    public void filterByOpenStatus() {
+        events.clear();
+        String today = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+                .format(new java.util.Date());
+        for (Event event : allEvents) {
+            String end = event.getRegistrationEnd();
+            // If no end date set, treat as open
+            if (end == null || end.isEmpty() || end.compareTo(today) >= 0) {
+                events.add(event);
+            }
+        }
+        notifyDataSetChanged();
+    }
+
+    /**
+     * Filters events based on spots remaining
+     * compares the limit with registrateduser count
+     * events with no limits are treated as unlimited
+     */
+
+    public void filterByAvailability() {
+        events.clear();
+        for (Event event : allEvents) {
+            Integer limit = event.getLimit();
+            int registered = event.getRegisteredUsers() != null ? event.getRegisteredUsers().size() : 0;
+            // Show if no limit set or spots remain
+            if (limit == null || registered < limit) {
+                events.add(event);
+            }
+        }
+        notifyDataSetChanged();
+    }
+
+    /**
+     * Sorts events by date
+     */
+
+    public void filterByDate() {
+        events.clear();
+        events.addAll(allEvents);
+        events.sort((a, b) -> {
+            String dateA = a.getDate() != null ? a.getDate() : "";
+            String dateB = b.getDate() != null ? b.getDate() : "";
+            return dateA.compareTo(dateB);
+        });
+        notifyDataSetChanged();
+    }
+
+    public void clearFilters() {
+        events.clear();
+        events.addAll(allEvents);
+        notifyDataSetChanged();
+    }
+
+
+
+
     @NonNull
     @Override
     public EventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -165,23 +226,22 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
         Event event = events.get(position);
-        String posterUrl = event.getPosterUri();
-        if (posterUrl != null && !posterUrl.trim().isEmpty()) {
-            Uri uri = Uri.parse(posterUrl.trim());
-            RequestOptions options = new RequestOptions()
-                    .centerCrop()
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .placeholder(R.drawable.poster_placeholder)
-                    .error(R.drawable.poster_placeholder);
-            Glide.with(holder.itemView.getContext())
-                    .load(uri)
-                    .apply(options)
-                    .into(holder.poster);
-        } else {
-            holder.poster.setImageResource(R.drawable.poster_placeholder);
-        }
+        EventPosterLoader.load(holder.itemView.getContext(), event.getPosterUri(), holder.poster, event.getId());
         holder.name.setText(event.getName() != null ? event.getName() : "");
-        holder.date.setText(event.getDate() != null ? event.getDate() : "");
+        String dateStr = event.getDate() != null ? event.getDate() : "";
+        holder.date.setText(dateStr.isEmpty() ? "—" : dateStr);
+
+        int registered = event.getRegisteredUsers() != null ? event.getRegisteredUsers().size() : 0;
+        holder.waitlist.setText(holder.itemView.getContext().getString(R.string.home_event_waitlist_count, registered));
+
+        String regEnd = event.getRegistrationEnd();
+        if (regEnd != null && !regEnd.trim().isEmpty()) {
+            holder.deadline.setVisibility(View.VISIBLE);
+            holder.deadline.setText(holder.itemView.getContext().getString(R.string.home_event_deadline, regEnd.trim()));
+        } else {
+            holder.deadline.setVisibility(View.GONE);
+        }
+
         holder.description.setText(event.getDescription() != null ? event.getDescription() : "");
 
         boolean canViewDetails = eventClickListener != null && event.getId() != null;
@@ -210,6 +270,8 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         final ImageView poster;
         final TextView name;
         final TextView date;
+        final TextView waitlist;
+        final TextView deadline;
         final TextView description;
         final Button joinLeaveBtn;
 
@@ -218,6 +280,8 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
             poster = itemView.findViewById(R.id.event_poster);
             name = itemView.findViewById(R.id.event_name);
             date = itemView.findViewById(R.id.event_date);
+            waitlist = itemView.findViewById(R.id.event_waitlist);
+            deadline = itemView.findViewById(R.id.event_deadline);
             description = itemView.findViewById(R.id.event_description);
             joinLeaveBtn = itemView.findViewById(R.id.event_join_leave_btn);
         }

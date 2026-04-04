@@ -1,6 +1,5 @@
 package com.example.willow_lotto_app.events;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -13,10 +12,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.RequestOptions;
 import com.example.willow_lotto_app.EntrantResponseManager;
 import com.example.willow_lotto_app.OrganizerLotteryManager;
 import com.example.willow_lotto_app.R;
@@ -26,16 +21,14 @@ import com.example.willow_lotto_app.registration.RegistrationStore;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.auth.User;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -59,6 +52,7 @@ public class EventDetailActivity extends AppCompatActivity {
     /** Fetched then filtered client-side to top-level (legacy docs may lack parentCommentId). */
     private static final int COMMENTS_FETCH_LIMIT = 100;
     private static final int REPLIES_PAGE_LIMIT = 30;
+
     public static final String EXTRA_EVENT_ID = "event_id";
 
     private FirebaseFirestore db;
@@ -91,7 +85,6 @@ public class EventDetailActivity extends AppCompatActivity {
     private TextView limitView;
     private TextView lotteryBulletsView;
     private ImageView posterView;
-    private View posterPlaceholder;
     private Button joinLeaveBtn;
 
     // Added for US 01.05.02 and US 01.05.03.
@@ -116,18 +109,7 @@ public class EventDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_detail);
 
-        // Support both in-app navigation (EXTRA_EVENT_ID) and deep links via QR code
-        eventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
-        if (eventId == null || eventId.isEmpty()) {
-            Uri data = getIntent().getData();
-            if (data != null
-                    && "willow-lottery".equals(data.getScheme())
-                    && "event".equals(data.getHost())
-                    && data.getPathSegments() != null
-                    && !data.getPathSegments().isEmpty()) {
-                eventId = data.getPathSegments().get(0);
-            }
-        }
+        eventId = EventDetailIntentHelper.resolveEventId(getIntent());
         if (eventId == null || eventId.isEmpty()) {
             Toast.makeText(this, "Event not found", Toast.LENGTH_SHORT).show();
             finish();
@@ -162,7 +144,6 @@ public class EventDetailActivity extends AppCompatActivity {
         limitView = findViewById(R.id.event_detail_limit);
         lotteryBulletsView = findViewById(R.id.event_detail_lottery_bullets);
         posterView = findViewById(R.id.event_detail_poster);
-        posterPlaceholder = findViewById(R.id.event_detail_poster_placeholder);
         joinLeaveBtn = findViewById(R.id.event_detail_join_leave_btn);
 
         // Added buttons for invitation response flow.
@@ -197,6 +178,11 @@ public class EventDetailActivity extends AppCompatActivity {
             @Override
             public void onCollapseReplies(int adapterPosition) {
                 commentsAdapter.notifyItemChanged(adapterPosition);
+            }
+
+            @Override
+            public void onDelete(EventComment comment) {
+                deleteComment(comment);
             }
         });
         commentsRecyclerView.setAdapter(commentsAdapter);
@@ -245,27 +231,10 @@ public class EventDetailActivity extends AppCompatActivity {
                             topLevel.add(c);
                         }
                     }
-                    commentsAdapter.setThreads(mergeCommentThreads(topLevel));
+                    commentsAdapter.setThreads(
+                            EventCommentThreadMerge.merge(topLevel, commentsAdapter.getThreads()));
                     commentsEmptyView.setVisibility(topLevel.isEmpty() ? View.VISIBLE : View.GONE);
                 });
-    }
-
-    private List<EventCommentThread> mergeCommentThreads(List<EventComment> topLevelFromSnap) {
-        Map<String, EventCommentThread> prev = new LinkedHashMap<>();
-        for (EventCommentThread t : commentsAdapter.getThreads()) {
-            prev.put(t.getTop().getDocumentId(), t);
-        }
-        List<EventCommentThread> out = new ArrayList<>();
-        for (EventComment top : topLevelFromSnap) {
-            EventCommentThread thread = prev.get(top.getDocumentId());
-            if (thread == null) {
-                thread = new EventCommentThread(top);
-            } else {
-                thread.setTop(top);
-            }
-            out.add(thread);
-        }
-        return out;
     }
 
     private void loadRepliesForThread(EventCommentThread thread, int adapterPosition) {
@@ -276,7 +245,6 @@ public class EventDetailActivity extends AppCompatActivity {
                 .document(eventId)
                 .collection(COMMENTS_SUBCOLLECTION)
                 .whereEqualTo("parentCommentId", parentId)
-                .orderBy("createdAt", Query.Direction.ASCENDING)
                 .limit(REPLIES_PAGE_LIMIT)
                 .get()
                 .addOnSuccessListener(snap -> {
@@ -286,6 +254,7 @@ public class EventDetailActivity extends AppCompatActivity {
                             thread.getReplies().add(EventComment.fromSnapshot(doc));
                         }
                     }
+                    Collections.sort(thread.getReplies(), EventComment.createdTimeAscending());
                     thread.setLoadingReplies(false);
                     commentsAdapter.notifyItemChanged(adapterPosition);
                 })
@@ -340,29 +309,18 @@ public class EventDetailActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.event_detail_comment_sign_in, Toast.LENGTH_SHORT).show();
             return;
         }
-        String body = commentInput.getText() != null ? commentInput.getText().toString().trim() : "";
-        if (body.isEmpty()) {
+        if (!EventCommentPostValidator.hasNonEmptyBody(commentInput.getText())) {
             return;
         }
+        String body = commentInput.getText().toString().trim();
 
         postCommentButton.setEnabled(false);
         db.collection("users").document(currentUserId).get()
                 .addOnSuccessListener(userDoc -> {
                     String authorName = userDoc != null ? userDoc.getString("name") : null;
-                    if (authorName == null || authorName.trim().isEmpty()) {
-                        authorName = "User";
-                    }
-                    Map<String, Object> comment = new HashMap<>();
-                    comment.put("authorId", currentUserId);
-                    comment.put("authorName", authorName.trim());
-                    comment.put("body", body);
-                    comment.put("createdAt", FieldValue.serverTimestamp());
                     final String replyParentId = replyingToCommentId;
-                    if (replyParentId != null) {
-                        comment.put("parentCommentId", replyParentId);
-                    } else {
-                        comment.put("parentCommentId", EventComment.TOP_LEVEL_PARENT_ID);
-                    }
+                    Map<String, Object> comment = EventCommentDocument.newDraft(
+                            currentUserId, authorName, body, replyParentId);
 
                     db.collection("events")
                             .document(eventId)
@@ -437,12 +395,7 @@ public class EventDetailActivity extends AppCompatActivity {
         nameView.setText(event.getName() != null ? event.getName() : "");
         descriptionView.setText(event.getDescription() != null ? event.getDescription() : "");
 
-        String organizerLabel =
-                event.getOrganizerId() != null && !event.getOrganizerId().isEmpty()
-                        ? event.getOrganizerId()
-                        : "Organizer";
-        organizerView.setText(
-                getString(R.string.event_detail_organized_by, organizerLabel));
+        bindOrganizerLabel(event.getOrganizerId());
 
         dateView.setText(getString(R.string.event_detail_event_date,
                 event.getDate() != null ? event.getDate() : ""));
@@ -458,27 +411,47 @@ public class EventDetailActivity extends AppCompatActivity {
             registrationOpensView.setVisibility(View.GONE);
         }
 
-        String posterUrl = event.getPosterUri();
-        if (posterUrl != null && !posterUrl.trim().isEmpty()) {
-            posterPlaceholder.setVisibility(View.GONE);
-            posterView.setVisibility(View.VISIBLE);
-            Uri uri = Uri.parse(posterUrl.trim());
-            RequestOptions options = new RequestOptions()
-                    .centerCrop()
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .placeholder(R.drawable.poster_placeholder)
-                    .error(R.drawable.poster_placeholder);
-            Glide.with(this)
-                    .load(uri)
-                    .apply(options)
-                    .transition(DrawableTransitionOptions.withCrossFade(200))
-                    .into(posterView);
-        } else {
-            posterView.setVisibility(View.GONE);
-            posterPlaceholder.setVisibility(View.VISIBLE);
-        }
-
+        EventPosterLoader.loadWithCrossFade(this, event.getPosterUri(), posterView, event.getId());
+        checkIfOrganizer();
         loadWaitingListCount();
+    }
+
+    /**
+     * Resolves the organizer line: guest profiles ({@code isAnonymous} in Firestore) show
+     * {@link R.string#event_detail_organizer_guest}; signed-in users show name, display name, or email.
+     */
+    private void bindOrganizerLabel(String organizerId) {
+        if (organizerId == null || organizerId.isEmpty()) {
+            organizerView.setText(getString(R.string.event_detail_organized_by, "Organizer"));
+            return;
+        }
+        db.collection("users").document(organizerId).get()
+                .addOnSuccessListener(userDoc -> {
+                    String label;
+                    if (!userDoc.exists()) {
+                        label = organizerId;
+                    } else if (Boolean.TRUE.equals(userDoc.getBoolean("isAnonymous"))) {
+                        label = getString(R.string.event_detail_organizer_guest);
+                    } else {
+                        String name = userDoc.getString("name");
+                        if (name != null && !name.trim().isEmpty()) {
+                            label = name.trim();
+                        } else {
+                            String displayName = userDoc.getString("displayName");
+                            if (displayName != null && !displayName.trim().isEmpty()) {
+                                label = displayName.trim();
+                            } else {
+                                String email = userDoc.getString("email");
+                                label = (email != null && !email.trim().isEmpty())
+                                        ? email.trim()
+                                        : organizerId;
+                            }
+                        }
+                    }
+                    organizerView.setText(getString(R.string.event_detail_organized_by, label));
+                })
+                .addOnFailureListener(e ->
+                        organizerView.setText(getString(R.string.event_detail_organized_by, organizerId)));
     }
 
     // Changed for US 01.05.04.
@@ -841,5 +814,33 @@ public class EventDetailActivity extends AppCompatActivity {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+    /**
+     * Checks if the current user is the event organizer.
+     * If so, enables the delete button on all comments.
+     */
+    private void checkIfOrganizer() {
+        if (currentUserId != null && event != null
+                && currentUserId.equals(event.getOrganizerId())) {
+            commentsAdapter.setIsOrganizer(true);
+        }
+    }
+
+    /**
+     * Deletes a comment from Firestore.
+     * Only available to the event organizer (02.08.01).
+     *
+     * @param comment The comment to delete.
+     */
+    private void deleteComment(EventComment comment) {
+        db.collection("events")
+                .document(eventId)
+                .collection(COMMENTS_SUBCOLLECTION)
+                .document(comment.getDocumentId())
+                .delete()
+                .addOnSuccessListener(aVoid ->
+                        Toast.makeText(this, "Comment deleted.", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Failed to delete comment.", Toast.LENGTH_SHORT).show());
     }
 }

@@ -3,6 +3,19 @@
 
     <string name="profile_sign_out">Sign Out</string>
     <string name="profile_title">Profile</string>
+    <string name="profile_sign_out">Sign out</string>
+    <string name="profile_edit">Edit</string>
+    <string name="profile_cancel_short">Cancel</string>
+    <string name="profile_full_name">Full Name</string>
+    <string name="profile_email_address">Email Address</string>
+    <string name="profile_phone_number">Phone Number</string>
+    <string name="profile_phone_not_set">Not set</string>
+    <string name="profile_account_status">Account Status</string>
+    <string name="profile_member_since">Member Since: %1$s</string>
+    <string name="profile_events_joined">Events Joined: %1$d</string>
+    <string name="profile_member_since_unknown">Member Since: —</string>
+    <string name="profile_danger_zone">Danger Zone</string>
+    <string name="profile_danger_zone_body">Deleting your profile is permanent and cannot be undone.</string>
     <string name="profile_name_label">Name *</string>
     <string name="profile_email_label">Email *</string>
     <string name="profile_phone_label">Phone (Optional)</string>
@@ -11,24 +24,46 @@
     <string name="profile_phone_hint">+1555123456</string>
     <string name="profile_save_changes">Save Changes</string>
     <string name="profile_cancel">Cancel</string>
+    <string name="profile_guest_display_name">Guest</string>
+    <string name="profile_guest_banner_title">Guest session</string>
+    <string name="profile_guest_banner_body">You\'re browsing without a full account. Sign up to edit your profile, email, and phone.</string>
+    <string name="profile_guest_email_unavailable">Available with a full account</string>
+    <string name="profile_guest_session_label">Browsing as guest</string>
+    <string name="profile_notifications_title">Notifications</string>
+    <string name="profile_notifications_subtitle">Receive notifications about events</string>
+    <string name="profile_register_history">Registration history</string>
+    <string name="profile_delete_profile">Delete profile</string>
 
+    <string name="home_search_hint">Search events…</string>
+    <string name="home_event_waitlist_count">%d people on waiting list</string>
+    <string name="home_event_deadline">Registration deadline: %1$s</string>
+    <string name="home_filter_content_desc">Open Events to filter</string>
+    <string name="login_title">Let\'s Sign you in</string>
     <string name="login_email_label">Email Address</string>
     <string name="login_email_hint">Enter your email address</string>
     <string name="login_password_label">Password</string>
     <string name="login_password_hint">Enter your password</string>
     <string name="login_remember">Remember Me</string>
     <string name="login_forgot">Forgot Password</string>
-    <string name="login_sign_in">Sign in</string>
+    <string name="login_forgot_hint">Password recovery is not set up for this build.</string>
+    <string name="login_sign_in">Sign In</string>
     <string name="login_continue_as_guest">Continue as Guest</string>
-    <string name="login_no_account">Don\'t Have an account?</string>
+    <string name="login_or">or</string>
+    <string name="login_no_account">Don\'t have an account?</string>
     <string name="login_admin_dashboard">Admin Access</string>
+    <string name="profile_admin_section_title">Administrator</string>
+    <string name="profile_admin_section_body">Open the moderation dashboard for events, profiles, and images.</string>
+    <string name="profile_admin_dashboard_button">Open admin dashboard</string>
     <string name="login_sign_up">Sign Up</string>
 
+    <string name="admin_permission_denied">You do not have admin permissions.</string>
+    <string name="admin_login_missing_fields">Enter email and password.</string>
+    <string name="admin_login_failed">Sign-in failed. Use the password for that account in Firebase Authentication.</string>
+    <string name="admin_login_sample_help">Firebase → Authentication → Add user: willowtestadmin@gmail.com / WillowTest2026 — then sign in here. (Test only; change for production.)</string>
     <string name="admin_back_button">Back to Sign In</string>
     <string name="admin_access_title">Admin Access</string>
     <string name="admin_login_title">Admin Email</string>
-    <string name="admin_login_hint">admin@example.com</string>
-    <string name="admin_login_shield_description">A blue circle with a white shield in the centre</string>
+    <string name="admin_login_hint">willowtestadmin@gmail.com</string>
     <string name="admin_password_title">Admin Password</string>
     <string name="admin_password_hint">Enter Admin Password</string>
     <string name="admin_security_notice"> <b>Security Notice:</b> This area is restricted to authorised administrators only. All access attempts are logged and monitored.</string>
@@ -38,18 +73,35 @@
     <string name="sign_up_name_title">Name</string>
     <string name="sign_up_name_hint">Enter your name</string>
     <string name="sign_up_complete">Get Started</string>
+    <string name="sign_up_already_have_account">Already have an account?</string>
+    <string name="sign_up_sign_in">Sign in</string>
 
     <string name="organizer_dashboard_title">Organizer Dashboard</string>
     <string name="organizer_dashboard_body">Create events, manage attendees, and track ticket sales.</string>
     <string name="organizer_dashboard_button">Go to Organizer Dashboard</string>
+    <string name="organizer_my_events_button">My organized events</string>
+    <string name="organizer_my_events_title">My events</string>
+    <string name="organizer_my_events_subtitle">Open the dashboard or export entrants (CSV) for any event you created.</string>
+    <string name="organizer_my_events_empty">You have not created any events yet.</string>
+    <string name="organizer_my_events_load_failed">Could not load your events.</string>
+    <string name="organizer_my_events_sign_in">Sign in to view your events.</string>
+    <string name="organizer_my_events_manage">Dashboard</string>
+    <string name="organizer_my_events_export_csv">Export CSV</string>
+    <string name="organizer_my_events_past_badge">Past event</string>
     <string name="organizer_dashboard_screen_title">Organizer Dashboard</string>
     <string name="organizer_dashboard_screen_body">Organizer tools will live here.</string>
     <string name="back_to_profile">Back to Profile</string>
+    <string name="organizer_export_entrants_csv">Export entrants (CSV)</string>
+    <string name="organizer_export_csv_loading">Building export…</string>
+    <string name="organizer_export_csv_failed">Could not export list.</string>
+    <string name="organizer_export_csv_write_failed">Could not save CSV file.</string>
+    <string name="organizer_export_csv_chooser">Share CSV</string>
+    <string name="organizer_export_csv_subject">Entrant list</string>
 
     <string name="admin_panel_title">Admin Dashboard</string>
     <string name="admin_panel_profile_button">Profile</string>
     <string name="admin_panel_moderation_title">Platform Moderation</string>
-    <string name="admin_panel_search">Search events, users, images</string>
+    <string name="admin_panel_search">Search events, users, images…</string>
     <string name="admin_panel_platform_title">Platform Overview</string>
     <string name="admin_panel_management">Management</string>
     <string name="admin_panel_event_title">Total Events</string>
@@ -57,11 +109,48 @@
     <string name="admin_panel_waitlist_title">Waiting List Entries</string>
     <string name="admin_panel_notif_title">Notifications Sent</string>
     <string name="admin_panel_event_browse">Browse Events</string>
-    <string name="admin_panel_event_subhead">View and Moderate all Events</string>
+    <string name="admin_panel_event_subhead">View and moderate all events</string>
     <string name="admin_panel_profile_browse">Browse Profiles</string>
-    <string name="admin_panel_profile_subhead">Manage User Profiles</string>
+    <string name="admin_panel_profile_subhead">Manage user profiles</string>
     <string name="admin_panel_image_browse">Browse Images</string>
-    <string name="admin_panel_image_subhead">Review Uploaded Images</string>
+    <string name="admin_panel_image_subhead">Review uploaded images</string>
+    <string name="admin_panel_organizers_browse">Browse Organizers</string>
+    <string name="admin_panel_organizers_subhead">Remove organizer access for policy violations</string>
+    <string name="admin_browse_profiles_title_entrants">Browse profiles</string>
+    <string name="admin_browse_profiles_title_organizers">Organizers</string>
+    <string name="admin_browse_profiles_screen_title">Browse &amp; Moderate Profiles</string>
+    <string name="admin_browse_profiles_screen_title_organizers">Browse &amp; Moderate Organizers</string>
+    <string name="admin_profile_guest_title">Guest User…</string>
+    <string name="admin_profile_unnamed">Unnamed user</string>
+    <string name="admin_profile_no_email">No email on file</string>
+    <string name="admin_profile_role_organizer">Organizer</string>
+    <string name="admin_profile_role_user">User</string>
+    <string name="admin_profile_meta_format">%1$s · UID: %2$s</string>
+    <string name="admin_load_organizers_failed">Could not load organizers.</string>
+    <string name="admin_load_profiles_failed">Could not load profiles.</string>
+    <string name="admin_remove_organizer_privileges">Remove organizer privileges</string>
+    <string name="admin_delete_profile">Delete profile</string>
+    <string name="admin_dialog_remove_organizer_title">Remove organizer privileges</string>
+    <string name="admin_dialog_remove_organizer_message">This user will lose organizer access. They can keep using the app as an entrant. They will be blocked from becoming an organizer again.</string>
+    <string name="admin_dialog_delete_profile_title">Delete profile</string>
+    <string name="admin_dialog_delete_profile_message">This will remove their profile and ban their email from signing up again.</string>
+    <string name="admin_toast_organizer_removed">Organizer privileges removed.</string>
+    <string name="admin_toast_organizer_remove_failed">Could not remove organizer privileges.</string>
+    <string name="admin_toast_profile_deleted">Profile deleted and email banned.</string>
+    <string name="admin_toast_profile_delete_failed">Could not delete profile.</string>
+    <string name="admin_toast_banned_email_failed">Could not save banned email.</string>
+    <string name="admin_dashboard_stats_failed">Could not load dashboard stats.</string>
+    <string name="admin_search_empty_query">Enter text to search.</string>
+    <string name="admin_search_pick_destination">Search in</string>
+    <string name="admin_browse_events_screen_title">Browse &amp; Moderate Events</string>
+    <string name="admin_browse_images_screen_title">Browse &amp; Moderate Images</string>
+
+    <string-array name="admin_search_destinations">
+        <item>Events</item>
+        <item>Profiles</item>
+        <item>Organizers</item>
+        <item>Images</item>
+    </string-array>
 
     <string name="create_event">Create event</string>
     <string name="create_event_title">Create Event</string>
@@ -93,6 +182,7 @@
     <string name="event_detail_registration_format">%1$s – %2$s</string>
     <string name="event_detail_no_registration_dates">Not set</string>
     <string name="event_detail_organized_by">Organized by %1$s</string>
+    <string name="event_detail_organizer_guest">Guest User</string>
     <string name="event_detail_event_date">Event Date %1$s</string>
     <string name="event_detail_registration_opens">Registration opens %1$s</string>
     <string name="event_detail_waiting_list_count">%1$d people on waiting list</string>

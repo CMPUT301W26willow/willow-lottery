@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.willow_lotto_app.R;
 import com.example.willow_lotto_app.events.Event;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -46,10 +47,24 @@ public class AdminBrowseImagesActivity extends AppCompatActivity implements Admi
      */
     private AdminImageAdapter adapter;
 
+    private String searchQueryNormalized = "";
+
+    private boolean screenReady;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!AdminUiHelper.requireAdminOrFinish(this)) {
+            return;
+        }
         setContentView(R.layout.activity_admin_browse_images);
+
+        searchQueryNormalized = AdminSearchTextUtil.normalizeQuery(
+                getIntent().getStringExtra(AdminIntentExtras.EXTRA_SEARCH_QUERY));
+
+        MaterialToolbar toolbar = findViewById(R.id.admin_images_toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
         recyclerView = findViewById(R.id.adminImagesRecycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -58,6 +73,15 @@ public class AdminBrowseImagesActivity extends AppCompatActivity implements Admi
         adapter = new AdminImageAdapter(imageEvents, this);
         recyclerView.setAdapter(adapter);
 
+        screenReady = true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!screenReady || isFinishing()) {
+            return;
+        }
         loadImages();
     }
 
@@ -84,17 +108,25 @@ public class AdminBrowseImagesActivity extends AppCompatActivity implements Admi
                             event.setName(doc.getString("name"));
                             event.setDate(doc.getString("date"));
                             event.setPosterUri(posterUri);
-                            imageEvents.add(event);
+                            if (imageEventMatchesSearch(event)) {
+                                imageEvents.add(event);
+                            }
                         }
                     }
-                    Toast.makeText(this, "Loaded images: " + imageEvents.size(), Toast.LENGTH_SHORT).show();
-
-                    adapter.notifyDataSetChanged();
+                    adapter.setEvents(imageEvents);
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Failed to load images", Toast.LENGTH_SHORT).show());
     }
 
+    private boolean imageEventMatchesSearch(Event event) {
+        if (searchQueryNormalized.isEmpty()) {
+            return true;
+        }
+        return AdminSearchTextUtil.containsNormalized(event.getName(), searchQueryNormalized)
+                || AdminSearchTextUtil.containsNormalized(event.getDate(), searchQueryNormalized)
+                || AdminSearchTextUtil.containsNormalized(event.getId(), searchQueryNormalized);
+    }
 
     /**
      * Shows confirmation before removing an uploaded event image.

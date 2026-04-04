@@ -17,4 +17,17 @@
 
     <!-- Material 2 layout: icon on top, label below. Fixes label-over-icon with Material 3 theme. -->
     <style name="Widget.Willow.BottomNavigationView" parent="Widget.MaterialComponents.BottomNavigationView" />
+
+    <style name="ShapeAppearance.Willow.EventCard.Image" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">12dp</item>
+        <item name="cornerSizeTopRight">12dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+    <style name="ShapeAppearance.Willow.AdminAvatar" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
 </resources>
