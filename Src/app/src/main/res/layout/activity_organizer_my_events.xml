@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/backgroundGray"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/organizer_my_events_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/organizer_my_events_title"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="@color/textDark" />
+
+    <TextView
+        android:id="@+id/organizer_my_events_subtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/organizer_my_events_title"
+        android:layout_marginTop="8dp"
+        android:text="@string/organizer_my_events_subtitle"
+        android:textColor="#666666" />
+
+    <Button
+        android:id="@+id/organizer_my_events_back"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_alignParentBottom="true"
+        android:text="@string/back_to_profile"
+        android:textColor="@color/primaryPurple"
+        android:background="@drawable/button_outline_purple" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/organizer_my_events_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/organizer_my_events_back"
+        android:layout_below="@id/organizer_my_events_subtitle"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="12dp"
+        android:clipToPadding="false"
+        android:paddingBottom="8dp" />
+
+    <TextView
+        android:id="@+id/organizer_my_events_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:padding="24dp"
+        android:text="@string/organizer_my_events_empty"
+        android:textColor="#666666"
+        android:visibility="gone" />
+
+</RelativeLayout>

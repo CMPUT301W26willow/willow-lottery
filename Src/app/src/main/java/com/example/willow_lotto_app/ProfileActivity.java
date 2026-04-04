@@ -42,7 +42,7 @@ public class ProfileActivity extends AppCompatActivity {
     //refrences to UI elements
     EditText nameInput, emailInput, phoneInput;
     // Button UI references from the profile screen
-    Button saveButton, cancelButton, organizerDashboardButton, deleteButton, registerButton, adminDashboardButton;    // refrences to the NAV( home, events, notifications, profile)
+    Button saveButton, cancelButton, organizerDashboardButton, organizerMyEventsButton, deleteButton, registerButton, adminDashboardButton;    // refrences to the NAV( home, events, notifications, profile)
     // Button UI references from the profile screen
 
     BottomNavigationView bottomNav;
@@ -67,6 +67,7 @@ public class ProfileActivity extends AppCompatActivity {
         cancelButton = findViewById(R.id.cancelButton);
         registerButton = findViewById(R.id.registerButton);
         organizerDashboardButton = findViewById(R.id.organizerDashboardButton);
+        organizerMyEventsButton = findViewById(R.id.organizerMyEventsButton);
         adminDashboardButton = findViewById(R.id.adminDashboardButton);
         bottomNav = findViewById(R.id.bottom_nav);
 
@@ -89,6 +90,7 @@ public class ProfileActivity extends AppCompatActivity {
         registerButton.setOnClickListener(v->showRegistrationHistory());
         // Open the organizer dashboard for the latest event created by this user
         organizerDashboardButton.setOnClickListener(v -> openOrganizerDashboardForLatestEvent());
+        organizerMyEventsButton.setOnClickListener(v -> openOrganizerMyEvents());
         adminDashboardButton.setOnClickListener(v -> openAdminDashboard());
         registerButton.setOnClickListener(v -> showRegistrationHistory());
         // click listener for Bottom Navigation to guide to diffrent navigation pages of the app
@@ -180,6 +182,14 @@ public class ProfileActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Could not open organizer dashboard.", Toast.LENGTH_SHORT).show());
+    }
+
+    private void openOrganizerMyEvents() {
+        if (mAuth.getCurrentUser() == null) {
+            Toast.makeText(this, "No signed-in user.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        startActivity(new Intent(this, OrganizerMyEventsActivity.class));
     }
 
     /**

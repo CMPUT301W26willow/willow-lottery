@@ -22,6 +22,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import android.view.WindowManager;
 /**
  * OrganizerDashboardActivity.java
@@ -48,6 +49,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
     private Button runLotteryButton;
     private Button drawReplacementButton;
     private Button backToProfileButton;
+    private Button exportEntrantsCsvButton;
     private Switch geolocationSwitch;
 
     private String eventId;
@@ -98,10 +100,14 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         runLotteryButton = findViewById(R.id.runLotteryButton);
         drawReplacementButton = findViewById(R.id.drawReplacementButton);
         backToProfileButton = findViewById(R.id.backToProfileButton);
+        exportEntrantsCsvButton = findViewById(R.id.exportEntrantsCsvButton);
         geolocationSwitch = findViewById(R.id.geolocationSwitch);
 
         createEventButton.setOnClickListener(v ->
                 startActivity(new Intent(this, CreateEventActivity.class)));
+
+        exportEntrantsCsvButton.setOnClickListener(v ->
+                OrganizerEntrantExportHelper.exportEntrantsCsv(this, eventId));
 
         backToProfileButton.setOnClickListener(v -> finish());
 
@@ -448,4 +454,5 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                 }
         );
     }
+
 }

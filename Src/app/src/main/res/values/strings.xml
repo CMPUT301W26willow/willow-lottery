@@ -39,9 +39,24 @@
     <string name="organizer_dashboard_title">Organizer Dashboard</string>
     <string name="organizer_dashboard_body">Create events, manage attendees, and track ticket sales.</string>
     <string name="organizer_dashboard_button">Go to Organizer Dashboard</string>
+    <string name="organizer_my_events_button">My organized events</string>
+    <string name="organizer_my_events_title">My events</string>
+    <string name="organizer_my_events_subtitle">Open the dashboard or export entrants (CSV) for any event you created.</string>
+    <string name="organizer_my_events_empty">You have not created any events yet.</string>
+    <string name="organizer_my_events_load_failed">Could not load your events.</string>
+    <string name="organizer_my_events_sign_in">Sign in to view your events.</string>
+    <string name="organizer_my_events_manage">Dashboard</string>
+    <string name="organizer_my_events_export_csv">Export CSV</string>
+    <string name="organizer_my_events_past_badge">Past event</string>
     <string name="organizer_dashboard_screen_title">Organizer Dashboard</string>
     <string name="organizer_dashboard_screen_body">Organizer tools will live here.</string>
     <string name="back_to_profile">Back to Profile</string>
+    <string name="organizer_export_entrants_csv">Export entrants (CSV)</string>
+    <string name="organizer_export_csv_loading">Building export…</string>
+    <string name="organizer_export_csv_failed">Could not export list.</string>
+    <string name="organizer_export_csv_write_failed">Could not save CSV file.</string>
+    <string name="organizer_export_csv_chooser">Share CSV</string>
+    <string name="organizer_export_csv_subject">Entrant list</string>
 
     <string name="admin_panel_title">Admin Dashboard</string>
     <string name="admin_panel_profile_button">Profile</string>
