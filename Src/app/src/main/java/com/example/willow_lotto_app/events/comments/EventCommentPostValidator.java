@@ -1,4 +1,4 @@
-package com.example.willow_lotto_app.events;
+package com.example.willow_lotto_app.events.comments;
 
 /**
  * Validation for posting event comments (used by {@link EventDetailActivity}).

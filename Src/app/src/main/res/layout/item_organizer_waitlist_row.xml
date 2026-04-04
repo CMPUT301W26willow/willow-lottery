@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingVertical="8dp">
+
+    <TextView
+        android:id="@+id/waitlist_row_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:textColor="@color/textDark"
+        android:textSize="14sp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/waitlist_row_invite"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:minWidth="0dp"
+        android:paddingHorizontal="10dp"
+        android:text="@string/organizer_waitlist_invite"
+        android:textAllCaps="false"
+        android:textSize="12sp"
+        app:cornerRadius="8dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/waitlist_row_remove"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:minWidth="0dp"
+        android:paddingHorizontal="10dp"
+        android:text="@string/organizer_waitlist_remove"
+        android:textAllCaps="false"
+        android:textSize="12sp"
+        app:cornerRadius="8dp"
+        app:strokeColor="@color/borderGray" />
+</LinearLayout>

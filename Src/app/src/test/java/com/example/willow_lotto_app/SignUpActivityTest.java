@@ -21,14 +21,14 @@ public class SignUpActivityTest {
     public void validateSignUpInput_emptyEmail_returnsEmailError() {
         String result = SignUpActivity.validateSignUpInput(
                 "Alice", "", "secret");
-        assertEquals("Email Required", result);
+        assertEquals("Email required", result);
     }
 
     @Test
     public void validateSignUpInput_emptyPassword_returnsPasswordError() {
         String result = SignUpActivity.validateSignUpInput(
                 "Alice", "user@example.com", "");
-        assertEquals("Password Invalid", result);
+        assertEquals("Password required", result);
     }
 
     @Test

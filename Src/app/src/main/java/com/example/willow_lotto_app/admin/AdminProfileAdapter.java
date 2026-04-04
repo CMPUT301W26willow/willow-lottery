@@ -31,16 +31,14 @@ public class AdminProfileAdapter extends RecyclerView.Adapter<AdminProfileAdapte
         void onDeleteProfileClicked(AdminUserItem user);
     }
 
-    private final List<AdminUserItem> users = new ArrayList<>();
+    private final List<AdminUserItem> users;
     private final AdminProfileActionListener listener;
     private final String mode;
 
     public AdminProfileAdapter(List<AdminUserItem> users,
                                AdminProfileActionListener listener,
                                String mode) {
-        if (users != null) {
-            this.users.addAll(users);
-        }
+        this.users = users != null ? users : new ArrayList<>();
         this.listener = listener;
         this.mode = mode;
     }

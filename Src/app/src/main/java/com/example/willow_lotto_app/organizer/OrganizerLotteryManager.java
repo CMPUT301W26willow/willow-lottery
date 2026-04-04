@@ -1,6 +1,7 @@
-package com.example.willow_lotto_app;
+package com.example.willow_lotto_app.organizer;
 
 import com.example.willow_lotto_app.notification.NotificationStore;
+import com.example.willow_lotto_app.notification.NotificationTypes;
 import com.example.willow_lotto_app.notification.UserNotification;
 import com.example.willow_lotto_app.registration.Registration;
 import com.example.willow_lotto_app.registration.RegistrationStatus;
@@ -52,6 +53,27 @@ public class OrganizerLotteryManager {
         this.db = FirebaseFirestore.getInstance();
         this.registrationRepository = new RegistrationStore();
         this.notificationRepository = new NotificationStore();
+    }
+
+    private interface EventNameCallback {
+        void onSuccess(String eventName);
+
+        void onFailure(Exception e);
+    }
+
+    private void getEventDisplayName(String eventId, EventNameCallback callback) {
+        db.collection("events")
+                .document(eventId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (!documentSnapshot.exists()) {
+                        callback.onSuccess("Event");
+                        return;
+                    }
+                    String name = documentSnapshot.getString("name");
+                    callback.onSuccess(name != null && !name.trim().isEmpty() ? name.trim() : "Event");
+                })
+                .addOnFailureListener(callback::onFailure);
     }
 
     /**
@@ -142,7 +164,7 @@ public class OrganizerLotteryManager {
                                                 new RegistrationStore.SimpleCallback() {
                                                     @Override
                                                     public void onSuccess() {
-                                                        sendInvitedNotifications(eventId, selected, callback);
+                                                        sendInvitedNotificationsResilient(eventId, selected, callback);
                                                     }
 
                                                     @Override
@@ -287,72 +309,168 @@ public class OrganizerLotteryManager {
         );
     }
 
-    private void sendInvitedNotifications(String eventId, List<Registration> selected, final LotteryCallback callback) {
+    /**
+     * Invites are already saved as INVITED; notifications are best-effort so a push failure
+     * does not undo the lottery result.
+     */
+    private void sendInvitedNotificationsResilient(String eventId, List<Registration> selected, final LotteryCallback callback) {
         if (selected.isEmpty()) {
             callback.onSuccess("No entrants were selected.", selected);
             return;
         }
 
-        final int[] completed = {0};
-        final int total = selected.size();
+        getEventDisplayName(eventId, new EventNameCallback() {
+            @Override
+            public void onSuccess(String eventName) {
+                String body = "Congratulations! You have been selected for " + eventName
+                        + ". Open this event to accept or decline your invitation.";
+                final int[] completed = {0};
+                final boolean[] hadFailure = {false};
+                final int total = selected.size();
 
-        for (Registration registration : selected) {
-            UserNotification notification = new UserNotification(
-                    eventId,
-                    "You were selected!",
-                    "You have been chosen to sign up for this event.",
-                    "lottery_invited"
-            );
+                for (Registration registration : selected) {
+                    UserNotification notification = new UserNotification(
+                            eventId,
+                            eventName,
+                            body,
+                            NotificationTypes.LOTTERY_INVITED
+                    );
 
+                    notificationRepository.sendNotificationToUser(
+                            registration.getUserId(),
+                            notification,
+                            new NotificationStore.SimpleCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    bump();
+                                }
 
-            notificationRepository.sendNotificationToUser(
-                    registration.getUserId(),
-                    notification,
-                    new NotificationStore.SimpleCallback() {
-                        @Override
-                        public void onSuccess() {
-                            completed[0]++;
-                            if (completed[0] == total) {
-                                callback.onSuccess("Lottery draw completed successfully.", selected);
+                                @Override
+                                public void onFailure(Exception e) {
+                                    hadFailure[0] = true;
+                                    bump();
+                                }
+
+                                private void bump() {
+                                    completed[0]++;
+                                    if (completed[0] == total) {
+                                        String msg = hadFailure[0]
+                                                ? "Selections saved. Some notifications could not be sent."
+                                                : "Lottery draw completed successfully.";
+                                        callback.onSuccess(msg, selected);
+                                    }
+                                }
                             }
-                            System.out.print("Notification Sent");
-                        }
+                    );
+                }
+            }
 
-                        @Override
-                        public void onFailure(Exception e) {
-                            callback.onFailure(e);
-                        }
-                    }
-            );
-        }
+            @Override
+            public void onFailure(Exception e) {
+                callback.onFailure(e);
+            }
+        });
     }
 
-    private void sendReplacementNotification(String eventId, Registration replacement, final LotteryCallback callback) {
-        UserNotification notification = new UserNotification(
-                eventId,
-                "You were selected as a replacement!",
-                "A spot opened up and you have now been invited to sign up for this event.",
-                "lottery_replacement"
-        );
+    /**
+     * Promotes one waitlisted entrant to INVITED (organizer pick) if a draw slot is open.
+     */
+    public void promoteWaitlistedToInvited(String eventId, Registration registration, final LotteryCallback callback) {
+        if (registration == null || registration.getId() == null) {
+            callback.onFailure(new IllegalArgumentException("Invalid registration."));
+            return;
+        }
 
-        notificationRepository.sendNotificationToUser(
-                replacement.getUserId(),
-                notification,
-                new NotificationStore.SimpleCallback() {
+        getEventDrawSize(eventId, new DrawSizeCallback() {
+            @Override
+            public void onSuccess(int savedDrawSize) {
+                if (savedDrawSize <= 0) {
+                    callback.onFailure(new Exception("Draw size must be set before inviting."));
+                    return;
+                }
+
+                getFilledSpotCount(eventId, new FilledCountCallback() {
                     @Override
-                    public void onSuccess() {
-                        List<Registration> result = new ArrayList<>();
-                        result.add(replacement);
-                        callback.onSuccess("Replacement entrant selected successfully.", result);
-                        System.out.print("Notification Sent replacement");
+                    public void onSuccess(int filledCount) {
+                        if (filledCount >= savedDrawSize) {
+                            callback.onFailure(new Exception("No spots remaining."));
+                            return;
+                        }
+
+                        registrationRepository.updateRegistrationStatus(
+                                registration.getId(),
+                                RegistrationStatus.INVITED.getValue(),
+                                new RegistrationStore.SimpleCallback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        List<Registration> one = new ArrayList<>();
+                                        one.add(registration);
+                                        sendInvitedNotificationsResilient(eventId, one, callback);
+                                    }
+
+                                    @Override
+                                    public void onFailure(Exception e) {
+                                        callback.onFailure(e);
+                                    }
+                                }
+                        );
                     }
 
                     @Override
                     public void onFailure(Exception e) {
                         callback.onFailure(e);
                     }
-                }
-        );
+                });
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                callback.onFailure(e);
+            }
+        });
+    }
+
+    private void sendReplacementNotification(String eventId, Registration replacement, final LotteryCallback callback) {
+        getEventDisplayName(eventId, new EventNameCallback() {
+            @Override
+            public void onSuccess(String eventName) {
+                String body = "A spot opened up for " + eventName
+                        + ". You have been invited—open the event to accept or decline.";
+                UserNotification notification = new UserNotification(
+                        eventId,
+                        eventName,
+                        body,
+                        NotificationTypes.LOTTERY_REPLACEMENT
+                );
+
+                notificationRepository.sendNotificationToUser(
+                        replacement.getUserId(),
+                        notification,
+                        new NotificationStore.SimpleCallback() {
+                            @Override
+                            public void onSuccess() {
+                                List<Registration> result = new ArrayList<>();
+                                result.add(replacement);
+                                callback.onSuccess("Replacement entrant selected successfully.", result);
+                            }
+
+                            @Override
+                            public void onFailure(Exception e) {
+                                List<Registration> result = new ArrayList<>();
+                                result.add(replacement);
+                                callback.onSuccess(
+                                        "Replacement saved; notification may not have been delivered.",
+                                        result);
+                            }
+                        }
+                );
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                callback.onFailure(e);
+            }
+        });
     }
 
     private void sendCancelledNotification(String eventId, String oldRegistrationId, final LotteryCallback callback) {
@@ -381,30 +499,38 @@ public class OrganizerLotteryManager {
                 }
 
                 final String finalUserId = userId;
-                // send the notification to the cancelled entrants notification subcollection
-                UserNotification notification = new UserNotification(
-                        eventId,
-                        "Your registration was cancelled",
-                        "Unfortunately, your registration for this event has been cancelled.",
-                        "lottery_cancelled"
-                );
+                getEventDisplayName(eventId, new EventNameCallback() {
+                    @Override
+                    public void onSuccess(String eventName) {
+                        UserNotification notification = new UserNotification(
+                                eventId,
+                                eventName,
+                                "Unfortunately, your registration for " + eventName + " has been cancelled.",
+                                NotificationTypes.LOTTERY_CANCELLED
+                        );
 
-                notificationRepository.sendNotificationToUser(
-                        finalUserId,
-                        notification,
-                        new NotificationStore.SimpleCallback() {
-                            @Override
-                            public void onSuccess() {
-                                System.out.print("Cancellation notification sent");
-                                drawReplacement(eventId, callback);
-                            }
+                        notificationRepository.sendNotificationToUser(
+                                finalUserId,
+                                notification,
+                                new NotificationStore.SimpleCallback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        drawReplacement(eventId, callback);
+                                    }
 
-                            @Override
-                            public void onFailure(Exception e) {
-                                drawReplacement(eventId, callback);
-                            }
-                        }
-                );
+                                    @Override
+                                    public void onFailure(Exception e) {
+                                        drawReplacement(eventId, callback);
+                                    }
+                                }
+                        );
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        drawReplacement(eventId, callback);
+                    }
+                });
             }
 
             @Override
@@ -431,39 +557,57 @@ public class OrganizerLotteryManager {
                             return;
                         }
 
-                        final int[] completed = {0};
-                        final int total = waitlistedRegistrations.size();
+                        getEventDisplayName(eventId, new EventNameCallback() {
+                            @Override
+                            public void onSuccess(String eventName) {
+                                String body = "Update regarding " + eventName
+                                        + ": you are on the waiting list. The organizer may send more news here.";
+                                final int[] completed = {0};
+                                final int total = waitlistedRegistrations.size();
 
-                        for (Registration registration : waitlistedRegistrations) {
-                            UserNotification notification = new UserNotification(
-                                    eventId,
-                                    "You are on the waiting list!",
-                                    "You are currently on the waiting list for this event. We will notify you if a spot opens up.",
-                                    "waitlist_update"
-                            );
+                                final boolean[] hadFailure = {false};
+                                for (Registration registration : waitlistedRegistrations) {
+                                    UserNotification notification = new UserNotification(
+                                            eventId,
+                                            eventName,
+                                            body,
+                                            NotificationTypes.WAITLIST_UPDATE
+                                    );
 
-                            notificationRepository.sendNotificationToUser(
-                                    registration.getUserId(),
-                                    notification,
-                                    new NotificationStore.SimpleCallback() {
-                                        @Override
-                                        public void onSuccess() {
-                                            completed[0]++;
-                                            if (completed[0] == total) {
-                                                callback.onSuccess(
-                                                        "Notified " + total + " waitlisted entrant(s).",
-                                                        waitlistedRegistrations
-                                                );
+                                    notificationRepository.sendNotificationToUser(
+                                            registration.getUserId(),
+                                            notification,
+                                            new NotificationStore.SimpleCallback() {
+                                                @Override
+                                                public void onSuccess() {
+                                                    bump();
+                                                }
+
+                                                @Override
+                                                public void onFailure(Exception e) {
+                                                    hadFailure[0] = true;
+                                                    bump();
+                                                }
+
+                                                private void bump() {
+                                                    completed[0]++;
+                                                    if (completed[0] == total) {
+                                                        String msg = hadFailure[0]
+                                                                ? "Update sent to some entrants; others may not have been notified."
+                                                                : "Notified " + total + " waitlisted entrant(s).";
+                                                        callback.onSuccess(msg, waitlistedRegistrations);
+                                                    }
+                                                }
                                             }
-                                        }
+                                    );
+                                }
+                            }
 
-                                        @Override
-                                        public void onFailure(Exception e) {
-                                            callback.onFailure(e);
-                                        }
-                                    }
-                            );
-                        }
+                            @Override
+                            public void onFailure(Exception e) {
+                                callback.onFailure(e);
+                            }
+                        });
                     }
 
                     @Override
@@ -473,6 +617,7 @@ public class OrganizerLotteryManager {
                 }
         );
     }
+
     private void getEventDrawSize(String eventId, final DrawSizeCallback callback) {
         db.collection("events")
                 .document(eventId)

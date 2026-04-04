@@ -1,237 +1,683 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/backgroundGray">
+    android:background="@color/backgroundGray"
+    android:orientation="vertical">
 
-    <LinearLayout
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/organizer_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="24dp">
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/login_screen_bg"
+        app:navigationIcon="@drawable/button_back_arrow"
+        app:subtitle="@string/organizer_dashboard_subtitle"
+        app:subtitleTextColor="@color/textGray"
+        app:title="@string/organizer_dashboard_screen_title"
+        app:titleTextColor="@color/textDark" />
 
-        <TextView
-            android:id="@+id/organizer_dashboard_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/organizer_dashboard_screen_title"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:textColor="@color/textDark"/>
-
-        <TextView
-            android:id="@+id/organizer_dashboard_body"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="@string/organizer_dashboard_screen_body"
-            android:textColor="#666666"/>
-
-        <Button
-            android:id="@+id/createEventButton"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"
-            android:text="@string/create_event"
-            android:textColor="@android:color/white"
-            android:background="@drawable/button_primary_purple"/>
-
-        <TextView
-            android:id="@+id/waitingListLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Waiting List"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/textDark"/>
-
-        <TextView
-            android:id="@+id/lotteryControlsLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Lottery Controls"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@color/textDark"/>
-
-        <EditText
-            android:id="@+id/drawSizeInput"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="8dp"
-            android:hint="Draw size"
-            android:inputType="number"
-            android:background="@drawable/input_background"
-            android:padding="12dp"
-            android:textColor="@color/textDark"
-            android:textColorHint="#888888"/>
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/organizer_dashboard_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:fillViewport="true">
 
         <LinearLayout
-            android:id="@+id/lotteryButtonsRow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="32dp">
 
-            <Button
-                android:id="@+id/runLotteryButton"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:text="Run Lottery"
-                android:textColor="@android:color/white"
-                android:background="@drawable/button_primary_purple"
-                android:layout_marginEnd="8dp"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/organizer_manage_events_btn"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="@string/organizer_manage_events"
+                android:textAllCaps="false"
+                app:cornerRadius="12dp"
+                app:strokeColor="@color/primary"
+                app:strokeWidth="1dp" />
 
-            <Button
-                android:id="@+id/drawReplacementButton"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:text="Draw Replacement"
-                android:textColor="@color/primaryPurple"
-                android:background="@drawable/button_outline_purple"/>
-        </LinearLayout>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/createEventButton"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginTop="10dp"
+                android:text="@string/organizer_create_new_event"
+                android:textAllCaps="false"
+                app:backgroundTint="@color/primary"
+                app:cornerRadius="12dp" />
 
-        <ListView
-            android:id="@+id/waitingListView"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="16dp"/>
+            <!-- Stats 2x2 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/notifyWaitlistButton"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginBottom="8dp"
-            android:text="Notify Waiting List"
-            android:textColor="@android:color/white"
-            android:background="@drawable/button_primary_purple"/>
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/organizer_stat_card_waitlisted"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    app:cardBackgroundColor="@color/login_screen_bg"
+                    app:cardCornerRadius="14dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="@color/borderGray"
+                    app:strokeWidth="1dp">
 
-        <Button
-            android:id="@+id/exportEntrantsCsvButton"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginBottom="8dp"
-            android:text="Export Entrants CSV"
-            android:textColor="@android:color/white"
-            android:background="@drawable/button_primary_purple"/>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="14dp">
 
-        <Button
-            android:id="@+id/viewInvitedButton"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginBottom="8dp"
-            android:text="Cancel Invited Entrants"
-            android:textColor="@android:color/white"
-            android:background="@drawable/button_primary_purple"/>
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_org_stat_people" />
 
-        <Button
-            android:id="@+id/viewCancelledButton"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginBottom="8dp"
-            android:text="View Cancelled Entrants"
-            android:textColor="@android:color/white"
-            android:background="@drawable/button_primary_purple"/>
+                        <TextView
+                            android:id="@+id/organizer_stat_value_waitlisted"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:text="—"
+                            android:textColor="@color/textDark"
+                            android:textSize="22sp"
+                            android:textStyle="bold" />
 
-        <LinearLayout
-            android:id="@+id/geolocationRow"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/organizer_stat_on_waitlist"
+                            android:textColor="@color/textGray"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/organizer_stat_card_draw"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    app:cardBackgroundColor="@color/login_screen_bg"
+                    app:cardCornerRadius="14dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="@color/borderGray"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="14dp">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_org_stat_check" />
+
+                        <TextView
+                            android:id="@+id/organizer_stat_value_draw"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:text="—"
+                            android:textColor="@color/textDark"
+                            android:textSize="22sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/organizer_stat_draw_capacity"
+                            android:textColor="@color/textGray"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:baselineAligned="false"
+                android:orientation="horizontal">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/organizer_stat_card_filled"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    app:cardBackgroundColor="@color/login_screen_bg"
+                    app:cardCornerRadius="14dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="@color/borderGray"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="14dp">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_org_stat_calendar" />
+
+                        <TextView
+                            android:id="@+id/organizer_stat_value_filled"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:text="—"
+                            android:textColor="@color/textDark"
+                            android:textSize="22sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/organizer_stat_slots_filled"
+                            android:textColor="@color/textGray"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/organizer_stat_card_open"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    app:cardBackgroundColor="@color/login_screen_bg"
+                    app:cardCornerRadius="14dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="@color/borderGray"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="14dp">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_org_stat_chart" />
+
+                        <TextView
+                            android:id="@+id/organizer_stat_value_open"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:text="—"
+                            android:textColor="@color/textDark"
+                            android:textSize="22sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/organizer_stat_open_slots"
+                            android:textColor="@color/textGray"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <!-- This event -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:text="@string/organizer_section_this_event"
+                android:textColor="@color/textDark"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:cardBackgroundColor="@color/login_screen_bg"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="2dp"
+                app:strokeColor="@color/borderGray"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="12dp">
+
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/organizer_current_event_poster"
+                        android:layout_width="88dp"
+                        android:layout_height="88dp"
+                        android:contentDescription="@null"
+                        android:scaleType="centerCrop"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearance.Willow.AdminAvatar"
+                        app:strokeColor="@color/borderGray"
+                        app:strokeWidth="1dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/organizer_current_event_name"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:ellipsize="end"
+                                android:maxLines="2"
+                                android:textColor="@color/textDark"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/organizer_current_event_status"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:background="@drawable/bg_notif_badge_neutral"
+                                android:paddingHorizontal="8dp"
+                                android:paddingVertical="3dp"
+                                android:textColor="@color/textGray"
+                                android:textSize="11sp" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/organizer_current_event_date"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:drawablePadding="6dp"
+                            android:gravity="center_vertical"
+                            android:textColor="@color/textGray"
+                            android:textSize="13sp"
+                            app:drawableStartCompat="@drawable/ic_org_stat_calendar" />
+
+                        <TextView
+                            android:id="@+id/organizer_current_event_waitlist"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:drawablePadding="6dp"
+                            android:gravity="center_vertical"
+                            android:textColor="@color/textGray"
+                            android:textSize="13sp"
+                            app:drawableStartCompat="@drawable/ic_org_stat_people" />
+
+                        <ProgressBar
+                            android:id="@+id/organizer_current_event_progress"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="8dp"
+                            android:layout_marginTop="8dp"
+                            android:max="100"
+                            android:progress="0"
+                            android:progressTint="@color/primary" />
+
+                        <TextView
+                            android:id="@+id/organizer_current_event_capacity_label"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textColor="@color/iconGray"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Lottery -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:text="@string/organizer_section_lottery"
+                android:textColor="@color/textDark"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:cardBackgroundColor="@color/login_screen_bg"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="2dp"
+                app:strokeColor="@color/borderGray"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="@string/organizer_draw_size_hint">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/drawSizeInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number"
+                            android:textColor="@color/textDark" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <LinearLayout
+                        android:id="@+id/lotteryButtonsRow"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/runLotteryButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            android:layout_weight="1"
+                            android:text="@string/organizer_run_lottery"
+                            android:textAllCaps="false"
+                            app:backgroundTint="@color/primary"
+                            app:cornerRadius="12dp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/drawReplacementButton"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/organizer_draw_replacement"
+                            android:textAllCaps="false"
+                            app:cornerRadius="12dp"
+                            app:strokeColor="@color/primary" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/organizer_waiting_list_heading"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:text="Waiting list"
+                        android:textColor="@color/textDark"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <ListView
+                        android:id="@+id/waitingListView"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:layout_marginTop="8dp"
+                        android:divider="@android:color/transparent"
+                        android:dividerHeight="0dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/notifyWaitlistButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="Notify waiting list"
+                        android:textAllCaps="false"
+                        app:backgroundTint="@color/primary"
+                        app:cornerRadius="12dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/exportEntrantsCsvButton"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/organizer_export_entrants_csv"
+                        android:textAllCaps="false"
+                        app:cornerRadius="12dp"
+                        app:strokeColor="@color/primary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Entrant lists -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:text="@string/organizer_section_entrants"
+                android:textColor="@color/textDark"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/viewInvitedButton"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Cancel invited entrants"
+                android:textAllCaps="false"
+                app:cornerRadius="12dp"
+                app:strokeColor="@color/primary" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/viewCancelledButton"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="View cancelled entrants"
+                android:textAllCaps="false"
+                app:cornerRadius="12dp"
+                app:strokeColor="@color/primary" />
+
+            <LinearLayout
+                android:id="@+id/geolocationRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Require geolocation"
+                    android:textColor="@color/textDark"
+                    android:textSize="15sp" />
+
+                <Switch
+                    android:id="@+id/geolocationSwitch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/viewMapButton"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="View entrant map"
+                android:textAllCaps="false"
+                app:cornerRadius="12dp"
+                app:strokeColor="@color/primary" />
 
             <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Require Geolocation"
-                android:textSize="16sp"
-                android:textColor="@color/textDark"/>
-
-            <Switch
-                android:id="@+id/geolocationSwitch"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:text="@string/organizer_co_section_title"
+                android:textColor="@color/textDark"
+                android:textSize="17sp"
+                android:textStyle="bold" />
 
+            <TextView
+                android:id="@+id/organizer_co_summary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/organizer_co_none"
+                android:textColor="@color/textGray"
+                android:textSize="14sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/organizer_co_manage_button"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/organizer_co_remove_title"
+                android:textAllCaps="false"
+                app:cornerRadius="12dp"
+                app:strokeColor="@color/primary" />
+
+            <!-- Invite -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:text="@string/organizer_section_invite"
+                android:textColor="@color/textDark"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:cardBackgroundColor="@color/login_screen_bg"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="2dp"
+                app:strokeColor="@color/borderGray"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Search by name, email, or phone">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/searchEntrantInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text"
+                            android:textColor="@color/textDark" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/searchEntrantButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="8dp"
+                            android:layout_weight="1"
+                            android:text="Search"
+                            android:textAllCaps="false"
+                            app:backgroundTint="@color/primary"
+                            app:cornerRadius="12dp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/inviteEntrantButton"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Invite"
+                            android:textAllCaps="false"
+                            app:cornerRadius="12dp"
+                            app:strokeColor="@color/primary" />
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/addCoOrganizerButton"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/organizer_co_add_button"
+                        android:textAllCaps="false"
+                        app:cornerRadius="12dp"
+                        app:strokeColor="@color/primary" />
+
+                    <ListView
+                        android:id="@+id/searchResultsListView"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:layout_marginTop="10dp"
+                        android:divider="@android:color/transparent"
+                        android:dividerHeight="0dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/backToProfileButton"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:text="@string/back_to_profile"
+                android:textAllCaps="false" />
         </LinearLayout>
-
-        <Button
-            android:id="@+id/viewMapButton"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginBottom="8dp"
-            android:text="View Entrant Map"
-            android:textColor="@android:color/white"
-            android:background="@drawable/button_primary_purple"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Search &amp; Invite Entrants"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@color/textDark"/>
-
-        <EditText
-            android:id="@+id/searchEntrantInput"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="8dp"
-            android:hint="Search by name, email, or phone"
-            android:background="@drawable/input_background"
-            android:padding="12dp"
-            android:textColor="@color/textDark"
-            android:textColorHint="#888888"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="8dp">
-
-            <Button
-                android:id="@+id/searchEntrantButton"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:text="Search"
-                android:textColor="@android:color/white"
-                android:background="@drawable/button_primary_purple"
-                android:layout_marginEnd="8dp"/>
-
-            <Button
-                android:id="@+id/inviteEntrantButton"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:text="Invite"
-                android:textColor="@android:color/white"
-                android:background="@drawable/button_primary_purple"/>
-
-        </LinearLayout>
-
-        <ListView
-            android:id="@+id/searchResultsListView"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginTop="8dp"/>
-
-        <Button
-            android:id="@+id/backToProfileButton"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="16dp"
-            android:text="@string/back_to_profile"
-            android:textColor="@android:color/white"
-            android:background="@drawable/button_primary_purple"/>
-
-    </LinearLayout>
-</ScrollView>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>

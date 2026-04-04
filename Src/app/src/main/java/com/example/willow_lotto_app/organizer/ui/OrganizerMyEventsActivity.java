@@ -1,4 +1,4 @@
-package com.example.willow_lotto_app;
+package com.example.willow_lotto_app.organizer.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,15 +11,22 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.willow_lotto_app.R;
 import com.example.willow_lotto_app.events.Event;
+import com.example.willow_lotto_app.organizer.OrganizerEntrantExportHelper;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Lists every event created by the signed-in organizer (excluding soft-deleted documents).
@@ -55,33 +62,47 @@ public class OrganizerMyEventsActivity extends AppCompatActivity implements Orga
             return;
         }
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        FirebaseFirestore.getInstance()
-                .collection("events")
-                .whereEqualTo("organizerId", uid)
-                .get()
-                .addOnSuccessListener(snap -> {
-                    List<Event> list = new ArrayList<>();
-                    for (DocumentSnapshot doc : snap.getDocuments()) {
-                        Boolean isDeleted = doc.getBoolean("isDeleted");
-                        if (isDeleted != null && isDeleted) {
-                            continue;
-                        }
-                        Event e = new Event();
-                        e.setId(doc.getId());
-                        e.setName(doc.getString("name"));
-                        e.setDescription(doc.getString("description"));
-                        e.setDate(doc.getString("date"));
-                        e.setOrganizerId(doc.getString("organizerId"));
-                        list.add(e);
-                    }
-                    Collections.sort(list, BY_DATE_DESC_THEN_NAME);
-                    adapter.setEvents(list);
-                    boolean showEmpty = list.isEmpty();
-                    emptyView.setVisibility(showEmpty ? View.VISIBLE : View.GONE);
-                    recyclerView.setVisibility(showEmpty ? View.GONE : View.VISIBLE);
-                })
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, R.string.organizer_my_events_load_failed, Toast.LENGTH_SHORT).show());
+        FirebaseFirestore fs = FirebaseFirestore.getInstance();
+        Task<QuerySnapshot> owned = fs.collection("events").whereEqualTo("organizerId", uid).get();
+        Task<QuerySnapshot> coOrganized = fs.collection("events").whereArrayContains("coOrganizerIds", uid).get();
+        Tasks.whenAllComplete(owned, coOrganized).addOnCompleteListener(task -> {
+            Map<String, Event> byId = new LinkedHashMap<>();
+            if (owned.isSuccessful() && owned.getResult() != null) {
+                mergeEventDocs(owned.getResult().getDocuments(), byId);
+            }
+            if (coOrganized.isSuccessful() && coOrganized.getResult() != null) {
+                mergeEventDocs(coOrganized.getResult().getDocuments(), byId);
+            }
+            List<Event> list = new ArrayList<>(byId.values());
+            Collections.sort(list, BY_DATE_DESC_THEN_NAME);
+            adapter.setEvents(list);
+            boolean showEmpty = list.isEmpty();
+            emptyView.setVisibility(showEmpty ? View.VISIBLE : View.GONE);
+            recyclerView.setVisibility(showEmpty ? View.GONE : View.VISIBLE);
+            if (!owned.isSuccessful() && !coOrganized.isSuccessful()) {
+                Toast.makeText(this, R.string.organizer_my_events_load_failed, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private static void mergeEventDocs(List<DocumentSnapshot> docs, Map<String, Event> byId) {
+        for (DocumentSnapshot doc : docs) {
+            Boolean isDeleted = doc.getBoolean("isDeleted");
+            if (isDeleted != null && isDeleted) {
+                continue;
+            }
+            Boolean isPrivate = doc.getBoolean("isPrivate");
+            if (isPrivate != null && isPrivate) {
+                continue;
+            }
+            Event e = new Event();
+            e.setId(doc.getId());
+            e.setName(doc.getString("name"));
+            e.setDescription(doc.getString("description"));
+            e.setDate(doc.getString("date"));
+            e.setOrganizerId(doc.getString("organizerId"));
+            byId.put(doc.getId(), e);
+        }
     }
 
     private static final Comparator<Event> BY_DATE_DESC_THEN_NAME = (a, b) -> {

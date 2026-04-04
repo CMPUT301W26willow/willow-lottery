@@ -1,6 +1,8 @@
-package com.example.willow_lotto_app;
+package com.example.willow_lotto_app.organizer;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
@@ -23,7 +25,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Builds the entrant CSV for an event and opens the system share sheet.
- * Shared by {@link OrganizerDashboardActivity} and {@link OrganizerMyEventsActivity}.
+ * Shared by {@link com.example.willow_lotto_app.organizer.ui.OrganizerDashboardActivity}
+ * and {@link com.example.willow_lotto_app.organizer.ui.OrganizerMyEventsActivity}.
  */
 public final class OrganizerEntrantExportHelper {
 
@@ -143,7 +146,16 @@ public final class OrganizerEntrantExportHelper {
                 share.putExtra(Intent.EXTRA_STREAM, uri);
                 share.putExtra(Intent.EXTRA_SUBJECT, activity.getString(R.string.organizer_export_csv_subject));
                 share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                activity.startActivity(Intent.createChooser(share, activity.getString(R.string.organizer_export_csv_chooser)));
+                Intent chooser = Intent.createChooser(share, activity.getString(R.string.organizer_export_csv_chooser));
+                PackageManager pm = activity.getPackageManager();
+                if (chooser.resolveActivity(pm) == null) {
+                    Toast.makeText(activity, R.string.organizer_export_csv_no_app, Toast.LENGTH_LONG).show();
+                    return;
+                }
+                activity.startActivity(chooser);
+            } catch (ActivityNotFoundException e) {
+                Log.e(TAG, "no app for csv share", e);
+                Toast.makeText(activity, R.string.organizer_export_csv_no_app, Toast.LENGTH_LONG).show();
             } catch (Exception e) {
                 Log.e(TAG, "share csv failed", e);
                 Toast.makeText(activity, R.string.organizer_export_csv_write_failed, Toast.LENGTH_SHORT).show();
