@@ -105,6 +105,7 @@
     <string name="event_detail_registration_format">%1$s – %2$s</string>
     <string name="event_detail_no_registration_dates">Not set</string>
     <string name="event_detail_organized_by">Organized by %1$s</string>
+    <string name="event_detail_organizer_guest">Guest User</string>
     <string name="event_detail_event_date">Event Date %1$s</string>
     <string name="event_detail_registration_opens">Registration opens %1$s</string>
     <string name="event_detail_waiting_list_count">%1$d people on waiting list</string>

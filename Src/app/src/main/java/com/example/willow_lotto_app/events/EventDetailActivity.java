@@ -397,12 +397,7 @@ public class EventDetailActivity extends AppCompatActivity {
         nameView.setText(event.getName() != null ? event.getName() : "");
         descriptionView.setText(event.getDescription() != null ? event.getDescription() : "");
 
-        String organizerLabel =
-                event.getOrganizerId() != null && !event.getOrganizerId().isEmpty()
-                        ? event.getOrganizerId()
-                        : "Organizer";
-        organizerView.setText(
-                getString(R.string.event_detail_organized_by, organizerLabel));
+        bindOrganizerLabel(event.getOrganizerId());
 
         dateView.setText(getString(R.string.event_detail_event_date,
                 event.getDate() != null ? event.getDate() : ""));
@@ -439,6 +434,44 @@ public class EventDetailActivity extends AppCompatActivity {
         }
 
         loadWaitingListCount();
+    }
+
+    /**
+     * Resolves the organizer line: guest profiles ({@code isAnonymous} in Firestore) show
+     * {@link R.string#event_detail_organizer_guest}; signed-in users show name, display name, or email.
+     */
+    private void bindOrganizerLabel(String organizerId) {
+        if (organizerId == null || organizerId.isEmpty()) {
+            organizerView.setText(getString(R.string.event_detail_organized_by, "Organizer"));
+            return;
+        }
+        db.collection("users").document(organizerId).get()
+                .addOnSuccessListener(userDoc -> {
+                    String label;
+                    if (!userDoc.exists()) {
+                        label = organizerId;
+                    } else if (Boolean.TRUE.equals(userDoc.getBoolean("isAnonymous"))) {
+                        label = getString(R.string.event_detail_organizer_guest);
+                    } else {
+                        String name = userDoc.getString("name");
+                        if (name != null && !name.trim().isEmpty()) {
+                            label = name.trim();
+                        } else {
+                            String displayName = userDoc.getString("displayName");
+                            if (displayName != null && !displayName.trim().isEmpty()) {
+                                label = displayName.trim();
+                            } else {
+                                String email = userDoc.getString("email");
+                                label = (email != null && !email.trim().isEmpty())
+                                        ? email.trim()
+                                        : organizerId;
+                            }
+                        }
+                    }
+                    organizerView.setText(getString(R.string.event_detail_organized_by, label));
+                })
+                .addOnFailureListener(e ->
+                        organizerView.setText(getString(R.string.event_detail_organized_by, organizerId)));
     }
 
     // Changed for US 01.05.04.
