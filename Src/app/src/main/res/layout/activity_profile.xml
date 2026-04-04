@@ -12,6 +12,7 @@
         android:layout_above="@id/bottom_nav_divider"
         android:clipToPadding="false"
         android:fillViewport="true"
+        android:paddingTop="30dp"
         android:paddingBottom="8dp">
 
         <LinearLayout
