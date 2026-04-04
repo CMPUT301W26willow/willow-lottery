@@ -22,6 +22,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import android.view.WindowManager;
 /**
  * OrganizerDashboardActivity.java
@@ -44,11 +45,11 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
 
     public static final String EXTRA_EVENT_ID = "event_id";
     private EditText drawSizeInput;
-    private Button createEventButton    ;
+    private Button createEventButton;
     private Button runLotteryButton;
     private Button drawReplacementButton;
     private Button backToProfileButton;
-
+    private Button exportEntrantsCsvButton;
     private Button notifyWaitlistButton;
     private Switch geolocationSwitch;
 
@@ -100,12 +101,16 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         runLotteryButton = findViewById(R.id.runLotteryButton);
         drawReplacementButton = findViewById(R.id.drawReplacementButton);
         backToProfileButton = findViewById(R.id.backToProfileButton);
+        exportEntrantsCsvButton = findViewById(R.id.exportEntrantsCsvButton);
         geolocationSwitch = findViewById(R.id.geolocationSwitch);
         notifyWaitlistButton = findViewById(R.id.notifyWaitlistButton);
         notifyWaitlistButton.setOnClickListener(v -> notifyWaitingList());
 
         createEventButton.setOnClickListener(v ->
                 startActivity(new Intent(this, CreateEventActivity.class)));
+
+        exportEntrantsCsvButton.setOnClickListener(v ->
+                OrganizerEntrantExportHelper.exportEntrantsCsv(this, eventId));
 
         backToProfileButton.setOnClickListener(v -> finish());
 
@@ -470,4 +475,5 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                 }
         );
     }
+
 }

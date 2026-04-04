@@ -48,6 +48,7 @@
         <activity android:name=".notification.NotificationActivity" android:exported="false"/>
         <activity android:name=".ProfileActivity" android:exported="false"/>
         <activity android:name=".OrganizerDashboardActivity" android:exported="false"/>
+        <activity android:name=".OrganizerMyEventsActivity" android:exported="false"/>
         <activity android:name=".events.CreateEventActivity" android:exported="false"/>
         <activity android:name=".events.EventQrActivity" android:exported="false"/>
         <activity android:name=".AdminLoginActivity" android:exported="false"/>
