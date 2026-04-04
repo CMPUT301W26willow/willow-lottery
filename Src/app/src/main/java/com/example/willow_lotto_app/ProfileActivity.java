@@ -483,9 +483,9 @@ public class ProfileActivity extends AppCompatActivity {
         String uid = mAuth.getCurrentUser().getUid();
 
         Map<String, Object> user = new HashMap<>();
-        user.put("name", name);
-        user.put("email", email);
-        user.put("phone", phone);
+        user.put("Name", name);
+        user.put("Email", email);
+        user.put("Phone", phone);
 
         db.collection("users")
                 .document(uid)

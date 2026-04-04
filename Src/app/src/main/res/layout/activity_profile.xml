@@ -101,6 +101,16 @@
                 </FrameLayout>
             </LinearLayout>
 
+            <Button
+                android:id="@+id/profileSignOutButton"
+                android:text="@string/profile_sign_out"
+                android:textColor="@color/accentBlue"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/backgroundGray"
+                />
+
             <ImageView
                 android:id="@+id/profile_avatar"
                 android:layout_width="96dp"
