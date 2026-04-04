@@ -17,4 +17,11 @@
     <color name="accentBlue">#2563EB</color>
     <color name="iconGray">#9CA3AF</color>
     <color name="strokeGrey">#aeafb9</color>
+
+    <!-- Login screen (Willow UI / Figma) -->
+    <color name="login_screen_bg">#FFFFFF</color>
+    <color name="login_input_fill">#F3F4F6</color>
+    <color name="login_hint">#9CA3AF</color>
+    <color name="login_forgot">#E11D48</color>
+    <color name="login_divider">#E5E7EB</color>
 </resources>

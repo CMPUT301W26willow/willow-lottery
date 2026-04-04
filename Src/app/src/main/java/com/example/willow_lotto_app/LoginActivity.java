@@ -7,6 +7,7 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -27,9 +28,10 @@ public class LoginActivity extends AppCompatActivity {
 
     // UI elements
     TextInputLayout emailInput, passwordInput;
-    Button signIn, continueAnon, adminDash, forgotPass;
+    Button signIn, continueAnon, adminDash;
     CheckBox rememberMe;
     TextView signUp;
+    TextView forgotPassword;
 
     // SharedPreferences
     private SharedPreferences sharedPref;
@@ -67,8 +69,11 @@ public class LoginActivity extends AppCompatActivity {
         continueAnon = findViewById(R.id.loginAsGuest);
         adminDash = findViewById(R.id.loginAdminAccess);
         signUp = findViewById(R.id.loginSignUp);
+        forgotPassword = findViewById(R.id.loginForgotPassword);
 
-        // Click listeners
+        forgotPassword.setOnClickListener(v ->
+                Toast.makeText(this, R.string.login_forgot_hint, Toast.LENGTH_SHORT).show());
+
         adminDash.setOnClickListener(view -> {startActivity(new Intent(LoginActivity.this, AdminLoginActivity.class));});
         continueAnon.setOnClickListener(view -> signInAnonymously());
         signIn.setOnClickListener(view -> checkUserProfile());

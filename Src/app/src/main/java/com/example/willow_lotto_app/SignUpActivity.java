@@ -3,20 +3,26 @@ package com.example.willow_lotto_app;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.TextInputLayout;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * Email/password account registration screen.
@@ -34,7 +40,6 @@ public class SignUpActivity extends AppCompatActivity {
     Button signUpComplete;
     FirebaseAuth mAuth;
     FirebaseFirestore db;
-    String[] registeredEvents = new String[40];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,11 +47,19 @@ public class SignUpActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_sign_up);
 
-        //Initialising Ui Interactable elements
+        MaterialToolbar toolbar = findViewById(R.id.sign_up_toolbar);
+        toolbar.setNavigationOnClickListener(v -> finish());
+
         nameInput = findViewById(R.id.signUpNameInput);
         emailInput = findViewById(R.id.signUpEmailInput);
         passwordInput = findViewById(R.id.signUpPasswordInput);
         signUpComplete = findViewById(R.id.buttonFinishSignUp);
+
+        TextView signInLink = findViewById(R.id.signUpSignInLink);
+        signInLink.setOnClickListener(v -> {
+            startActivity(new Intent(SignUpActivity.this, LoginActivity.class));
+            finish();
+        });
 
         //Initialising Firebase Related services
         db = FirebaseFirestore.getInstance();
@@ -54,9 +67,9 @@ public class SignUpActivity extends AppCompatActivity {
 
         //OnclickListener to allow user to proceed
         signUpComplete.setOnClickListener(view -> {
-            String name = String.valueOf(nameInput.getEditText().getText()).trim();
-            String email = String.valueOf(emailInput.getEditText().getText()).trim();
-            String password = String.valueOf(passwordInput.getEditText().getText());
+            String name = textFrom(nameInput).trim();
+            String email = textFrom(emailInput).trim();
+            String password = textFrom(passwordInput);
             String phone = "000-000-0000";
 
             String error = validateSignUpInput(name, email, password);
@@ -74,15 +87,17 @@ public class SignUpActivity extends AppCompatActivity {
                         String uid = authResult.getUser().getUid();
 
                         //Mapping User Hashmap (keys match ProfileActivity expectations)
+                        List<String> registeredEvents = new ArrayList<>();
                         Map<String, Object> user = new HashMap<>();
                         user.put("name", name);
                         user.put("email", email);
                         user.put("phone", phone);
-                        user.put("registeredEvents",registeredEvents);
+                        user.put("registeredEvents", registeredEvents);
                         user.put("isOrganizer", false);
                         user.put("organizerBanned", false);
                         user.put("isDeleted", false);
                         user.put("deletedByAdmin", false);
+                        user.put("isAnonymous", false);
 
                         db.collection("users")
                                 .document(uid)
@@ -93,10 +108,12 @@ public class SignUpActivity extends AppCompatActivity {
                                     finish();
                                 })
                                 .addOnFailureListener(e ->
-                                        Toast.makeText(this, "Error Saving Profile", Toast.LENGTH_SHORT).show());
+                                        Toast.makeText(this,
+                                                "Could not save profile: " + (e.getMessage() != null ? e.getMessage() : "unknown error"),
+                                                Toast.LENGTH_LONG).show());
                     })
                     .addOnFailureListener(e ->
-                            Toast.makeText(this, "Error Creating Account: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                            Toast.makeText(this, authErrorMessage(e), Toast.LENGTH_LONG).show());
 
         });
 
@@ -132,12 +149,12 @@ public class SignUpActivity extends AppCompatActivity {
                             .addOnSuccessListener(authResult -> {
                                 String uid = authResult.getUser().getUid();
 
-                                // Mapping User Hashmap (keys match ProfileActivity expectations)
+                                List<String> registeredEventsList = new ArrayList<>();
                                 Map<String, Object> user = new HashMap<>();
                                 user.put("name", name);
                                 user.put("email", email);
                                 user.put("phone", phone);
-                                user.put("registeredEvents", registeredEvents);
+                                user.put("registeredEvents", registeredEventsList);
 
                                 /**
                                  * Added moderation-related flags for admin flows.
@@ -146,6 +163,7 @@ public class SignUpActivity extends AppCompatActivity {
                                 user.put("organizerBanned", false);
                                 user.put("isDeleted", false);
                                 user.put("deletedByAdmin", false);
+                                user.put("isAnonymous", false);
 
                                 db.collection("users")
                                         .document(uid)
@@ -155,22 +173,47 @@ public class SignUpActivity extends AppCompatActivity {
                                             startActivity(new Intent(SignUpActivity.this, MainActivity.class));
                                             finish();
                                         })
-                                        .addOnFailureListener(e ->
-                                                Toast.makeText(this, "Error Saving Profile", Toast.LENGTH_SHORT).show());
+                                        .addOnFailureListener(err ->
+                                                Toast.makeText(this,
+                                                        "Could not save profile: " + (err.getMessage() != null ? err.getMessage() : "unknown error"),
+                                                        Toast.LENGTH_LONG).show());
                             })
-                            .addOnFailureListener(e ->
-                                    Toast.makeText(this, "Error Creating Account: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                            .addOnFailureListener(err ->
+                                    Toast.makeText(this, authErrorMessage(err), Toast.LENGTH_LONG).show());
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Could not verify sign-up eligibility.", Toast.LENGTH_SHORT).show());
     }
 
+    private static String textFrom(TextInputLayout layout) {
+        if (layout == null || layout.getEditText() == null) {
+            return "";
+        }
+        CharSequence cs = layout.getEditText().getText();
+        return cs != null ? cs.toString() : "";
+    }
+
     /** Validates sign-up fields; returns first error message or null if valid. */
     static String validateSignUpInput(String name, String email, String password) {
         if (name == null || name.trim().isEmpty()) return "Name required";
-        if (email == null || email.trim().isEmpty()) return "Email Required";
-        if (password == null || password.trim().isEmpty()) return "Password Invalid";
+        if (email == null || email.trim().isEmpty()) return "Email required";
+        if (password == null || password.isEmpty()) return "Password required";
+        if (password.length() < 6) return "Password must be at least 6 characters";
         return null;
+    }
+
+    private static String authErrorMessage(Exception e) {
+        if (e instanceof FirebaseAuthWeakPasswordException) {
+            return "Password is too weak. Use at least 6 characters.";
+        }
+        if (e instanceof FirebaseAuthUserCollisionException) {
+            return "An account already exists with this email.";
+        }
+        if (e instanceof FirebaseAuthInvalidCredentialsException) {
+            return "Invalid email or password format.";
+        }
+        String msg = e != null && e.getMessage() != null ? e.getMessage() : "Sign up failed.";
+        return "Could not create account: " + msg;
     }
 
 }

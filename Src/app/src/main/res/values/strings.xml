@@ -10,15 +10,18 @@
     <string name="profile_save_changes">Save Changes</string>
     <string name="profile_cancel">Cancel</string>
 
+    <string name="login_title">Let\'s Sign you in</string>
     <string name="login_email_label">Email Address</string>
     <string name="login_email_hint">Enter your email address</string>
     <string name="login_password_label">Password</string>
     <string name="login_password_hint">Enter your password</string>
     <string name="login_remember">Remember Me</string>
     <string name="login_forgot">Forgot Password</string>
-    <string name="login_sign_in">Sign in</string>
+    <string name="login_forgot_hint">Password recovery is not set up for this build.</string>
+    <string name="login_sign_in">Sign In</string>
     <string name="login_continue_as_guest">Continue as Guest</string>
-    <string name="login_no_account">Don\'t Have an account?</string>
+    <string name="login_or">or</string>
+    <string name="login_no_account">Don\'t have an account?</string>
     <string name="login_admin_dashboard">Admin Access</string>
     <string name="login_sign_up">Sign Up</string>
 
@@ -35,6 +38,8 @@
     <string name="sign_up_name_title">Name</string>
     <string name="sign_up_name_hint">Enter your name</string>
     <string name="sign_up_complete">Get Started</string>
+    <string name="sign_up_already_have_account">Already have an account?</string>
+    <string name="sign_up_sign_in">Sign in</string>
 
     <string name="organizer_dashboard_title">Organizer Dashboard</string>
     <string name="organizer_dashboard_body">Create events, manage attendees, and track ticket sales.</string>
