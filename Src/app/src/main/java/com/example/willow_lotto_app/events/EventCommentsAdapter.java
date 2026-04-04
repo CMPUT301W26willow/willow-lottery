@@ -20,7 +20,7 @@ import java.util.List;
 
 /**
  * EventCommentsAdapter.java
- *
+ * <p>
  *
  * Top-level comments with expand/collapse replies.
  * Supports organizer delete functionality (02.08.01).

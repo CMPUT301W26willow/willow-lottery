@@ -20,7 +20,7 @@ import java.util.List;
 
 /**
  * Administrator screen for browsing uploaded event images.
- *
+ * <p>
  * Current scope:
  * - Uses event posterUri values as the image source.
  * - Lets the admin remove the image by clearing posterUri on the event.

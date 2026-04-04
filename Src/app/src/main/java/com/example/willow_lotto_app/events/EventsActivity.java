@@ -31,11 +31,11 @@ import java.util.Set;
 
 /**
  * EventsActivity.java
- *
+ * <p>
  * Author: Mehr Dhanda
- *
+ * <p>
  * Full events list screen. Allows entrants to browse and search for events.
- *
+ * <p>
  * Responsibilities:
  * - Implements 01.01.03 "View events available to join" by listing all
  *   events from Firestore with an empty-state message when none exist.
@@ -43,7 +43,7 @@ import java.util.Set;
  * - Connects join/leave interactions (01.01.01 / 01.01.02) via
  *   {@link EventsAdapter.OnJoinLeaveListener}.
  * - Opens {@link EventDetailActivity} for the selected event.
- *
+ * <p>
  * Outstanding issues:
  * - Search is client-side only; does not query Firestore directly.
  */

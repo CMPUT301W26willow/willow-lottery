@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  * RecyclerView adapter used by the administrator event moderation screen.
- *
+ *<p>
  * Responsibilities:
  * - Displays event cards in the admin dashboard.
  * - Lets the admin remove events.

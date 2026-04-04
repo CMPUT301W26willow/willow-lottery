@@ -1,14 +1,14 @@
 /**
  * EntrantMapActivity.java
- *
+ * <p>
  * Author: Mehr Dhanda
- *
+ * <p>
  * Displays a Google Map showing the locations where entrants joined
  * the waiting list for a specific event. Each entrant is represented
  * by a map marker at their recorded location.
- *
+ * <p>
  * Role: Controller in the MVC pattern.
- *
+ * <p>
  * Outstanding issues:
  * - Event ID is currently hardcoded as "event1". Should be passed dynamically via Intent.
  * - No clustering for overlapping markers.
@@ -20,7 +20,6 @@ import android.util.Log;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentManager;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -33,15 +32,15 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 /**
  * EventQrActivity.java
- *
+ *<p>
  * Displays a generated QR code for a newly created event and lets the organizer
  * download the QR image for sharing.
- *
+ *<p>
  * Role in application:
  * - Controller/View layer for the post-event-creation QR flow.
  * - Receives the event ID and event name by Intent.
  * - Uses QRCodeHelper to generate a QR code that links back to the event.
- *
+ *<p>
  * Outstanding issues:
  * - QR generation depends on the helper utility and assumes a valid incoming event ID.
  * - Download feedback is minimal and error handling for storage/media failures is basic.
@@ -50,13 +49,13 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 /**
  * EntrantMapActivity.java
- *
+ *<p>
  * Displays a Google Map with markers showing where entrants joined the waiting list for a specific event.
- *
+ *<p>
  * Role in application:
  * - Controller/View layer for organizer geolocation viewing.
  * - Reads entrant location data from Firestore and renders markers on a Google Map.
- *
+ *<p>
  * Outstanding issues:
  * - The event ID is currently hardcoded as "event1" and should be passed by Intent.
  * - This file still reads from the older events/{eventId}/waitingList structure instead

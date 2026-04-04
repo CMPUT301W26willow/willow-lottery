@@ -23,7 +23,7 @@ import java.util.Map;
 
 /**
  * Administrator screen for browsing and moderating events.
- *
+ * <p>
  * Responsibilities:
  * - Allows admins to browse events.
  * - Allows admins to remove events.
@@ -101,7 +101,7 @@ public class AdminBrowseEventsActivity extends AppCompatActivity implements Admi
 
     /**
      * Loads all non-deleted events from Firestore.
-     *
+     * <p>
      * If older events do not yet have an isDeleted field, they are still shown.
      */
     private void loadEvents() {
@@ -252,7 +252,7 @@ public class AdminBrowseEventsActivity extends AppCompatActivity implements Admi
 
     /**
      * Marks all comments belonging to an event as removed.
-     *
+     * <p>
      * This assumes a comments collection with an eventId field and an isRemoved field.
      *
      * @param event selected event

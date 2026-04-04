@@ -26,9 +26,6 @@ public class AdminLoginActivity extends AppCompatActivity {
     private TextInputEditText passwordEdit;
     private MaterialButton adminAccessButton;
 
-    FirebaseFirestore db;
-
-    TextInputLayout emailInput, passwordInput;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

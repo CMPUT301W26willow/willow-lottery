@@ -32,7 +32,7 @@ import java.util.Set;
 
 /**
  * Home screen for entrants.
- *
+ *<p>
  * Responsibilities:
  * - Implements 01.01.03 "View events available to join" by showing a
  *   limited feed of events the user can browse.
@@ -211,7 +211,7 @@ public class MainActivity extends AppCompatActivity {
         return o != null ? o.toString() : "";
     }
 
-    @SuppressWarnings("unchecked")
+
     private static List<String> readStringList(QueryDocumentSnapshot doc, String field) {
         List<String> out = new ArrayList<>();
         Object o = doc.get(field);

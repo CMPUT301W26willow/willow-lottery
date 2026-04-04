@@ -7,11 +7,11 @@ import java.util.Set;
 
 /**
  * Utility class for determining whether a signed-in user has administrator access.
- *
+ * <p>
  * Responsibilities:
  * - Stores the hard-coded administrator email allow-list.
  * - Provides helper methods used by ProfileActivity and admin screens.
- *
+ * <p>
  * Current admin emails:
  * - admin1@gmail.com
  * - admin2@gmail.com

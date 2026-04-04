@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  * RecyclerView adapter used by the administrator image moderation screen.
- *
+ * <p>
  * Current phase-1 design:
  * - The image list is built from event posterUri values.
  * - Removing an image clears the posterUri field on the related event.

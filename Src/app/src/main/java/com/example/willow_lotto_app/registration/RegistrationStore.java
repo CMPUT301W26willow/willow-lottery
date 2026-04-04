@@ -12,16 +12,16 @@ import java.util.Map;
 
 /**
  * RegistrationStore.java
- *
+ *<p>
  * Helper for reading and updating event registration documents
  * in the top-level Firestore "registrations" collection.
- *
+ *<p>
  * Role in application:
  * - Repository/data-access layer for registration records.
  * - Creates waitlist registrations.
  * - Queries registrations by event and status.
  * - Updates registration statuses individually or in batches.
- *
+ *<p>
  * Outstanding issues:
  * - This store does not yet enforce uniqueness for one user per event unless the
  *   calling code checks for existing registrations first.

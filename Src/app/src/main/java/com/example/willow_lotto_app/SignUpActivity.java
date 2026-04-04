@@ -26,7 +26,7 @@ import java.util.Map;
 
 /**
  * Email/password account registration screen.
- *
+ *<p>
  * Responsibilities:
  * - Implements 01.02.01 "Account Registration" by creating a Firebase Auth
  *   user with email and password.
@@ -121,7 +121,7 @@ public class SignUpActivity extends AppCompatActivity {
 
     /**
      * Checks whether the email entered during sign-up has been banned by an administrator.
-     *
+     *<p>
      * If the email is banned, sign-up is stopped.
      * If the email is not banned, the existing account creation logic runs.
      *

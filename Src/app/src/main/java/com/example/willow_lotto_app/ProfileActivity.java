@@ -37,7 +37,7 @@ import com.example.willow_lotto_app.admin.AdminDashboardActivity;
 
 /**
  * Profile management screen for the signed-in user.
- *
+ *<p>
  * Responsibilities:
  * - Lets users view and edit basic profile fields backed by Firestore.
  * - Provides navigation into organizer flows (create first event or open
@@ -71,10 +71,10 @@ public class ProfileActivity extends AppCompatActivity {
     private String lastLoadedPhone = "";
     private boolean editMode;
 
-    //refrences to UI elements
+    //references to UI elements
     EditText nameInput, emailInput, phoneInput;
     // Button UI references from the profile screen
-    Button saveButton, cancelButton, organizerDashboardButton, organizerMyEventsButton, deleteButton, registerButton, adminDashboardButton;    // refrences to the NAV( home, events, notifications, profile)
+    Button saveButton, cancelButton, organizerDashboardButton, organizerMyEventsButton, deleteButton, registerButton, adminDashboardButton;    // references to the NAV( home, events, notifications, profile)
     // Button UI references from the profile screen
 
     BottomNavigationView bottomNav;
@@ -149,7 +149,7 @@ public class ProfileActivity extends AppCompatActivity {
         organizerMyEventsButton.setOnClickListener(v -> openOrganizerMyEvents());
         adminDashboardButton.setOnClickListener(v -> openAdminDashboard());
         applyAdminEntryVisibility();
-        // click listener for Bottom Navigation to guide to diffrent navigation pages of the app
+        // click listener for Bottom Navigation to guide to different navigation pages of the app
 
         bottomNav.setOnItemSelectedListener(item -> {
             // click listener for home page

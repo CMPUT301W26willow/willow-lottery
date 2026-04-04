@@ -4,14 +4,14 @@ import com.google.firebase.Timestamp;
 
 /**
  * UI model class representing a notification item displayed in the notifications list.
- *
+ *<p>
  * Role in application:
  * - Serves as the read-side/display model for NotificationActivity and NotificationAdapter.
  * - Holds both Firestore document data and the document ID for RecyclerView display.
- *
+ *<p>
  * - UserNotification is mainly used when writing notification data to Firestore.
  * - UserNotificationItem is used when reading notification data back for display.
- *
+ *<p>
  * Current limitations / outstanding issues:
  * - Event name is not currently stored here unless added separately later.
  * - No helper methods currently exist for formatting date/time for display.
