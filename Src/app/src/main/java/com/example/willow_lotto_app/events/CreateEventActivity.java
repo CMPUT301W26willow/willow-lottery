@@ -4,8 +4,6 @@ import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
@@ -27,15 +25,14 @@ import com.example.willow_lotto_app.R;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageMetadata;
-import com.google.firebase.storage.StorageReference;
 
-import java.io.InputStream;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * CreateEventActivity.java
@@ -47,7 +44,7 @@ import java.util.Map;
  * Responsibilities:
  * - Collects core event fields and validates required ones.
  * - Allows organizer to optionally set a waiting list limit (02.03.01).
- * - Uploads an optional poster image to Firebase Storage.
+ * - Stores an optional poster as a compressed JPEG data URI in Firestore ({@code posterUri}).
  * - On success, navigates to {@link EventQrActivity}.
  *
  * Outstanding issues:
@@ -73,6 +70,7 @@ public class CreateEventActivity extends AppCompatActivity {
     private Button submitButton;
     private FirebaseFirestore db;
     private Uri posterUri;
+    private final ExecutorService posterEncodeExecutor = Executors.newSingleThreadExecutor();
 
     private final ActivityResultLauncher<Intent> pickImage = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
@@ -130,6 +128,12 @@ public class CreateEventActivity extends AppCompatActivity {
         waitlistLimitButton.setOnClickListener(v -> showNumberPickerDialog());
 
         submitButton.setOnClickListener(v -> createEvent());
+    }
+
+    @Override
+    protected void onDestroy() {
+        posterEncodeExecutor.shutdownNow();
+        super.onDestroy();
     }
 
     private void openImagePicker() {
@@ -238,10 +242,9 @@ public class CreateEventActivity extends AppCompatActivity {
     }
 
     private static final String TAG = "CreateEventActivity";
-    private static final long DOWNLOAD_URL_DELAY_MS = 800;
 
     /**
-     * Creates event in Firestore first to get eventId, then uploads poster.
+     * Creates event in Firestore first to get eventId, then compresses and saves the poster into the same document.
      *
      * @param waitlistLimit Optional max number of entrants on waiting list.
      */
@@ -268,84 +271,42 @@ public class CreateEventActivity extends AppCompatActivity {
                                       String registrationStart, String registrationEnd, String eventDate,
                                       boolean locationRequired, String uid, Integer waitlistLimit,
                                       boolean isPrivate) {
-        String path = "event_posters/" + eventId + ".jpg";
-        StorageReference ref = FirebaseStorage.getInstance().getReference().child(path);
-
-        String mimeType = getContentResolver().getType(posterUri);
-        if (mimeType == null || !mimeType.startsWith("image/")) mimeType = "image/jpeg";
-
-        StorageMetadata metadata = new StorageMetadata.Builder()
-                .setContentType(mimeType)
-                .build();
-
-        InputStream stream;
-        try {
-            stream = getContentResolver().openInputStream(posterUri);
-        } catch (Exception e) {
-            Log.e(TAG, "Could not open poster stream", e);
-            Toast.makeText(this, "Could not read image: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            submitButton.setEnabled(true);
-            return;
-        }
-        if (stream == null) {
-            Toast.makeText(this, "Could not read image", Toast.LENGTH_SHORT).show();
-            submitButton.setEnabled(true);
-            return;
-        }
-
-        InputStream streamToClose = stream;
-        ref.putStream(stream, metadata)
-                .addOnSuccessListener(taskSnapshot -> {
-                    closeQuietly(streamToClose);
-                    StorageReference uploadedRef = taskSnapshot.getStorage();
-                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                        uploadedRef.getDownloadUrl()
-                                .addOnSuccessListener(uri -> {
-                                    db.collection("events").document(eventId)
-                                            .update("posterUri", uri.toString())
-                                            .addOnSuccessListener(aVoid -> {
-                                                // CHANGED: private events should not generate promotional QR code
-                                                if (isPrivate) {
-                                                    Toast.makeText(this, "Private event created", Toast.LENGTH_SHORT).show();
-                                                    finish();
-                                                    return;
-                                                }
-
-                                                Intent intent = new Intent(this, EventQrActivity.class);
-                                                intent.putExtra(EventQrActivity.EXTRA_EVENT_ID, eventId);
-                                                intent.putExtra(EventQrActivity.EXTRA_EVENT_NAME, name);
-                                                startActivity(intent);
-                                                finish();
-                                            })
-                                            .addOnFailureListener(e -> {
-                                                Toast.makeText(this, "Event created but poster link failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                                                submitButton.setEnabled(true);
-                                            });
-                                })
-                                .addOnFailureListener(e -> {
-                                    Log.e(TAG, "Failed to get download URL", e);
-                                    Toast.makeText(this, "Upload done but URL failed. " + e.getMessage(), Toast.LENGTH_LONG).show();
-                                    submitButton.setEnabled(true);
-                                });
-                    }, DOWNLOAD_URL_DELAY_MS);
-                })
-                .addOnFailureListener(e -> {
-                    closeQuietly(streamToClose);
-                    Log.e(TAG, "Poster upload failed", e);
-                    String msg = e.getMessage();
-                    if (msg != null && msg.contains("object does not exist")) {
-                        Toast.makeText(this, "Storage not set up. Enable Storage in Firebase Console.", Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(this, "Upload failed: " + msg, Toast.LENGTH_LONG).show();
-                    }
+        final Uri localPosterUri = posterUri;
+        posterEncodeExecutor.execute(() -> {
+            try {
+                String dataUri = PosterFirestoreCodec.encodePosterAsDataUri(getContentResolver(), localPosterUri);
+                runOnUiThread(() -> savePosterDataUriAndNavigate(eventId, dataUri, name, isPrivate));
+            } catch (IOException e) {
+                Log.e(TAG, "Poster encoding failed", e);
+                runOnUiThread(() -> {
+                    Toast.makeText(this,
+                            e.getMessage() != null ? e.getMessage() : "Could not process image",
+                            Toast.LENGTH_LONG).show();
                     submitButton.setEnabled(true);
                 });
+            }
+        });
     }
 
-    private static void closeQuietly(InputStream stream) {
-        if (stream != null) {
-            try { stream.close(); } catch (Exception ignored) {}
-        }
+    private void savePosterDataUriAndNavigate(String eventId, String dataUri, String name, boolean isPrivate) {
+        db.collection("events").document(eventId)
+                .update("posterUri", dataUri)
+                .addOnSuccessListener(aVoid -> {
+                    if (isPrivate) {
+                        Toast.makeText(this, "Private event created", Toast.LENGTH_SHORT).show();
+                        finish();
+                        return;
+                    }
+                    Intent intent = new Intent(this, EventQrActivity.class);
+                    intent.putExtra(EventQrActivity.EXTRA_EVENT_ID, eventId);
+                    intent.putExtra(EventQrActivity.EXTRA_EVENT_NAME, name);
+                    startActivity(intent);
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Event created but saving poster failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    submitButton.setEnabled(true);
+                });
     }
 
     /**
