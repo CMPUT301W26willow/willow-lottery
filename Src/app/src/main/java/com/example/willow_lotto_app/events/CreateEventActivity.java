@@ -63,6 +63,10 @@ public class CreateEventActivity extends AppCompatActivity {
     private EditText registrationEndInput;
     private EditText eventDateInput;
     private SwitchCompat locationRequiredSwitch;
+
+    // CHANGED: used for US 02.01.02 private event creation
+    private SwitchCompat privateEventSwitch;
+
     private ImageView posterPreview;
     private View posterPlaceholder;
     private View posterArea;
@@ -101,6 +105,10 @@ public class CreateEventActivity extends AppCompatActivity {
         registrationEndInput = findViewById(R.id.create_event_registration_end);
         eventDateInput = findViewById(R.id.create_event_date);
         locationRequiredSwitch = findViewById(R.id.create_event_location_required);
+
+        // CHANGED: initialize private event switch
+        privateEventSwitch = findViewById(R.id.create_event_private_switch);
+
         posterPreview = findViewById(R.id.create_event_poster_preview);
         posterPlaceholder = findViewById(R.id.create_event_poster_placeholder);
         posterArea = findViewById(R.id.create_event_poster_area);
@@ -217,10 +225,15 @@ public class CreateEventActivity extends AppCompatActivity {
                 ? FirebaseAuth.getInstance().getCurrentUser().getUid()
                 : "";
 
+        // CHANGED: read private/public choice for US 02.01.02
+        boolean isPrivate = privateEventSwitch != null && privateEventSwitch.isChecked();
+
         if (posterUri != null) {
-            createEventThenUploadPoster(name, description, registrationStart, registrationEnd, eventDate, locationRequiredSwitch.isChecked(), uid, waitlistLimit);
+            createEventThenUploadPoster(name, description, registrationStart, registrationEnd, eventDate,
+                    locationRequiredSwitch.isChecked(), uid, waitlistLimit, isPrivate);
         } else {
-            createEventInFirestore(name, description, registrationStart, registrationEnd, eventDate, locationRequiredSwitch.isChecked(), uid, null, waitlistLimit);
+            createEventInFirestore(name, description, registrationStart, registrationEnd, eventDate,
+                    locationRequiredSwitch.isChecked(), uid, null, waitlistLimit, isPrivate);
         }
     }
 
@@ -232,14 +245,18 @@ public class CreateEventActivity extends AppCompatActivity {
      *
      * @param waitlistLimit Optional max number of entrants on waiting list.
      */
-    private void createEventThenUploadPoster(String name, String description, String registrationStart, String registrationEnd, String eventDate, boolean locationRequired, String uid, Integer waitlistLimit) {
-        Map<String, Object> event = buildEventMap(name, description, registrationStart, registrationEnd, eventDate, locationRequired, uid, null, waitlistLimit);
+    private void createEventThenUploadPoster(String name, String description, String registrationStart,
+                                             String registrationEnd, String eventDate, boolean locationRequired,
+                                             String uid, Integer waitlistLimit, boolean isPrivate) {
+        Map<String, Object> event = buildEventMap(name, description, registrationStart, registrationEnd,
+                eventDate, locationRequired, uid, null, waitlistLimit, isPrivate);
 
         db.collection("events")
                 .add(event)
                 .addOnSuccessListener(documentReference -> {
                     String eventId = documentReference.getId();
-                    uploadPosterForEvent(eventId, name, description, registrationStart, registrationEnd, eventDate, locationRequired, uid, waitlistLimit);
+                    uploadPosterForEvent(eventId, name, description, registrationStart, registrationEnd,
+                            eventDate, locationRequired, uid, waitlistLimit, isPrivate);
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Failed to create event", Toast.LENGTH_SHORT).show();
@@ -247,7 +264,10 @@ public class CreateEventActivity extends AppCompatActivity {
                 });
     }
 
-    private void uploadPosterForEvent(String eventId, String name, String description, String registrationStart, String registrationEnd, String eventDate, boolean locationRequired, String uid, Integer waitlistLimit) {
+    private void uploadPosterForEvent(String eventId, String name, String description,
+                                      String registrationStart, String registrationEnd, String eventDate,
+                                      boolean locationRequired, String uid, Integer waitlistLimit,
+                                      boolean isPrivate) {
         String path = "event_posters/" + eventId + ".jpg";
         StorageReference ref = FirebaseStorage.getInstance().getReference().child(path);
 
@@ -284,6 +304,13 @@ public class CreateEventActivity extends AppCompatActivity {
                                     db.collection("events").document(eventId)
                                             .update("posterUri", uri.toString())
                                             .addOnSuccessListener(aVoid -> {
+                                                // CHANGED: private events should not generate promotional QR code
+                                                if (isPrivate) {
+                                                    Toast.makeText(this, "Private event created", Toast.LENGTH_SHORT).show();
+                                                    finish();
+                                                    return;
+                                                }
+
                                                 Intent intent = new Intent(this, EventQrActivity.class);
                                                 intent.putExtra(EventQrActivity.EXTRA_EVENT_ID, eventId);
                                                 intent.putExtra(EventQrActivity.EXTRA_EVENT_NAME, name);
@@ -326,13 +353,25 @@ public class CreateEventActivity extends AppCompatActivity {
      *
      * @param waitlistLimit Optional max number of entrants. Null means unlimited.
      */
-    private void createEventInFirestore(String name, String description, String registrationStart, String registrationEnd, String eventDate, boolean locationRequired, String uid, String posterUrl, Integer waitlistLimit) {
-        Map<String, Object> event = buildEventMap(name, description, registrationStart, registrationEnd, eventDate, locationRequired, uid, posterUrl, waitlistLimit);
+    private void createEventInFirestore(String name, String description, String registrationStart,
+                                        String registrationEnd, String eventDate, boolean locationRequired,
+                                        String uid, String posterUrl, Integer waitlistLimit,
+                                        boolean isPrivate) {
+        Map<String, Object> event = buildEventMap(name, description, registrationStart, registrationEnd,
+                eventDate, locationRequired, uid, posterUrl, waitlistLimit, isPrivate);
 
         db.collection("events")
                 .add(event)
                 .addOnSuccessListener(documentReference -> {
                     String eventId = documentReference.getId();
+
+                    // CHANGED: private events should not generate promotional QR code
+                    if (isPrivate) {
+                        Toast.makeText(this, "Private event created", Toast.LENGTH_SHORT).show();
+                        finish();
+                        return;
+                    }
+
                     Intent intent = new Intent(this, EventQrActivity.class);
                     intent.putExtra(EventQrActivity.EXTRA_EVENT_ID, eventId);
                     intent.putExtra(EventQrActivity.EXTRA_EVENT_NAME, name);
@@ -356,7 +395,10 @@ public class CreateEventActivity extends AppCompatActivity {
      * @param waitlistLimit Optional max waiting list size. Null means unlimited.
      * @return Map of event fields ready for Firestore.
      */
-    private Map<String, Object> buildEventMap(String name, String description, String registrationStart, String registrationEnd, String eventDate, boolean locationRequired, String uid, String posterUrl, Integer waitlistLimit) {
+    private Map<String, Object> buildEventMap(String name, String description, String registrationStart,
+                                              String registrationEnd, String eventDate, boolean locationRequired,
+                                              String uid, String posterUrl, Integer waitlistLimit,
+                                              boolean isPrivate) {
         Map<String, Object> event = new HashMap<>();
         event.put("name", name);
         event.put("description", description);
@@ -367,6 +409,10 @@ public class CreateEventActivity extends AppCompatActivity {
         event.put("organizerId", uid);
         event.put("drawSize", 0);
         event.put("registeredUsers", new java.util.ArrayList<String>());
+
+        // CHANGED: marks event as private/public for US 02.01.02
+        event.put("isPrivate", isPrivate);
+
         if (posterUrl != null) event.put("posterUri", posterUrl);
         if (waitlistLimit != null) event.put("waitlistLimit", waitlistLimit);
         return event;

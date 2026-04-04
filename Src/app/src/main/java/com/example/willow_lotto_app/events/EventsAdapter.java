@@ -131,6 +131,8 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         notifyDataSetChanged();
     }
 
+
+
     /**
      * Filters events by keyword across name, description, and date fields.
      *
@@ -153,6 +155,69 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         }
         notifyDataSetChanged();
     }
+
+    /**
+     * Filters events to show which ones are open
+     * compars the end date to todays date
+     * events with no end date are treated as open
+     */
+
+    public void filterByOpenStatus() {
+        events.clear();
+        String today = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+                .format(new java.util.Date());
+        for (Event event : allEvents) {
+            String end = event.getRegistrationEnd();
+            // If no end date set, treat as open
+            if (end == null || end.isEmpty() || end.compareTo(today) >= 0) {
+                events.add(event);
+            }
+        }
+        notifyDataSetChanged();
+    }
+
+    /**
+     * Filters events based on spots remaining
+     * compares the limit with registrateduser count
+     * events with no limits are treated as unlimited
+     */
+
+    public void filterByAvailability() {
+        events.clear();
+        for (Event event : allEvents) {
+            Integer limit = event.getLimit();
+            int registered = event.getRegisteredUsers() != null ? event.getRegisteredUsers().size() : 0;
+            // Show if no limit set or spots remain
+            if (limit == null || registered < limit) {
+                events.add(event);
+            }
+        }
+        notifyDataSetChanged();
+    }
+
+    /**
+     * Sorts events by date
+     */
+
+    public void filterByDate() {
+        events.clear();
+        events.addAll(allEvents);
+        events.sort((a, b) -> {
+            String dateA = a.getDate() != null ? a.getDate() : "";
+            String dateB = b.getDate() != null ? b.getDate() : "";
+            return dateA.compareTo(dateB);
+        });
+        notifyDataSetChanged();
+    }
+
+    public void clearFilters() {
+        events.clear();
+        events.addAll(allEvents);
+        notifyDataSetChanged();
+    }
+
+
+
 
     @NonNull
     @Override

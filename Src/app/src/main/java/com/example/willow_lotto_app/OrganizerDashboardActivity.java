@@ -50,6 +50,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
     private Button drawReplacementButton;
     private Button backToProfileButton;
     private Button exportEntrantsCsvButton;
+    private Button notifyWaitlistButton;
     private Switch geolocationSwitch;
 
     private String eventId;
@@ -102,6 +103,8 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         backToProfileButton = findViewById(R.id.backToProfileButton);
         exportEntrantsCsvButton = findViewById(R.id.exportEntrantsCsvButton);
         geolocationSwitch = findViewById(R.id.geolocationSwitch);
+        notifyWaitlistButton = findViewById(R.id.notifyWaitlistButton);
+        notifyWaitlistButton.setOnClickListener(v -> notifyWaitingList());
 
         createEventButton.setOnClickListener(v ->
                 startActivity(new Intent(this, CreateEventActivity.class)));
@@ -196,6 +199,24 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
                     }
                 })
                 .addOnFailureListener(e -> Log.e("OrganizerDashboard", "Failed to load draw size", e));
+    }
+
+    /**
+     * Sends a notification to all entrants currently on the waiting list.
+     * Called when the organizer taps the Notify Waiting List button.
+     */
+    private void notifyWaitingList() {
+        lotteryManager.notifyWaitlistedEntrants(eventId, new OrganizerLotteryManager.LotteryCallback() {
+            @Override
+            public void onSuccess(String message, List<Registration> affectedRegistrations) {
+                Toast.makeText(OrganizerDashboardActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Toast.makeText(OrganizerDashboardActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     /**

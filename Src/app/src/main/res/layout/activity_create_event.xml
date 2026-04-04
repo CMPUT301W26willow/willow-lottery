@@ -93,6 +93,35 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="Private Event"
+                android:textColor="@color/textDark"
+                android:textStyle="bold"
+                android:layout_marginBottom="4dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Hide this event from public listings and do not generate a QR code"
+                    android:textColor="#666666"
+                    android:textSize="14sp"/>
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/create_event_private_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:text="Waiting List Limit (Optional)"
                 android:textColor="@color/textDark"
                 android:textStyle="bold"
