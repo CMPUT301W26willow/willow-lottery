@@ -69,6 +69,7 @@
         <activity android:name=".SignUpActivity" android:exported="false"/>
         <activity android:name=".events.EditEventActivity" android:exported="false"/>
         <activity android:name=".EntrantMapActivity" android:exported="false"/>
+        <activity android:name=".events.InvitedEntrantsActivity" android:exported="false"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"
