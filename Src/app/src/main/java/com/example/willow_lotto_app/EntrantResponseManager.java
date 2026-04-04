@@ -4,7 +4,21 @@ import com.example.willow_lotto_app.registration.RegistrationStatus;
 import com.example.willow_lotto_app.registration.RegistrationStore;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-
+/**
+ * EntrantResponseManager.java
+ *
+ * Handles entrant response actions after a lottery invitation has been issued.
+ *
+ * Role in application:
+ * - Service/manager layer for updating invitation outcomes.
+ * - Changes registration status between invited, accepted, declined, and cancelled.
+ * - Keeps the event's registeredUsers array synchronized for compatibility with the current event data model.
+ *
+ * Outstanding issues:
+ * - This manager assumes the caller already knows the correct registration ID.
+ * - There is no built-in timeout or non-response handling yet.
+ * - Cancellation and acceptance logic still depends on the event's registeredUsers array, which may later be replaced by fully registration-driven queries.
+ */
 public class EntrantResponseManager {
 
     public interface SimpleCallback {
@@ -20,21 +34,7 @@ public class EntrantResponseManager {
         this.registrationRepository = new RegistrationStore();
     }
 
-    /**
-     * EntrantMapActivity.java
-     *
-     * Displays a Google Map with markers showing where entrants joined the waiting list for a specific event.
-     *
-     * Role in application:
-     * - Controller/View layer for organizer geolocation viewing.
-     * - Reads entrant location data from Firestore and renders markers on a Google Map.
-     *
-     * Outstanding issues:
-     * - The event ID is currently hardcoded as "event1" and should be passed by Intent.
-     * - This file still reads from the older events/{eventId}/waitingList structure instead
-     *   of the newer top-level registrations-based flow.
-     * - Marker clustering is not implemented, so dense areas may become visually crowded.
-     */
+
 
     public void acceptInvitation(String registrationId, String eventId, String userId, final SimpleCallback callback) {
         registrationRepository.updateRegistrationStatus(

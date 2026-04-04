@@ -59,6 +59,7 @@ dependencies {
     testImplementation("org.robolectric:robolectric:4.16.1")
     // Mockito to test items that require mocking to function
     testImplementation("org.mockito:mockito-core:5.23.0")
+    testImplementation("org.json:json:20240303")
     androidTestImplementation("org.mockito:mockito-android:5.23.0")
     //Junit ext and espresso to test intentions
     androidTestImplementation(libs.ext.junit)

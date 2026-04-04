@@ -15,6 +15,7 @@ package com.example.willow_lotto_app.registration;
 public enum RegistrationStatus {
     WAITLISTED("waitlisted"),
     INVITED("invited"),
+    PRIVATE_INVITED("private_invited"),
     ACCEPTED("accepted"),
     DECLINED("declined"),
     CANCELLED("cancelled");

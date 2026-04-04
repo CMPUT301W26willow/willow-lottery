@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.example.willow_lotto_app.admin.AdminAccessUtil;
+import com.example.willow_lotto_app.admin.AdminDashboardActivity;
+
 /**
  * Profile management screen for the signed-in user.
  *
@@ -39,7 +42,7 @@ public class ProfileActivity extends AppCompatActivity {
     //refrences to UI elements
     EditText nameInput, emailInput, phoneInput;
     // Button UI references from the profile screen
-    Button saveButton, cancelButton, organizerDashboardButton, deleteButton, registerButton;    // refrences to the NAV( home, events, notifications, profile)
+    Button saveButton, cancelButton, organizerDashboardButton, deleteButton, registerButton, adminDashboardButton;    // refrences to the NAV( home, events, notifications, profile)
     // Button UI references from the profile screen
 
     BottomNavigationView bottomNav;
@@ -64,6 +67,7 @@ public class ProfileActivity extends AppCompatActivity {
         cancelButton = findViewById(R.id.cancelButton);
         registerButton = findViewById(R.id.registerButton);
         organizerDashboardButton = findViewById(R.id.organizerDashboardButton);
+        adminDashboardButton = findViewById(R.id.adminDashboardButton);
         bottomNav = findViewById(R.id.bottom_nav);
 
         mAuth = FirebaseAuth.getInstance();
@@ -85,6 +89,8 @@ public class ProfileActivity extends AppCompatActivity {
         registerButton.setOnClickListener(v->showRegistrationHistory());
         // Open the organizer dashboard for the latest event created by this user
         organizerDashboardButton.setOnClickListener(v -> openOrganizerDashboardForLatestEvent());
+        adminDashboardButton.setOnClickListener(v -> openAdminDashboard());
+        registerButton.setOnClickListener(v -> showRegistrationHistory());
         // click listener for Bottom Navigation to guide to diffrent navigation pages of the app
 
         bottomNav.setOnItemSelectedListener(item -> {
@@ -174,6 +180,54 @@ public class ProfileActivity extends AppCompatActivity {
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Could not open organizer dashboard.", Toast.LENGTH_SHORT).show());
+    }
+
+    /**
+     * Opens the admin dashboard only if the current user's email is hard-coded
+     * as an admin email.
+     *
+     * - If the user is not a hard-coded admin, show:
+     * "you do not have admin permissions"
+     */
+
+
+    private void openAdminDashboard() {
+        if (mAuth.getCurrentUser() == null) {
+            Toast.makeText(this, "No signed-in user.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String uid = mAuth.getCurrentUser().getUid();
+
+        db.collection("users")
+                .document(uid)
+                .get()
+                .addOnSuccessListener(document -> {
+                    String rawEmail = document.getString("email");
+                    String email = rawEmail == null ? null : rawEmail.trim().toLowerCase();
+
+                    boolean isAdmin =
+                            email != null && (
+                                    email.equals("admin1@gmail.com") ||
+                                            email.equals("admin2@gmail.com") ||
+                                            email.equals("admin3@gmail.com")
+                            );
+
+                    Toast.makeText(
+                            this,
+                            "isAdmin=" + isAdmin,
+                            Toast.LENGTH_LONG
+                    ).show();
+
+                    if (!isAdmin) {
+                        Toast.makeText(this, "you do not have admin permissions", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    startActivity(new Intent(ProfileActivity.this, AdminDashboardActivity.class));
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Could not verify admin permissions", Toast.LENGTH_SHORT).show());
     }
 
     /**

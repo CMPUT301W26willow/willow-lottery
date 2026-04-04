@@ -26,26 +26,24 @@ import com.example.willow_lotto_app.registration.RegistrationStore;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Detailed view for a single event.
- *
  * Responsibilities:
  * - Displays event metadata, poster, and registration period (02.01.04).
  * - Implements 01.01.01 / 01.01.02 "Join/Leave Events" by letting the user
  *   join or leave the waiting list for this event.
- * - Implements 01.05.01 - 01.05.05
+ * - Implements 01.05.01 - 01.05.07
  * - Supports deep links from QR codes (willow-lottery://event/{id}).
  * @author Jasdeep Cheema and Dev Tiwari
  * @version 2.0
@@ -59,6 +57,7 @@ public class EventDetailActivity extends AppCompatActivity {
     /** Fetched then filtered client-side to top-level (legacy docs may lack parentCommentId). */
     private static final int COMMENTS_FETCH_LIMIT = 100;
     private static final int REPLIES_PAGE_LIMIT = 30;
+
     public static final String EXTRA_EVENT_ID = "event_id";
 
     private FirebaseFirestore db;
@@ -116,18 +115,7 @@ public class EventDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_detail);
 
-        // Support both in-app navigation (EXTRA_EVENT_ID) and deep links via QR code
-        eventId = getIntent().getStringExtra(EXTRA_EVENT_ID);
-        if (eventId == null || eventId.isEmpty()) {
-            Uri data = getIntent().getData();
-            if (data != null
-                    && "willow-lottery".equals(data.getScheme())
-                    && "event".equals(data.getHost())
-                    && data.getPathSegments() != null
-                    && !data.getPathSegments().isEmpty()) {
-                eventId = data.getPathSegments().get(0);
-            }
-        }
+        eventId = EventDetailIntentHelper.resolveEventId(getIntent());
         if (eventId == null || eventId.isEmpty()) {
             Toast.makeText(this, "Event not found", Toast.LENGTH_SHORT).show();
             finish();
@@ -211,6 +199,7 @@ public class EventDetailActivity extends AppCompatActivity {
         loadEvent();
     }
 
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -244,27 +233,10 @@ public class EventDetailActivity extends AppCompatActivity {
                             topLevel.add(c);
                         }
                     }
-                    commentsAdapter.setThreads(mergeCommentThreads(topLevel));
+                    commentsAdapter.setThreads(
+                            EventCommentThreadMerge.merge(topLevel, commentsAdapter.getThreads()));
                     commentsEmptyView.setVisibility(topLevel.isEmpty() ? View.VISIBLE : View.GONE);
                 });
-    }
-
-    private List<EventCommentThread> mergeCommentThreads(List<EventComment> topLevelFromSnap) {
-        Map<String, EventCommentThread> prev = new LinkedHashMap<>();
-        for (EventCommentThread t : commentsAdapter.getThreads()) {
-            prev.put(t.getTop().getDocumentId(), t);
-        }
-        List<EventCommentThread> out = new ArrayList<>();
-        for (EventComment top : topLevelFromSnap) {
-            EventCommentThread thread = prev.get(top.getDocumentId());
-            if (thread == null) {
-                thread = new EventCommentThread(top);
-            } else {
-                thread.setTop(top);
-            }
-            out.add(thread);
-        }
-        return out;
     }
 
     private void loadRepliesForThread(EventCommentThread thread, int adapterPosition) {
@@ -275,7 +247,6 @@ public class EventDetailActivity extends AppCompatActivity {
                 .document(eventId)
                 .collection(COMMENTS_SUBCOLLECTION)
                 .whereEqualTo("parentCommentId", parentId)
-                .orderBy("createdAt", Query.Direction.ASCENDING)
                 .limit(REPLIES_PAGE_LIMIT)
                 .get()
                 .addOnSuccessListener(snap -> {
@@ -285,6 +256,7 @@ public class EventDetailActivity extends AppCompatActivity {
                             thread.getReplies().add(EventComment.fromSnapshot(doc));
                         }
                     }
+                    Collections.sort(thread.getReplies(), EventComment.createdTimeAscending());
                     thread.setLoadingReplies(false);
                     commentsAdapter.notifyItemChanged(adapterPosition);
                 })
@@ -339,29 +311,18 @@ public class EventDetailActivity extends AppCompatActivity {
             Toast.makeText(this, R.string.event_detail_comment_sign_in, Toast.LENGTH_SHORT).show();
             return;
         }
-        String body = commentInput.getText() != null ? commentInput.getText().toString().trim() : "";
-        if (body.isEmpty()) {
+        if (!EventCommentPostValidator.hasNonEmptyBody(commentInput.getText())) {
             return;
         }
+        String body = commentInput.getText().toString().trim();
 
         postCommentButton.setEnabled(false);
         db.collection("users").document(currentUserId).get()
                 .addOnSuccessListener(userDoc -> {
                     String authorName = userDoc != null ? userDoc.getString("name") : null;
-                    if (authorName == null || authorName.trim().isEmpty()) {
-                        authorName = "User";
-                    }
-                    Map<String, Object> comment = new HashMap<>();
-                    comment.put("authorId", currentUserId);
-                    comment.put("authorName", authorName.trim());
-                    comment.put("body", body);
-                    comment.put("createdAt", FieldValue.serverTimestamp());
                     final String replyParentId = replyingToCommentId;
-                    if (replyParentId != null) {
-                        comment.put("parentCommentId", replyParentId);
-                    } else {
-                        comment.put("parentCommentId", EventComment.TOP_LEVEL_PARENT_ID);
-                    }
+                    Map<String, Object> comment = EventCommentDocument.newDraft(
+                            currentUserId, authorName, body, replyParentId);
 
                     db.collection("events")
                             .document(eventId)
@@ -386,6 +347,12 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     // Load event doc then waiting-list count and join state.
+    /**
+     * Loads the selected event document from Firestore.
+     * If loading fails, the activity closes after showing an error message.
+     *
+     * @since 30/03/2026
+     */
     private void loadEvent() {
         db.collection("events").document(eventId).get()
                 .addOnSuccessListener(this::applyEventDoc)
@@ -395,6 +362,12 @@ public class EventDetailActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Applies the loaded Firestore event document to the local event model
+     * and updates the detail screen UI.
+     *
+     * @param doc Firestore document containing the selected event data
+     */
     private void applyEventDoc(DocumentSnapshot doc) {
         if (doc == null || !doc.exists()) {
             Toast.makeText(this, "Event not found", Toast.LENGTH_SHORT).show();
@@ -472,6 +445,12 @@ public class EventDetailActivity extends AppCompatActivity {
     // The old version counted every registration for the event.
     // This version counts only WAITLISTED registrations, which is the actual
     // waiting-list number the story asks for.
+    /**
+     * Loads the number of entrants currently on the waiting list for the event.
+     * Only registrations with WAITLISTED status are counted.
+     *
+     * @since 30/03/2026
+     */
     private void loadWaitingListCount() {
         db.collection(REGISTRATIONS_COLLECTION)
                 .whereEqualTo("eventId", eventId)
@@ -500,8 +479,12 @@ public class EventDetailActivity extends AppCompatActivity {
                 });
     }
 
-    // Still builds the criteria text, but this also supports US 01.05.05
-    // because the entrant can now see the lottery rules on the detail screen.
+    //  US 01.05.05
+    /**
+     * Builds and displays the lottery criteria summary shown to the entrant.
+     *
+     * @since 30/03/2026
+     */
     private void buildLotteryCriteria() {
         Integer drawSize = event.getDrawSize();
         StringBuilder sb = new StringBuilder();
@@ -516,6 +499,12 @@ public class EventDetailActivity extends AppCompatActivity {
     // Changed so the screen reads not only whether the registration exists,
     // but also what the user's current status is.
     // That status is needed for invited / accepted / declined / cancelled states.
+    /**
+     * Loads the current user's registration for this event and updates the button UI
+     * based on whether the user is registered and what their current status is.
+     *
+     * @since 30/03/2026
+     */
     private void checkJoinedAndUpdateButton() {
         if (currentUserId == null) {
             joined = false;
@@ -551,6 +540,12 @@ public class EventDetailActivity extends AppCompatActivity {
 
     // Changed so button behavior now depends on registration status,
     // not only on whether the registration document exists.
+    /**
+     * Updates the main action buttons shown on the event detail screen
+     * based on the entrant's current registration status.
+     *
+     * @since 30/03/2026
+     */
     private void updateJoinLeaveButton() {
         joinLeaveBtn.setVisibility(View.VISIBLE);
         joinLeaveBtn.setEnabled(true);
@@ -569,9 +564,8 @@ public class EventDetailActivity extends AppCompatActivity {
             return;
         }
 
-        // Added for US 01.05.02 and US 01.05.03.
-        // Invited users should not see the normal join/leave button.
-        // They should instead get Accept and Decline.
+        // US 01.05.02 and US 01.05.03.
+        // Invited users get Accept and Decline.
         if (RegistrationStatus.INVITED.getValue().equals(currentStatus)) {
             joinLeaveBtn.setVisibility(View.GONE);
             acceptButton.setVisibility(View.VISIBLE);
@@ -579,14 +573,14 @@ public class EventDetailActivity extends AppCompatActivity {
             return;
         }
 
-        // Added so accepted users no longer look like normal waitlisted users.
+        // accepted users
         if (RegistrationStatus.ACCEPTED.getValue().equals(currentStatus)) {
             joinLeaveBtn.setText("Invitation Accepted");
             joinLeaveBtn.setEnabled(false);
             return;
         }
 
-        // Added so declined users no longer look like normal waitlisted users.
+        // declined users
         if (RegistrationStatus.DECLINED.getValue().equals(currentStatus)) {
             joinLeaveBtn.setText("Invitation Declined");
             joinLeaveBtn.setEnabled(false);
@@ -599,14 +593,31 @@ public class EventDetailActivity extends AppCompatActivity {
             joinLeaveBtn.setEnabled(false);
             return;
         }
+        // US 1:05:07
+        // CHANGED: private-event invitation state
+        // User has been invited to join the private waiting list, so show Accept/Decline.
+        if (RegistrationStatus.PRIVATE_INVITED.getValue().equals(currentStatus)) {
+            joinLeaveBtn.setVisibility(View.GONE);
+            acceptButton.setVisibility(View.VISIBLE);
+            declineButton.setVisibility(View.VISIBLE);
+            return;
+        }
 
-        // Existing joined / waitlisted state still ends here.
-        joinLeaveBtn.setText(R.string.event_joined_waiting_list);
+        // Existing joined / waitlisted state
+        joinLeaveBtn.setText("Leave Waiting List");
         joinLeaveBtn.setOnClickListener(v -> leaveEvent());
+
+
     }
 
-    // Same basic join logic as before, but now explicitly writes WAITLISTED status
-    // so the rest of the project can use consistent registration-state logic.
+
+    // basic join logic , explicitly writes WAITLISTED status
+    /**
+     * Adds the current user to the waiting list for this event.
+     * A new registration document is created with WAITLISTED status.
+     *
+     * @since 30/03/2026
+     */
     private void joinEvent() {
         if (currentUserId == null) return;
         String docId = eventId + "_" + currentUserId;
@@ -627,8 +638,13 @@ public class EventDetailActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> Toast.makeText(this, "Could not join event", Toast.LENGTH_SHORT).show());
     }
 
-    // Same basic leave logic as before, with local UI state reset added
-    // so the new status-based button logic updates immediately.
+    // leave logic
+    // status-based button logic updates immediately.
+    /**
+     * Removes the current user from the waiting list for this event.
+     *
+     * @since 30/03/2026
+     */
     private void leaveEvent() {
         if (currentUserId == null) return;
         String docId = eventId + "_" + currentUserId;
@@ -646,7 +662,42 @@ public class EventDetailActivity extends AppCompatActivity {
 
     // Added for US 01.05.02.
     // Invited users can now accept the invitation directly from this screen.
+    /**
+     * Accepts the current invitation shown to the entrant.
+     * This supports both private-event waiting-list invitations and
+     * regular invitation acceptance flow.
+     *
+     * @since 30/03/2026
+     */
     private void acceptInvitation() {
+        // US 1:05:07
+        // CHANGED: accepting a private-event invitation moves the entrant onto the waiting list
+        if (RegistrationStatus.PRIVATE_INVITED.getValue().equals(currentStatus)) {
+            registrationStore.updateRegistrationStatus(
+                    registrationId,
+                    RegistrationStatus.WAITLISTED.getValue(),
+                    new RegistrationStore.SimpleCallback() {
+                        @Override
+                        public void onSuccess() {
+                            currentStatus = RegistrationStatus.WAITLISTED.getValue();
+                            joined = true;
+                            loadWaitingListCount();
+                            updateJoinLeaveButton();
+                            Toast.makeText(EventDetailActivity.this,
+                                    "You joined the private event waiting list.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            Toast.makeText(EventDetailActivity.this,
+                                    "Could not accept invitation.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+            );
+            return;
+        }
         if (registrationId == null) {
             Toast.makeText(this, "Registration not found", Toast.LENGTH_SHORT).show();
             return;
@@ -673,8 +724,41 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
     // Added for US 01.05.03.
-    // Also completes US 01.05.01 because declining triggers replacement selection.
+    // US 01.05.01 declining triggers replacement selection.
+    /**
+     * Declines the current invitation shown to the entrant.
+     * This supports both private-event invitation decline and
+     * regular decline-with-replacement logic.
+     *
+     * @since 30/03/2026
+     */
     private void declineInvitation() {
+        // US 1:05:07
+        // CHANGED: declining a private-event invite just marks it declined
+        if (RegistrationStatus.PRIVATE_INVITED.getValue().equals(currentStatus)) {
+            registrationStore.updateRegistrationStatus(
+                    registrationId,
+                    RegistrationStatus.DECLINED.getValue(),
+                    new RegistrationStore.SimpleCallback() {
+                        @Override
+                        public void onSuccess() {
+                            currentStatus = RegistrationStatus.DECLINED.getValue();
+                            updateJoinLeaveButton();
+                            Toast.makeText(EventDetailActivity.this,
+                                    "You declined the private event invitation.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            Toast.makeText(EventDetailActivity.this,
+                                    "Could not decline invitation.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+            );
+            return;
+        }
         if (registrationId == null) {
             Toast.makeText(this, "Registration not found", Toast.LENGTH_SHORT).show();
             return;

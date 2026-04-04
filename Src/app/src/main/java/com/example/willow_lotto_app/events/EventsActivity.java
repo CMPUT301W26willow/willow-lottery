@@ -188,6 +188,15 @@ public class EventsActivity extends AppCompatActivity {
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Event> list = new ArrayList<>();
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        Boolean isDeleted = doc.getBoolean("isDeleted");
+                        if (isDeleted != null && isDeleted) {
+                            continue;
+                        }
+                        // added to not run loop if event is private
+                        Boolean isPrivate = doc.getBoolean("isPrivate");
+                        if (isPrivate != null && isPrivate) {
+                            continue;
+                        }
                         Event event = new Event();
                         event.setId(doc.getId());
                         event.setName(getString(doc, "name"));
