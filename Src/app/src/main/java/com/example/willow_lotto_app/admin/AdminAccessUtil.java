@@ -16,6 +16,8 @@ import java.util.Set;
  * - admin1@gmail.com
  * - admin2@gmail.com
  * - admin3@gmail.com
+ * - carrot@gmail.com
+ * - willowtestadmin@gmail.com (dedicated test admin — create this user in Firebase Auth)
  */
 
 public class AdminAccessUtil {
@@ -25,7 +27,9 @@ public class AdminAccessUtil {
     private static final Set<String> ADMIN_EMAILS = new HashSet<>(Arrays.asList(
             "admin1@gmail.com",
             "admin2@gmail.com",
-            "admin3@gmail.com"
+            "admin3@gmail.com",
+            "carrot@gmail.com",
+            "willowtestadmin@gmail.com"
     ));
 
     /**
@@ -44,7 +48,7 @@ public class AdminAccessUtil {
         if (email == null) {
             return false;
         }
-        return ADMIN_EMAILS.contains(email.trim().toLowerCase(Locale.CANADA));
+        return ADMIN_EMAILS.contains(email.trim().toLowerCase(Locale.ROOT));
     }
 
 }

@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.willow_lotto_app.R;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
@@ -76,10 +77,20 @@ public class AdminBrowseProfilesActivity extends AppCompatActivity implements Ad
      */
     private AdminProfileAdapter adapter;
 
+    private String searchQueryNormalized = "";
+
+    private boolean screenReady;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!AdminUiHelper.requireAdminOrFinish(this)) {
+            return;
+        }
         setContentView(R.layout.activity_admin_browse_profiles);
+
+        searchQueryNormalized = AdminSearchTextUtil.normalizeQuery(
+                getIntent().getStringExtra(AdminIntentExtras.EXTRA_SEARCH_QUERY));
 
         recyclerView = findViewById(R.id.adminProfilesRecycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -97,6 +108,22 @@ public class AdminBrowseProfilesActivity extends AppCompatActivity implements Ad
         adapter = new AdminProfileAdapter(userList, this, mode);
         recyclerView.setAdapter(adapter);
 
+        MaterialToolbar toolbar = findViewById(R.id.admin_profiles_toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+        toolbar.setTitle(MODE_ORGANIZERS.equals(mode)
+                ? R.string.admin_browse_profiles_screen_title_organizers
+                : R.string.admin_browse_profiles_screen_title);
+
+        screenReady = true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!screenReady || isFinishing()) {
+            return;
+        }
         loadProfiles();
     }
 
@@ -115,35 +142,58 @@ public class AdminBrowseProfilesActivity extends AppCompatActivity implements Ad
         if (MODE_ORGANIZERS.equals(mode)) {
             db.collection("users")
                     .whereEqualTo("isOrganizer", true)
-                    .whereEqualTo("isDeleted", false)
                     .get()
                     .addOnSuccessListener(query -> {
                         userList.clear();
-
                         for (DocumentSnapshot doc : query.getDocuments()) {
+                            if (Boolean.TRUE.equals(doc.getBoolean("isDeleted"))) {
+                                continue;
+                            }
                             userList.add(AdminUserItem.fromDocument(doc));
                         }
-
+                        applyProfileSearchFilter();
                         adapter.notifyDataSetChanged();
                     })
                     .addOnFailureListener(e ->
-                            Toast.makeText(this, "Failed to load organizer profiles", Toast.LENGTH_SHORT).show());
+                            Toast.makeText(this, R.string.admin_load_organizers_failed, Toast.LENGTH_SHORT).show());
         } else {
             db.collection("users")
-                    .whereEqualTo("isDeleted", false)
                     .get()
                     .addOnSuccessListener(query -> {
                         userList.clear();
-
                         for (DocumentSnapshot doc : query.getDocuments()) {
+                            if (Boolean.TRUE.equals(doc.getBoolean("isDeleted"))) {
+                                continue;
+                            }
                             userList.add(AdminUserItem.fromDocument(doc));
                         }
-
+                        applyProfileSearchFilter();
                         adapter.notifyDataSetChanged();
                     })
                     .addOnFailureListener(e ->
-                            Toast.makeText(this, "Failed to load user profiles", Toast.LENGTH_SHORT).show());
+                            Toast.makeText(this, R.string.admin_load_profiles_failed, Toast.LENGTH_SHORT).show());
         }
+    }
+
+    private void applyProfileSearchFilter() {
+        if (searchQueryNormalized.isEmpty()) {
+            return;
+        }
+        List<AdminUserItem> filtered = new ArrayList<>();
+        for (AdminUserItem user : userList) {
+            if (profileMatchesSearch(user)) {
+                filtered.add(user);
+            }
+        }
+        userList.clear();
+        userList.addAll(filtered);
+    }
+
+    private boolean profileMatchesSearch(AdminUserItem user) {
+        return AdminSearchTextUtil.containsNormalized(user.getUid(), searchQueryNormalized)
+                || AdminSearchTextUtil.containsNormalized(user.getEmail(), searchQueryNormalized)
+                || AdminSearchTextUtil.containsNormalized(user.getName(), searchQueryNormalized)
+                || AdminSearchTextUtil.containsNormalized(user.getDisplayName(), searchQueryNormalized);
     }
 
     /**
@@ -154,10 +204,10 @@ public class AdminBrowseProfilesActivity extends AppCompatActivity implements Ad
     @Override
     public void onRemoveOrganizerClicked(AdminUserItem user) {
         new AlertDialog.Builder(this)
-                .setTitle("Remove Organizer Privileges")
-                .setMessage("Are you sure you want to remove organizer privileges for this user?")
-                .setPositiveButton("Confirm", (dialog, which) -> removeOrganizerPrivileges(user))
-                .setNegativeButton("Cancel", null)
+                .setTitle(R.string.admin_dialog_remove_organizer_title)
+                .setMessage(R.string.admin_dialog_remove_organizer_message)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> removeOrganizerPrivileges(user))
+                .setNegativeButton(android.R.string.cancel, null)
                 .show();
     }
 
@@ -169,10 +219,10 @@ public class AdminBrowseProfilesActivity extends AppCompatActivity implements Ad
     @Override
     public void onDeleteProfileClicked(AdminUserItem user) {
         new AlertDialog.Builder(this)
-                .setTitle("Delete Profile")
-                .setMessage("Are you sure you want to delete this profile? This will ban the email from signing up again.")
-                .setPositiveButton("Confirm", (dialog, which) -> deleteProfileAndBanEmail(user))
-                .setNegativeButton("Cancel", null)
+                .setTitle(R.string.admin_dialog_delete_profile_title)
+                .setMessage(R.string.admin_dialog_delete_profile_message)
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> deleteProfileAndBanEmail(user))
+                .setNegativeButton(android.R.string.cancel, null)
                 .show();
     }
 
@@ -218,11 +268,11 @@ public class AdminBrowseProfilesActivity extends AppCompatActivity implements Ad
                             "Organizer privileges removed and organizerBanned set to true."
                     );
 
-                    Toast.makeText(this, "Organizer privileges removed", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.admin_toast_organizer_removed, Toast.LENGTH_SHORT).show();
                     loadProfiles();
                 })
                 .addOnFailureListener(e ->
-                        Toast.makeText(this, "Failed to remove organizer privileges", Toast.LENGTH_SHORT).show());
+                        Toast.makeText(this, R.string.admin_toast_organizer_remove_failed, Toast.LENGTH_SHORT).show());
     }
 
     /**
@@ -245,7 +295,7 @@ public class AdminBrowseProfilesActivity extends AppCompatActivity implements Ad
 
         String normalizedEmail = user.getEmail() == null
                 ? ""
-                : user.getEmail().toLowerCase(Locale.CANADA).trim();
+                : user.getEmail().toLowerCase(Locale.ROOT).trim();
 
         Map<String, Object> bannedEmailDoc = new HashMap<>();
         bannedEmailDoc.put("email", normalizedEmail);
@@ -255,26 +305,33 @@ public class AdminBrowseProfilesActivity extends AppCompatActivity implements Ad
         db.collection("users")
                 .document(user.getUid())
                 .update(userUpdates)
-                .addOnSuccessListener(unused ->
-                        db.collection("banned_emails")
-                                .document(normalizedEmail)
-                                .set(bannedEmailDoc)
-                                .addOnSuccessListener(unused2 -> {
-                                    AdminNotificationHelper.logAdminAction(
-                                            adminEmail,
-                                            "profile",
-                                            user.getUid(),
-                                            "delete_profile",
-                                            "Profile soft-deleted and email banned from future sign-up."
-                                    );
-
-                                    Toast.makeText(this, "Profile deleted and email banned", Toast.LENGTH_SHORT).show();
-                                    loadProfiles();
-                                })
-                                .addOnFailureListener(e ->
-                                        Toast.makeText(this, "Failed to save banned email", Toast.LENGTH_SHORT).show()))
+                .addOnSuccessListener(unused -> {
+                    Runnable finishOk = () -> {
+                        AdminNotificationHelper.logAdminAction(
+                                adminEmail,
+                                "profile",
+                                user.getUid(),
+                                "delete_profile",
+                                normalizedEmail.isEmpty()
+                                        ? "Profile soft-deleted (guest / no email; skipped banned_emails)."
+                                        : "Profile soft-deleted and email banned from future sign-up."
+                        );
+                        Toast.makeText(this, R.string.admin_toast_profile_deleted, Toast.LENGTH_SHORT).show();
+                        loadProfiles();
+                    };
+                    if (normalizedEmail.isEmpty()) {
+                        finishOk.run();
+                        return;
+                    }
+                    db.collection("banned_emails")
+                            .document(normalizedEmail)
+                            .set(bannedEmailDoc)
+                            .addOnSuccessListener(unused2 -> finishOk.run())
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(this, R.string.admin_toast_banned_email_failed, Toast.LENGTH_SHORT).show());
+                })
                 .addOnFailureListener(e ->
-                        Toast.makeText(this, "Failed to delete profile", Toast.LENGTH_SHORT).show());
+                        Toast.makeText(this, R.string.admin_toast_profile_delete_failed, Toast.LENGTH_SHORT).show());
     }
 
 }

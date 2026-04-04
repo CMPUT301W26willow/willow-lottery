@@ -1,6 +1,5 @@
 package com.example.willow_lotto_app.events;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -13,10 +12,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.RequestOptions;
 import com.example.willow_lotto_app.EntrantResponseManager;
 import com.example.willow_lotto_app.OrganizerLotteryManager;
 import com.example.willow_lotto_app.R;
@@ -416,24 +411,7 @@ public class EventDetailActivity extends AppCompatActivity {
             registrationOpensView.setVisibility(View.GONE);
         }
 
-        String posterUrl = event.getPosterUri();
-        int fallback = EventPlaceholderDrawables.forEventId(event.getId());
-        if (posterUrl != null && !posterUrl.trim().isEmpty()) {
-            Uri uri = Uri.parse(posterUrl.trim());
-            RequestOptions options = new RequestOptions()
-                    .centerCrop()
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .placeholder(fallback)
-                    .error(fallback);
-            Glide.with(this)
-                    .load(uri)
-                    .apply(options)
-                    .transition(DrawableTransitionOptions.withCrossFade(200))
-                    .into(posterView);
-        } else {
-            Glide.with(this).clear(posterView);
-            posterView.setImageResource(fallback);
-        }
+        EventPosterLoader.loadWithCrossFade(this, event.getPosterUri(), posterView, event.getId());
         checkIfOrganizer();
         loadWaitingListCount();
     }
