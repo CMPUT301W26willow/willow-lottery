@@ -10,6 +10,8 @@ import android.widget.Toast;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
+import com.example.willow_lotto_app.organizer.OrganizerLotteryManager;
+import com.example.willow_lotto_app.organizer.ui.OrganizerDashboardActivity;
 import com.example.willow_lotto_app.registration.Registration;
 
 import org.junit.After;

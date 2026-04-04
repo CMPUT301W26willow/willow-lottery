@@ -20,12 +20,12 @@ import static org.mockito.Mockito.when;
 import android.content.Intent;
 import android.net.Uri;
 
-import com.example.willow_lotto_app.events.EventComment;
-import com.example.willow_lotto_app.events.EventCommentDocument;
-import com.example.willow_lotto_app.events.EventCommentPostValidator;
-import com.example.willow_lotto_app.events.EventCommentThread;
-import com.example.willow_lotto_app.events.EventCommentThreadMerge;
-import com.example.willow_lotto_app.events.EventCommentsAdapter;
+import com.example.willow_lotto_app.events.comments.EventComment;
+import com.example.willow_lotto_app.events.comments.EventCommentDocument;
+import com.example.willow_lotto_app.events.comments.EventCommentPostValidator;
+import com.example.willow_lotto_app.events.comments.EventCommentThread;
+import com.example.willow_lotto_app.events.comments.EventCommentThreadMerge;
+import com.example.willow_lotto_app.events.comments.EventCommentsAdapter;
 import com.example.willow_lotto_app.events.EventDetailActivity;
 import com.example.willow_lotto_app.events.EventDetailIntentHelper;
 import com.google.firebase.Timestamp;

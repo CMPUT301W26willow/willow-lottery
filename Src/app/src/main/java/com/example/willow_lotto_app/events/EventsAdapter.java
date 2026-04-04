@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.willow_lotto_app.R;
+import com.example.willow_lotto_app.events.poster.EventPosterLoader;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -182,8 +183,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         events.clear();
         for (Event event : allEvents) {
             Integer limit = event.getLimit();
-            int registered = event.getRegisteredUsers() != null ? event.getRegisteredUsers().size() : 0;
-            // Show if no limit set or spots remain
+            int registered = event.getWaitlistDisplayCount();
             if (limit == null || registered < limit) {
                 events.add(event);
             }
@@ -231,7 +231,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         String dateStr = event.getDate() != null ? event.getDate() : "";
         holder.date.setText(dateStr.isEmpty() ? "—" : dateStr);
 
-        int registered = event.getRegisteredUsers() != null ? event.getRegisteredUsers().size() : 0;
+        int registered = event.getWaitlistDisplayCount();
         holder.waitlist.setText(holder.itemView.getContext().getString(R.string.home_event_waitlist_count, registered));
 
         String regEnd = event.getRegistrationEnd();

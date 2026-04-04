@@ -27,6 +27,8 @@ public class UserNotification {
     private String title;
     private String message;
     private String type;
+    /** Optional; UID of the organizer who sent a co-organizer invite. */
+    private String inviterId;
     private boolean read;
     private Timestamp createdAt;
 
@@ -50,6 +52,9 @@ public class UserNotification {
         data.put("type", type);
         data.put("read", read);
         data.put("createdAt", createdAt == null ? Timestamp.now() : createdAt);
+        if (inviterId != null && !inviterId.isEmpty()) {
+            data.put("inviterId", inviterId);
+        }
         return data;
     }
 
@@ -67,6 +72,14 @@ public class UserNotification {
 
     public String getType() {
         return type;
+    }
+
+    public String getInviterId() {
+        return inviterId;
+    }
+
+    public void setInviterId(String inviterId) {
+        this.inviterId = inviterId;
     }
 
     public boolean isRead() {

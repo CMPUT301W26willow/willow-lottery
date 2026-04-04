@@ -22,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 
 import com.example.willow_lotto_app.R;
+import com.example.willow_lotto_app.events.poster.PosterFirestoreCodec;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -343,10 +344,6 @@ public class CreateEventActivity extends AppCompatActivity {
                     Toast.makeText(this, "Failed to create event", Toast.LENGTH_SHORT).show();
                     submitButton.setEnabled(true);
                 });
-
-        db.collection("events").document(event.toString()).collection("WaitList");
-        db.collection("events").document(event.toString()).collection("ChosenList");
-        db.collection("events").document(event.toString()).collection("EnrolledList");
     }
 
     /**
@@ -370,6 +367,8 @@ public class CreateEventActivity extends AppCompatActivity {
         event.put("organizerId", uid);
         event.put("drawSize", 0);
         event.put("registeredUsers", new java.util.ArrayList<String>());
+        event.put("coOrganizerIds", new java.util.ArrayList<String>());
+        event.put("pendingCoOrganizerIds", new java.util.ArrayList<String>());
 
         // CHANGED: marks event as private/public for US 02.01.02
         event.put("isPrivate", isPrivate);

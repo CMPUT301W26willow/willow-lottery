@@ -17,6 +17,7 @@ import com.example.willow_lotto_app.events.EventsActivity;
 import com.example.willow_lotto_app.events.EventsAdapter;
 import com.example.willow_lotto_app.notification.NotificationActivity;
 import com.example.willow_lotto_app.registration.RegistrationStatus;
+import com.example.willow_lotto_app.registration.WaitlistCountLoader;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -87,7 +88,14 @@ public class MainActivity extends AppCompatActivity {
         adapter.setOnJoinLeaveListener(new EventsAdapter.OnJoinLeaveListener() {
             @Override
             public void onJoin(Event event) {
-                if (currentUserId == null) return;
+                if (currentUserId == null) {
+                    return;
+                }
+                Integer lim = event.getLimit();
+                if (lim != null && lim > 0 && event.getWaitlistDisplayCount() >= lim) {
+                    Toast.makeText(MainActivity.this, R.string.waitlist_full_message, Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 String docId = event.getId() + "_" + currentUserId;
                 Map<String, Object> reg = new HashMap<>();
                 reg.put("eventId", event.getId());
@@ -95,6 +103,10 @@ public class MainActivity extends AppCompatActivity {
                 reg.put("status", RegistrationStatus.WAITLISTED.getValue());
                 db.collection(REGISTRATIONS_COLLECTION).document(docId).set(reg)
                         .addOnSuccessListener(aVoid -> {
+                            int cur = event.getWaitlistedRegistrationCount();
+                            if (cur >= 0) {
+                                event.setWaitlistedRegistrationCount(cur + 1);
+                            }
                             adapter.setEventJoined(event.getId(), true);
                         })
                         .addOnFailureListener(e -> Toast.makeText(MainActivity.this, "Could not join event", Toast.LENGTH_SHORT).show());
@@ -102,10 +114,18 @@ public class MainActivity extends AppCompatActivity {
             
             @Override
             public void onLeave(Event event) {
-                if (currentUserId == null) return;
+                if (currentUserId == null) {
+                    return;
+                }
                 String docId = event.getId() + "_" + currentUserId;
                 db.collection(REGISTRATIONS_COLLECTION).document(docId).delete()
-                        .addOnSuccessListener(aVoid -> adapter.setEventJoined(event.getId(), false))
+                        .addOnSuccessListener(aVoid -> {
+                            int cur = event.getWaitlistedRegistrationCount();
+                            if (cur >= 0) {
+                                event.setWaitlistedRegistrationCount(Math.max(0, cur - 1));
+                            }
+                            adapter.setEventJoined(event.getId(), false);
+                        })
                         .addOnFailureListener(e -> Toast.makeText(MainActivity.this, "Could not leave event", Toast.LENGTH_SHORT).show());
             }
         });
@@ -169,9 +189,12 @@ public class MainActivity extends AppCompatActivity {
                         event.setRegistrationStart(getString(doc, "registrationStart"));
                         event.setRegistrationEnd(getString(doc, "registrationEnd"));
                         event.setRegisteredUsers(readStringList(doc, "registeredUsers"));
+                        WaitlistCountLoader.applyWaitlistLimitFromDoc(doc, event);
                         list.add(event);
                     }
                     adapter.setEvents(list);
+                    WaitlistCountLoader.loadWaitlistedCounts(db, list,
+                            () -> runOnUiThread(() -> adapter.notifyDataSetChanged()));
                     if (currentUserId != null) {
                         loadJoinedEventIds(joined -> adapter.setJoinedEventIds(joined));
                     } else {

@@ -23,6 +23,7 @@ public class UserNotificationItem {
     private String title;
     private String message;
     private String type;
+    private String inviterId;
     private boolean read;
     private Timestamp createdAt;
 
@@ -75,6 +76,14 @@ public class UserNotificationItem {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getInviterId() {
+        return inviterId;
+    }
+
+    public void setInviterId(String inviterId) {
+        this.inviterId = inviterId;
     }
 
     public void setRead(boolean read) {

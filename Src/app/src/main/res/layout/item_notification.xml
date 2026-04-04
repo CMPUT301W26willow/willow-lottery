@@ -1,57 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
     android:layout_marginVertical="6dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="3dp">
+    app:cardBackgroundColor="@color/login_screen_bg"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="2dp"
+    app:strokeColor="@color/borderGray"
+    app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="horizontal"
+        android:padding="14dp">
 
-        <TextView
-            android:id="@+id/notification_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:textColor="@color/textDark"/>
+        <ImageView
+            android:id="@+id/notification_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="top"
+            android:contentDescription="@null"
+            android:padding="4dp" />
 
-        <TextView
-            android:id="@+id/notification_message"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:textSize="14sp"
-            android:textColor="#666666"/>
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/notification_type"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textSize="12sp"
-            android:textColor="@color/primaryPurple"/>
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/notification_date"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textSize="12sp"
-            android:textColor="#999999"/>
+                <TextView
+                    android:id="@+id/notification_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="14dp"
+                    android:textColor="@color/textDark"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/notification_read_status"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textSize="12sp"
-            android:textColor="#999999"/>
+                <View
+                    android:id="@+id/notification_unread_dot"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:layout_gravity="end|top"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/bg_notif_unread_dot"
+                    android:visibility="gone" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/notification_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="@color/textGray"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/notification_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/iconGray"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/notification_type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
     </LinearLayout>
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

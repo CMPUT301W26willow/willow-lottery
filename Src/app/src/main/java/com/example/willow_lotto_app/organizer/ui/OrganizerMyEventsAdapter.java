@@ -1,4 +1,4 @@
-package com.example.willow_lotto_app;
+package com.example.willow_lotto_app.organizer.ui;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.willow_lotto_app.R;
 import com.example.willow_lotto_app.events.Event;
 
 import java.util.ArrayList;
