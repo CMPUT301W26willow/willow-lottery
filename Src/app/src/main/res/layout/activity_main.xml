@@ -1,27 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/backgroundGray">
+    android:background="@color/login_screen_bg">
 
-    <!-- Main screen content -->
     <LinearLayout
         android:id="@+id/main_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/bottom_nav"
+        android:layout_above="@id/bottom_nav_divider"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="16dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Available Events"
-            android:textSize="22sp"
+            android:textColor="@color/textDark"
+            android:textSize="24sp"
             android:textStyle="bold"
-            android:textColor="@color/textDark"/>
+            android:letterSpacing="-0.02" />
 
         <TextView
             android:id="@+id/home_events_label"
@@ -29,30 +30,89 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="User browses all open events."
-            android:textSize="12sp"
-            android:textColor="@color/textGray"/>
+            android:textColor="@color/textGray"
+            android:textSize="13sp"
+            android:visibility="gone" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="@color/login_screen_bg"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/borderGray"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingEnd="4dp">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:contentDescription="@null"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_home_search_24" />
+
+                <EditText
+                    android:id="@+id/home_search_input"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:hint="@string/home_search_hint"
+                    android:imeOptions="actionSearch"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:textColor="@color/textDark"
+                    android:textColorHint="@color/login_hint"
+                    android:textSize="15sp" />
+
+                <ImageButton
+                    android:id="@+id/home_filter_btn"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/home_filter_content_desc"
+                    android:padding="12dp"
+                    android:src="@drawable/ic_home_tune_24" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/home_events_recycler"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_marginTop="12dp"
             android:layout_weight="1"
-            android:layout_marginTop="8dp"
-            android:clipToPadding="false"/>
+            android:clipToPadding="false"
+            android:paddingBottom="16dp" />
     </LinearLayout>
 
-    <!-- Bottom Navigation Bar -->
+    <View
+        android:id="@+id/bottom_nav_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_above="@id/bottom_nav"
+        android:background="@color/login_divider" />
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav"
         android:layout_width="match_parent"
-        android:layout_height="88dp"
+        android:layout_height="72dp"
         android:layout_alignParentBottom="true"
-        android:background="@android:color/white"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        app:itemIconSize="22dp"
-        app:itemIconTint="@color/primaryPurple"
-        app:itemTextColor="@color/primaryPurple"
+        android:background="@color/login_screen_bg"
+        android:paddingTop="6dp"
+        android:paddingBottom="8dp"
+        app:itemIconSize="24dp"
+        app:itemIconTint="@color/bottom_nav_item_color"
+        app:itemTextColor="@color/bottom_nav_item_color"
+        app:labelVisibilityMode="labeled"
         app:menu="@menu/bottom_menu" />
-
 </RelativeLayout>

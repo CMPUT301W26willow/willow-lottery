@@ -66,6 +66,7 @@ public class EditEventActivity extends AppCompatActivity {
         }
 
         eventPosterImageView = findViewById(R.id.eventPosterImageView);
+        eventPosterImageView.setImageResource(EventPlaceholderDrawables.forEventId(eventId));
         uploadStatusText = findViewById(R.id.uploadStatusText);
 
         Button uploadPosterButton = findViewById(R.id.uploadPosterButton);

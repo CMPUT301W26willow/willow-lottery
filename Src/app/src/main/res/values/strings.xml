@@ -10,6 +10,10 @@
     <string name="profile_save_changes">Save Changes</string>
     <string name="profile_cancel">Cancel</string>
 
+    <string name="home_search_hint">Search events…</string>
+    <string name="home_event_waitlist_count">%d people on waiting list</string>
+    <string name="home_event_deadline">Registration deadline: %1$s</string>
+    <string name="home_filter_content_desc">Open Events to filter</string>
     <string name="login_title">Let\'s Sign you in</string>
     <string name="login_email_label">Email Address</string>
     <string name="login_email_hint">Enter your email address</string>

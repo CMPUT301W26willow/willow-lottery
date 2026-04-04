@@ -16,6 +16,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.willow_lotto_app.R;
 import com.example.willow_lotto_app.events.Event;
+import com.example.willow_lotto_app.events.EventPlaceholderDrawables;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,20 +90,22 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ad
          * Load poster if one exists. Otherwise show the placeholder.
          */
         String posterUrl = event.getPosterUri();
+        int fallback = EventPlaceholderDrawables.forEventId(event.getId());
         if (posterUrl != null && !posterUrl.trim().isEmpty()) {
             Uri uri = Uri.parse(posterUrl.trim());
             RequestOptions options = new RequestOptions()
                     .centerCrop()
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .placeholder(R.drawable.poster_placeholder)
-                    .error(R.drawable.poster_placeholder);
+                    .placeholder(fallback)
+                    .error(fallback);
 
             Glide.with(holder.itemView.getContext())
                     .load(uri)
                     .apply(options)
                     .into(holder.posterImage);
         } else {
-            holder.posterImage.setImageResource(R.drawable.poster_placeholder);
+            Glide.with(holder.itemView.getContext()).clear(holder.posterImage);
+            holder.posterImage.setImageResource(fallback);
         }
 
         holder.deleteEventButton.setOnClickListener(v -> {

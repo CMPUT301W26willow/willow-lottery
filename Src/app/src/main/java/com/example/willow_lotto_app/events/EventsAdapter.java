@@ -231,22 +231,37 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
         Event event = events.get(position);
         String posterUrl = event.getPosterUri();
+        int fallback = EventPlaceholderDrawables.forEventId(event.getId());
         if (posterUrl != null && !posterUrl.trim().isEmpty()) {
             Uri uri = Uri.parse(posterUrl.trim());
             RequestOptions options = new RequestOptions()
                     .centerCrop()
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .placeholder(R.drawable.poster_placeholder)
-                    .error(R.drawable.poster_placeholder);
+                    .placeholder(fallback)
+                    .error(fallback);
             Glide.with(holder.itemView.getContext())
                     .load(uri)
                     .apply(options)
                     .into(holder.poster);
         } else {
-            holder.poster.setImageResource(R.drawable.poster_placeholder);
+            Glide.with(holder.itemView.getContext()).clear(holder.poster);
+            holder.poster.setImageResource(fallback);
         }
         holder.name.setText(event.getName() != null ? event.getName() : "");
-        holder.date.setText(event.getDate() != null ? event.getDate() : "");
+        String dateStr = event.getDate() != null ? event.getDate() : "";
+        holder.date.setText(dateStr.isEmpty() ? "—" : dateStr);
+
+        int registered = event.getRegisteredUsers() != null ? event.getRegisteredUsers().size() : 0;
+        holder.waitlist.setText(holder.itemView.getContext().getString(R.string.home_event_waitlist_count, registered));
+
+        String regEnd = event.getRegistrationEnd();
+        if (regEnd != null && !regEnd.trim().isEmpty()) {
+            holder.deadline.setVisibility(View.VISIBLE);
+            holder.deadline.setText(holder.itemView.getContext().getString(R.string.home_event_deadline, regEnd.trim()));
+        } else {
+            holder.deadline.setVisibility(View.GONE);
+        }
+
         holder.description.setText(event.getDescription() != null ? event.getDescription() : "");
 
         boolean canViewDetails = eventClickListener != null && event.getId() != null;
@@ -275,6 +290,8 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
         final ImageView poster;
         final TextView name;
         final TextView date;
+        final TextView waitlist;
+        final TextView deadline;
         final TextView description;
         final Button joinLeaveBtn;
 
@@ -283,6 +300,8 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
             poster = itemView.findViewById(R.id.event_poster);
             name = itemView.findViewById(R.id.event_name);
             date = itemView.findViewById(R.id.event_date);
+            waitlist = itemView.findViewById(R.id.event_waitlist);
+            deadline = itemView.findViewById(R.id.event_deadline);
             description = itemView.findViewById(R.id.event_description);
             joinLeaveBtn = itemView.findViewById(R.id.event_join_leave_btn);
         }
