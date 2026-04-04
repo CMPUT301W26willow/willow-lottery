@@ -186,6 +186,11 @@ public class EventDetailActivity extends AppCompatActivity {
             public void onCollapseReplies(int adapterPosition) {
                 commentsAdapter.notifyItemChanged(adapterPosition);
             }
+
+            @Override
+            public void onDelete(EventComment comment) {
+                deleteComment(comment);
+            }
         });
         commentsRecyclerView.setAdapter(commentsAdapter);
         postCommentButton.setOnClickListener(v -> postComment());
@@ -437,7 +442,7 @@ public class EventDetailActivity extends AppCompatActivity {
             posterView.setVisibility(View.GONE);
             posterPlaceholder.setVisibility(View.VISIBLE);
         }
-
+        checkIfOrganizer();
         loadWaitingListCount();
     }
 
@@ -801,5 +806,33 @@ public class EventDetailActivity extends AppCompatActivity {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+    /**
+     * Checks if the current user is the event organizer.
+     * If so, enables the delete button on all comments.
+     */
+    private void checkIfOrganizer() {
+        if (currentUserId != null && event != null
+                && currentUserId.equals(event.getOrganizerId())) {
+            commentsAdapter.setIsOrganizer(true);
+        }
+    }
+
+    /**
+     * Deletes a comment from Firestore.
+     * Only available to the event organizer (02.08.01).
+     *
+     * @param comment The comment to delete.
+     */
+    private void deleteComment(EventComment comment) {
+        db.collection("events")
+                .document(eventId)
+                .collection(COMMENTS_SUBCOLLECTION)
+                .document(comment.getDocumentId())
+                .delete()
+                .addOnSuccessListener(aVoid ->
+                        Toast.makeText(this, "Comment deleted.", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Failed to delete comment.", Toast.LENGTH_SHORT).show());
     }
 }

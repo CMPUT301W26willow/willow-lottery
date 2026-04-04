@@ -19,21 +19,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Top-level comments with expand/collapse replies (Option A).
+ * EventCommentsAdapter.java
+ *
+ *
+ * Top-level comments with expand/collapse replies.
+ * Supports organizer delete functionality (02.08.01).
  */
 public class EventCommentsAdapter extends RecyclerView.Adapter<EventCommentsAdapter.ThreadHolder> {
 
     public interface ThreadListener {
         void onReply(EventComment topLevel);
-
-        /** Called when user expands thread; activity loads replies if needed. */
         void onExpandReplies(EventCommentThread thread, int adapterPosition);
-
         void onCollapseReplies(int adapterPosition);
+
+        /**
+         * Called when the organizer taps the delete button on a comment.
+         *
+         * @param comment The comment to delete.
+         */
+        void onDelete(EventComment comment);
     }
 
     private final List<EventCommentThread> threads = new ArrayList<>();
     private final ThreadListener listener;
+    private boolean isOrganizer = false;
 
     public EventCommentsAdapter(ThreadListener listener) {
         this.listener = listener;
@@ -51,6 +60,17 @@ public class EventCommentsAdapter extends RecyclerView.Adapter<EventCommentsAdap
         notifyDataSetChanged();
     }
 
+    /**
+     * Sets whether the current user is the organizer.
+     * If true, delete buttons are shown on each comment.
+     *
+     * @param isOrganizer True if the current user is the event organizer.
+     */
+    public void setIsOrganizer(boolean isOrganizer) {
+        this.isOrganizer = isOrganizer;
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public ThreadHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -61,7 +81,7 @@ public class EventCommentsAdapter extends RecyclerView.Adapter<EventCommentsAdap
 
     @Override
     public void onBindViewHolder(@NonNull ThreadHolder holder, int position) {
-        holder.bind(threads.get(position));
+        holder.bind(threads.get(position), isOrganizer);
     }
 
     @Override
@@ -75,6 +95,7 @@ public class EventCommentsAdapter extends RecyclerView.Adapter<EventCommentsAdap
         private final TextView timeView;
         private final TextView bodyView;
         private final Button replyBtn;
+        private final Button deleteBtn;
         private final TextView toggleReplies;
         private final ProgressBar loading;
         private final RecyclerView repliesRv;
@@ -88,6 +109,7 @@ public class EventCommentsAdapter extends RecyclerView.Adapter<EventCommentsAdap
             timeView = itemView.findViewById(R.id.event_comment_time);
             bodyView = itemView.findViewById(R.id.event_comment_body);
             replyBtn = itemView.findViewById(R.id.event_comment_reply_btn);
+            deleteBtn = itemView.findViewById(R.id.event_comment_delete_btn);
             toggleReplies = itemView.findViewById(R.id.event_comment_toggle_replies);
             loading = itemView.findViewById(R.id.event_comment_replies_loading);
             repliesRv = itemView.findViewById(R.id.event_comment_replies_list);
@@ -96,13 +118,20 @@ public class EventCommentsAdapter extends RecyclerView.Adapter<EventCommentsAdap
             repliesRv.setAdapter(repliesAdapter);
         }
 
-        void bind(EventCommentThread thread) {
+        void bind(EventCommentThread thread, boolean isOrganizer) {
             EventComment c = thread.getTop();
             authorView.setText(c.resolveDisplayName());
             bodyView.setText(c.getBody() != null ? c.getBody() : "");
             bindTime(timeView, c.getCreatedAt());
 
             replyBtn.setOnClickListener(v -> listener.onReply(c));
+
+            if (isOrganizer) {
+                deleteBtn.setVisibility(View.VISIBLE);
+                deleteBtn.setOnClickListener(v -> listener.onDelete(c));
+            } else {
+                deleteBtn.setVisibility(View.GONE);
+            }
 
             boolean expanded = thread.isExpanded();
             if (expanded) {
