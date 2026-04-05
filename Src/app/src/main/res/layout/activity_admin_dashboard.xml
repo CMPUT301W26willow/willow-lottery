@@ -588,7 +588,7 @@
                         app:layout_constraintEnd_toStartOf="@+id/adminManagementImagesCount"
                         app:layout_constraintStart_toEndOf="@+id/adminPanelImageImg"
                         app:layout_constraintTop_toBottomOf="@+id/adminPanelImageManageTitle" />
-
+                    <!--Notification Log -->
                     <TextView
                         android:id="@+id/adminManagementImagesCount"
                         android:layout_width="wrap_content"
@@ -602,6 +602,64 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/adminPanelNotifLogCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="@color/login_screen_bg"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/borderGray"
+                app:strokeWidth="1dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="80dp"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="14dp">
+
+                <ImageView
+                    android:id="@+id/adminPanelNotifLogImg"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:contentDescription="Notification Log"
+                    android:src="@drawable/admin_panel_images"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/adminPanelNotifLogTitle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Notification Log"
+                    android:textColor="@color/textDark"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/adminPanelNotifLogImg"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="4dp"
+                    android:text="View all notifications sent to entrants"
+                    android:textColor="@color/textGray"
+                    android:textSize="13sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/adminPanelNotifLogImg"
+                    app:layout_constraintTop_toBottomOf="@+id/adminPanelNotifLogTitle" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
