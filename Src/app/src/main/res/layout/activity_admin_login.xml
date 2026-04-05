@@ -10,7 +10,7 @@
         android:id="@+id/adminBackButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="30dp"
         android:backgroundTint="#00F5F5F7"
         android:text="@string/admin_back_button"
         android:textColor="@color/textGray"
@@ -103,7 +103,7 @@
         android:textColor="@color/textDark"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/AdminEmailInput" />
+        app:layout_constraintTop_toBottomOf="@+id/adminEmailInput" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/adminPasswordInput"
@@ -123,8 +123,7 @@
             android:id="@+id/admin_password_edit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPassword"
-            android:textColor="@color/textDark" />
+            tools:ignore="TextContrastCheck" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

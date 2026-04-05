@@ -50,6 +50,12 @@ public class AdminDashboardActivity extends AppCompatActivity {
 
     private final NumberFormat intFormat = NumberFormat.getIntegerInstance(Locale.getDefault());
 
+    private TextView infoEventCard,infoUserCard,infoWaitlistCard,infoNotifCard;
+
+    private FirebaseFirestore db;
+
+    Integer statEvents,statUsers,statWaitlist,statNotif;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,8 +85,6 @@ public class AdminDashboardActivity extends AppCompatActivity {
         profileButton.setOnClickListener(v ->
                 startActivity(new Intent(this, ProfileActivity.class)));
 
-        browseEventsCard.setOnClickListener(v ->
-                startActivity(new Intent(this, AdminBrowseEventsActivity.class)));
 
         browseImagesCard.setOnClickListener(v ->
                 startActivity(new Intent(this, AdminBrowseImagesActivity.class)));

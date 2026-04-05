@@ -24,4 +24,7 @@
     <color name="login_hint">#9CA3AF</color>
     <color name="login_forgot">#E11D48</color>
     <color name="login_divider">#E5E7EB</color>
+
+    <color name="notif_badge_success_text">#166534</color>
+    <color name="notif_badge_info_text">#1D4ED8</color>
 </resources>

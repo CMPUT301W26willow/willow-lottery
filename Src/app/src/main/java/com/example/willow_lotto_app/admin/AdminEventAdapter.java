@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.willow_lotto_app.R;
 import com.example.willow_lotto_app.events.Event;
-import com.example.willow_lotto_app.events.EventPosterLoader;
+import com.example.willow_lotto_app.events.poster.EventPosterLoader;
 
 import java.util.ArrayList;
 import java.util.List;

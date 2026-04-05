@@ -1,18 +1,3 @@
-/**
- * EntrantMapActivity.java
- *
- * Author: Mehr Dhanda
- *
- * Displays a Google Map showing the locations where entrants joined
- * the waiting list for a specific event. Each entrant is represented
- * by a map marker at their recorded location.
- *
- * Role: Controller in the MVC pattern.
- *
- * Outstanding issues:
- * - Event ID is currently hardcoded as "event1". Should be passed dynamically via Intent.
- * - No clustering for overlapping markers.
- */
 package com.example.willow_lotto_app;
 
 import android.os.Bundle;
@@ -20,59 +5,46 @@ import android.util.Log;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentManager;
 
+import com.example.willow_lotto_app.registration.RegistrationStatus;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
-/**
- * EventQrActivity.java
- *
- * Displays a generated QR code for a newly created event and lets the organizer
- * download the QR image for sharing.
- *
- * Role in application:
- * - Controller/View layer for the post-event-creation QR flow.
- * - Receives the event ID and event name by Intent.
- * - Uses QRCodeHelper to generate a QR code that links back to the event.
- *
- * Outstanding issues:
- * - QR generation depends on the helper utility and assumes a valid incoming event ID.
- * - Download feedback is minimal and error handling for storage/media failures is basic.
- * - There is no sharing intent yet; only download is supported.
- */
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * EntrantMapActivity.java
- *
- * Displays a Google Map with markers showing where entrants joined the waiting list for a specific event.
- *
- * Role in application:
- * - Controller/View layer for organizer geolocation viewing.
- * - Reads entrant location data from Firestore and renders markers on a Google Map.
- *
- * Outstanding issues:
- * - The event ID is currently hardcoded as "event1" and should be passed by Intent.
- * - This file still reads from the older events/{eventId}/waitingList structure instead
- *   of the newer top-level registrations-based flow.
- * - Marker clustering is not implemented, so dense areas may become visually crowded.
+ * Organizer map of entrant join locations. Uses {@code registrations} (waitlisted, with
+ * optional {@code latitude}/{@code longitude}) and legacy {@code events/{id}/waitingList}.
  */
-
 public class EntrantMapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    private static final String EVENT_ID = "event1";
+    private static final String TAG = "EntrantMapActivity";
+    private static final String REGISTRATIONS_COLLECTION = "registrations";
+
+    public static final String EXTRA_EVENT_ID = "event_id";
+    private static final String FALLBACK_EVENT_ID = "event1";
+
+    private String eventId;
     private GoogleMap mMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_entrant_map);
+
+        String fromIntent = getIntent() != null ? getIntent().getStringExtra(EXTRA_EVENT_ID) : null;
+        eventId = (fromIntent != null && !fromIntent.trim().isEmpty())
+                ? fromIntent.trim()
+                : FALLBACK_EVENT_ID;
 
         Button backButton = findViewById(R.id.backButton);
         backButton.setOnClickListener(v -> finish());
@@ -84,47 +56,101 @@ public class EntrantMapActivity extends AppCompatActivity implements OnMapReadyC
         }
     }
 
-    /**
-     * Called when the Google Map is ready to use.
-     * Loads entrant locations from Firestore and places markers on the map.
-     *
-     * @param googleMap The GoogleMap instance that is ready.
-     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         loadEntrantLocations();
     }
 
-    /**
-     * Fetches entrant documents from the Firestore waitingList subcollection.
-     * For each entrant with valid latitude and longitude fields, adds a marker
-     * to the map at their location.
-     */
     private void loadEntrantLocations() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+        List<LatLng> points = new ArrayList<>();
+        final int[] pending = {2};
+
+        Runnable finishBatch = () -> {
+            if (--pending[0] > 0) {
+                return;
+            }
+            runOnUiThread(() -> fitCamera(points));
+        };
+
+        db.collection(REGISTRATIONS_COLLECTION)
+                .whereEqualTo("eventId", eventId)
+                .whereEqualTo("status", RegistrationStatus.WAITLISTED.getValue())
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        for (DocumentSnapshot doc : task.getResult().getDocuments()) {
+                            addMarkerFromRegistration(doc, points);
+                        }
+                    } else if (task.getException() != null) {
+                        Log.e(TAG, "Error loading registration locations", task.getException());
+                    }
+                    finishBatch.run();
+                });
 
         db.collection("events")
-                .document(EVENT_ID)
+                .document(eventId)
                 .collection("waitingList")
                 .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                        String name = doc.getString("name");
-                        Double latitude = doc.getDouble("latitude");
-                        Double longitude = doc.getDouble("longitude");
-
-                        if (latitude != null && longitude != null && name != null) {
-                            LatLng location = new LatLng(latitude, longitude);
-                            mMap.addMarker(new MarkerOptions()
-                                    .position(location)
-                                    .title(name));
-                            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 10));
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        for (QueryDocumentSnapshot doc : task.getResult()) {
+                            addMarkerFromLegacyWaitingList(doc, points);
                         }
+                    } else if (task.getException() != null) {
+                        Log.e(TAG, "Error loading legacy waitingList", task.getException());
                     }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("Firestore", "Error loading entrant locations", e);
+                    finishBatch.run();
                 });
+    }
+
+    private void addMarkerFromRegistration(DocumentSnapshot doc, List<LatLng> points) {
+        Double latitude = doc.getDouble("latitude");
+        Double longitude = doc.getDouble("longitude");
+        if (latitude == null || longitude == null) {
+            return;
+        }
+        String title = doc.getString("name");
+        if (title == null || title.trim().isEmpty()) {
+            title = doc.getString("userId");
+        }
+        if (title == null || title.trim().isEmpty()) {
+            title = getString(R.string.notif_event_fallback_name);
+        }
+        LatLng location = new LatLng(latitude, longitude);
+        mMap.addMarker(new MarkerOptions().position(location).title(title.trim()));
+        points.add(location);
+    }
+
+    private void addMarkerFromLegacyWaitingList(QueryDocumentSnapshot doc, List<LatLng> points) {
+        String name = doc.getString("name");
+        Double latitude = doc.getDouble("latitude");
+        Double longitude = doc.getDouble("longitude");
+        if (latitude == null || longitude == null || name == null || name.trim().isEmpty()) {
+            return;
+        }
+        LatLng location = new LatLng(latitude, longitude);
+        mMap.addMarker(new MarkerOptions().position(location).title(name.trim()));
+        points.add(location);
+    }
+
+    private void fitCamera(List<LatLng> points) {
+        if (mMap == null || points.isEmpty()) {
+            return;
+        }
+        if (points.size() == 1) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(points.get(0), 10));
+            return;
+        }
+        LatLngBounds.Builder bounds = new LatLngBounds.Builder();
+        for (LatLng p : points) {
+            bounds.include(p);
+        }
+        try {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), 80));
+        } catch (IllegalStateException ex) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(points.get(0), 10));
+        }
     }
 }

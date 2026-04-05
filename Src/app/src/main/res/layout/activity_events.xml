@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:paddingTop="16dp"
+        android:paddingTop="30dp"
         android:paddingBottom="8dp"
         android:text="Events"
         android:textSize="22sp"

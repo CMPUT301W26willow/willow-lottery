@@ -16,17 +16,27 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseUser;
 
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
+
 import com.example.willow_lotto_app.events.CreateEventActivity;
+import com.example.willow_lotto_app.events.Event;
 import com.example.willow_lotto_app.events.EventsActivity;
 import com.example.willow_lotto_app.notification.NotificationActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -34,6 +44,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.example.willow_lotto_app.admin.AdminAccessUtil;
 import com.example.willow_lotto_app.admin.AdminDashboardActivity;
+import com.example.willow_lotto_app.organizer.ui.OrganizerDashboardActivity;
+import com.example.willow_lotto_app.organizer.ui.OrganizerMyEventsActivity;
 
 /**
  * Profile management screen for the signed-in user.
@@ -41,7 +53,7 @@ import com.example.willow_lotto_app.admin.AdminDashboardActivity;
  * Responsibilities:
  * - Lets users view and edit basic profile fields backed by Firestore.
  * - Provides navigation into organizer flows (create first event or open
- *   {@link OrganizerDashboardActivity} for the latest event).
+ *   {@link com.example.willow_lotto_app.organizer.ui.OrganizerDashboardActivity} for the latest event).
  * - Exposes registration history for the user based on stored event IDs.
  */
 public class ProfileActivity extends AppCompatActivity {
@@ -259,24 +271,59 @@ public class ProfileActivity extends AppCompatActivity {
 
         String uid = mAuth.getCurrentUser().getUid();
 
-        db.collection("events")
-                .whereEqualTo("organizerId", uid)
-                .limit(1)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (queryDocumentSnapshots.isEmpty()) {
-                        // No events yet → take organizer to create their first one.
-                        startActivity(new Intent(ProfileActivity.this, CreateEventActivity.class));
-                    } else {
-                        String eventId = queryDocumentSnapshots.getDocuments().get(0).getId();
-                        Intent intent = new Intent(ProfileActivity.this, OrganizerDashboardActivity.class);
-                        intent.putExtra(OrganizerDashboardActivity.EXTRA_EVENT_ID, eventId);
-                        startActivity(intent);
-                    }
-                })
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, "Could not open organizer dashboard.", Toast.LENGTH_SHORT).show());
+        Task<QuerySnapshot> owned = db.collection("events").whereEqualTo("organizerId", uid).get();
+        Task<QuerySnapshot> co = db.collection("events").whereArrayContains("coOrganizerIds", uid).get();
+        Tasks.whenAllComplete(owned, co).addOnCompleteListener(task -> {
+            if (!owned.isSuccessful() && !co.isSuccessful()) {
+                Toast.makeText(this, "Could not open organizer dashboard.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Map<String, Event> byId = new LinkedHashMap<>();
+            if (owned.isSuccessful() && owned.getResult() != null) {
+                for (DocumentSnapshot doc : owned.getResult().getDocuments()) {
+                    addProfileEventDoc(doc, byId);
+                }
+            }
+            if (co.isSuccessful() && co.getResult() != null) {
+                for (DocumentSnapshot doc : co.getResult().getDocuments()) {
+                    addProfileEventDoc(doc, byId);
+                }
+            }
+            List<Event> list = new ArrayList<>(byId.values());
+            if (list.isEmpty()) {
+                startActivity(new Intent(ProfileActivity.this, CreateEventActivity.class));
+                return;
+            }
+            Collections.sort(list, PROFILE_EVENT_BY_DATE_DESC);
+            String eventId = list.get(0).getId();
+            Intent intent = new Intent(ProfileActivity.this, OrganizerDashboardActivity.class);
+            intent.putExtra(OrganizerDashboardActivity.EXTRA_EVENT_ID, eventId);
+            startActivity(intent);
+        });
     }
+
+    private static void addProfileEventDoc(DocumentSnapshot doc, Map<String, Event> byId) {
+        Boolean isDeleted = doc.getBoolean("isDeleted");
+        if (isDeleted != null && isDeleted) {
+            return;
+        }
+        Boolean isPrivate = doc.getBoolean("isPrivate");
+        if (isPrivate != null && isPrivate) {
+            return;
+        }
+        Event e = new Event();
+        e.setId(doc.getId());
+        e.setName(doc.getString("name"));
+        e.setDate(doc.getString("date"));
+        e.setOrganizerId(doc.getString("organizerId"));
+        byId.put(doc.getId(), e);
+    }
+
+    private static final Comparator<Event> PROFILE_EVENT_BY_DATE_DESC = (a, b) -> {
+        String da = a.getDate() != null ? a.getDate() : "";
+        String db = b.getDate() != null ? b.getDate() : "";
+        return db.compareTo(da);
+    };
 
     private void openOrganizerMyEvents() {
         if (mAuth.getCurrentUser() == null) {
@@ -388,6 +435,9 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void signOut() {
         mAuth.signOut();
+        getSharedPreferences("appData", MODE_PRIVATE).edit()
+                .putBoolean("rememberUser", false)
+                .apply();
         Intent intent = new Intent(this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
@@ -483,9 +533,9 @@ public class ProfileActivity extends AppCompatActivity {
         String uid = mAuth.getCurrentUser().getUid();
 
         Map<String, Object> user = new HashMap<>();
-        user.put("name", name);
-        user.put("email", email);
-        user.put("phone", phone);
+        user.put("Name", name);
+        user.put("Email", email);
+        user.put("Phone", phone);
 
         db.collection("users")
                 .document(uid)
