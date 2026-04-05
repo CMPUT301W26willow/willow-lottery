@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.willow_lotto_app.EntrantResponseManager;
 import com.example.willow_lotto_app.R;
 import com.example.willow_lotto_app.organizer.EventOrganizerAccess;
+import com.example.willow_lotto_app.admin.AdminAccessUtil;
 import com.example.willow_lotto_app.organizer.OrganizerLotteryManager;
 import com.example.willow_lotto_app.notification.NotificationStore;
 import com.example.willow_lotto_app.notification.NotificationTypes;
@@ -878,8 +879,20 @@ public class EventDetailActivity extends AppCompatActivity {
      * Checks if the current user is the event organizer.
      * If so, enables the delete button on all comments.
      */
+// CHANGED: also grants delete access to admins (03.10.01)
     private void checkIfOrganizer() {
-        if (currentUserId != null && event != null && event.isManagedBy(currentUserId)) {
+        if (currentUserId == null) return;
+
+        // existing organizer check
+        if (event != null && event.isManagedBy(currentUserId)) {
+            commentsAdapter.setIsOrganizer(true);
+            return;
+        }
+
+        // ADDED: also show delete buttons if the current user is an admin
+        com.google.firebase.auth.FirebaseUser firebaseUser =
+                com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        if (firebaseUser != null && AdminAccessUtil.isAdminEmail(firebaseUser.getEmail())) {
             commentsAdapter.setIsOrganizer(true);
         }
     }
