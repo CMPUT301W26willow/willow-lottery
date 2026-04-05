@@ -1,6 +1,21 @@
 <resources>
     <string name="app_name">Willow_Lotto_app</string>
     <string name="profile_title">Profile</string>
+<<<<<<< Updated upstream
+=======
+    <string name="profile_edit">Edit</string>
+    <string name="profile_cancel_short">Cancel</string>
+    <string name="profile_full_name">Full Name</string>
+    <string name="profile_email_address">Email Address</string>
+    <string name="profile_phone_number">Phone Number</string>
+    <string name="profile_phone_not_set">Not set</string>
+    <string name="profile_account_status">Account Status</string>
+    <string name="profile_member_since">Member Since: %1$s</string>
+    <string name="profile_events_joined">Events Joined: %1$d</string>
+    <string name="profile_member_since_unknown">Member Since: —</string>
+    <string name="profile_danger_zone">Danger Zone</string>
+    <string name="profile_danger_zone_body">Deleting your profile is permanent and cannot be undone.</string>
+>>>>>>> Stashed changes
     <string name="profile_name_label">Name *</string>
     <string name="profile_email_label">Email *</string>
     <string name="profile_phone_label">Phone (Optional)</string>

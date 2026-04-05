@@ -9,6 +9,21 @@ import android.widget.ImageView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+<<<<<<< Updated upstream
+=======
+import com.example.willow_lotto_app.admin.AdminAccessUtil;
+import com.example.willow_lotto_app.admin.AdminDashboardActivity;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+/**
+ * Sample admin entry from the main login screen: email + password via Firebase Auth,
+ * then opens {@link AdminDashboardActivity} only if the account is on the allow-list.
+ */
+>>>>>>> Stashed changes
 public class AdminLoginActivity extends AppCompatActivity {
 
     ImageView adminShield;
