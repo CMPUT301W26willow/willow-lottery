@@ -12,11 +12,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.willow_lotto_app.R;
 import com.example.willow_lotto_app.events.Event;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Administrator screen for browsing uploaded event images.
@@ -47,6 +51,11 @@ public class AdminBrowseImagesActivity extends AppCompatActivity implements Admi
      */
     private AdminImageAdapter adapter;
 
+    /**
+     * Signed-in admin email used in audit logs.
+     */
+    private String adminEmail;
+
     private String searchQueryNormalized = "";
 
     private boolean screenReady;
@@ -72,6 +81,9 @@ public class AdminBrowseImagesActivity extends AppCompatActivity implements Admi
         db = FirebaseFirestore.getInstance();
         adapter = new AdminImageAdapter(imageEvents, this);
         recyclerView.setAdapter(adapter);
+        adminEmail = FirebaseAuth.getInstance().getCurrentUser() != null
+                ? FirebaseAuth.getInstance().getCurrentUser().getEmail()
+                : "";
 
         screenReady = true;
     }
@@ -143,20 +155,51 @@ public class AdminBrowseImagesActivity extends AppCompatActivity implements Admi
                 .show();
     }
 
+    private void notifyOrganizerAboutRemovedImage(Event event) {
+        db.collection("events")
+                .document(event.getId())
+                .get()
+                .addOnSuccessListener(doc -> {
+                    String organizerId = doc.getString("organizerId");
+
+                    AdminNotificationHelper.sendAdminNotification(
+                            organizerId,
+                            event.getId(),
+                            "Image removed",
+                            "The image for your event \"" + event.getName() + "\" was removed by an administrator for violating app policy.",
+                            "admin_delete_event_image"
+                    );
+                });
+    }
+
     /**
      * Removes the image for the selected event by clearing posterUri.
      *
      * @param event selected event
      */
     private void removeImage(Event event) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("posterUri", "");
+        updates.put("updatedAt", FieldValue.serverTimestamp());
+
         db.collection("events")
                 .document(event.getId())
-                .update("posterUri", "")
+                .update(updates)
                 .addOnSuccessListener(unused -> {
-                    Toast.makeText(this, "Image removed", Toast.LENGTH_SHORT).show();
+                    notifyOrganizerAboutRemovedImage(event);
+
+                    AdminNotificationHelper.logAdminAction(
+                            adminEmail,
+                            "event_image",
+                            event.getId(),
+                            "delete_image",
+                            "Event posterUri cleared by admin."
+                    );
+
+                    Toast.makeText(this, "Event image removed", Toast.LENGTH_SHORT).show();
                     loadImages();
                 })
                 .addOnFailureListener(e ->
-                        Toast.makeText(this, "Failed to remove image", Toast.LENGTH_SHORT).show());
+                        Toast.makeText(this, "Failed to remove event image", Toast.LENGTH_SHORT).show());
     }
 }
