@@ -101,6 +101,9 @@ public class AdminDashboardActivity extends AppCompatActivity {
             startActivity(i);
         });
 
+        browseEventsCard.setOnClickListener(v ->
+                startActivity(new Intent(this, AdminBrowseEventsActivity.class)));
+
         searchInput = findViewById(R.id.admin_dashboard_search_input);
         searchGoButton = findViewById(R.id.admin_dashboard_search_go);
         searchGoButton.setOnClickListener(v -> showSearchDestinationPicker());
