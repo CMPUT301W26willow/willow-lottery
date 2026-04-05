@@ -160,20 +160,7 @@ public class AdminBrowseEventsActivity extends AppCompatActivity implements Admi
                 .show();
     }
 
-    /**
-     * Shows confirmation before removing the image for an event.
-     *
-     * @param event selected event
-     */
-    @Override
-    public void onDeleteImageClicked(Event event) {
-        new AlertDialog.Builder(this)
-                .setTitle("Delete Event Image")
-                .setMessage("Are you sure you want to remove this event image?")
-                .setPositiveButton("Confirm", (dialog, which) -> removeEventImage(event))
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
+
 
     /**
      * Shows confirmation before removing comments for an event.
@@ -191,6 +178,53 @@ public class AdminBrowseEventsActivity extends AppCompatActivity implements Admi
     }
 
     /**
+     * Sends a notification to every user who still has a registration for the event.
+     *
+     * This includes users on the waitlist, invited users, and accepted users.
+     *
+     * @param event removed event
+     */
+    private void notifyAffectedUsersAboutRemovedEvent(Event event) {
+        db.collection("registrations")
+                .whereEqualTo("eventId", event.getId())
+                .get()
+                .addOnSuccessListener(query -> {
+                    for (DocumentSnapshot doc : query.getDocuments()) {
+                        String userId = doc.getString("userId");
+
+                        AdminNotificationHelper.sendAdminNotification(
+                                userId,
+                                event.getId(),
+                                "Event removed",
+                                "The event \"" + event.getName() + "\" was removed by an administrator. Your registration or waitlist entry is no longer active.",
+                                "admin_delete_event_user"
+                        );
+                    }
+                });
+    }
+
+    /**
+     * Deletes all registration documents associated with a removed event.
+     *
+     * This prevents users from remaining on the waitlist or in accepted/invited
+     * states for an event that no longer exists.
+     *
+     * @param event removed event
+     */
+    private void deleteRegistrationsForRemovedEvent(Event event) {
+        db.collection("registrations")
+                .whereEqualTo("eventId", event.getId())
+                .get()
+                .addOnSuccessListener(query -> {
+                    for (DocumentSnapshot doc : query.getDocuments()) {
+                        db.collection("registrations")
+                                .document(doc.getId())
+                                .delete();
+                    }
+                });
+    }
+
+    /**
      * Soft-deletes an event and notifies the organizer if organizerId exists.
      *
      * @param event selected event
@@ -204,6 +238,8 @@ public class AdminBrowseEventsActivity extends AppCompatActivity implements Admi
                 .document(event.getId())
                 .update(updates)
                 .addOnSuccessListener(unused -> {
+                    notifyAffectedUsersAboutRemovedEvent(event);
+                    deleteRegistrationsForRemovedEvent(event);
                     notifyOrganizerAboutRemovedEvent(event);
 
                     AdminNotificationHelper.logAdminAction(
@@ -211,7 +247,7 @@ public class AdminBrowseEventsActivity extends AppCompatActivity implements Admi
                             "event",
                             event.getId(),
                             "delete_event",
-                            "Event was soft-deleted by admin."
+                            "Event was soft-deleted and related registrations were cleaned up by admin."
                     );
 
                     Toast.makeText(this, "Event removed", Toast.LENGTH_SHORT).show();
@@ -221,34 +257,8 @@ public class AdminBrowseEventsActivity extends AppCompatActivity implements Admi
                         Toast.makeText(this, "Failed to remove event", Toast.LENGTH_SHORT).show());
     }
 
-    /**
-     * Removes the event image by clearing the posterUri field.
-     *
-     * @param event selected event
-     */
-    private void removeEventImage(Event event) {
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("posterUri", "");
-        updates.put("updatedAt", FieldValue.serverTimestamp());
 
-        db.collection("events")
-                .document(event.getId())
-                .update(updates)
-                .addOnSuccessListener(unused -> {
-                    AdminNotificationHelper.logAdminAction(
-                            adminEmail,
-                            "event_image",
-                            event.getId(),
-                            "delete_image",
-                            "Event posterUri cleared by admin."
-                    );
 
-                    Toast.makeText(this, "Event image removed", Toast.LENGTH_SHORT).show();
-                    loadEvents();
-                })
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, "Failed to remove event image", Toast.LENGTH_SHORT).show());
-    }
 
     /**
      * Marks all comments belonging to an event as removed.

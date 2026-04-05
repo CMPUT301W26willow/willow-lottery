@@ -64,19 +64,11 @@
                 android:textAllCaps="false" />
 
             <Button
-                android:id="@+id/admin_delete_image_button"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="8dp"
-                android:text="Remove Image"
-                android:textAllCaps="false" />
-
-            <Button
                 android:id="@+id/admin_delete_comments_button"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:layout_marginTop="8dp"
-                android:text="Remove Event Comments"
+                android:text="Remove Comments"
                 android:textAllCaps="false" />
         </LinearLayout>
 

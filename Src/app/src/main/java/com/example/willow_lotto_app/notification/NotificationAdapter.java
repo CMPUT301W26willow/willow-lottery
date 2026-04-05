@@ -64,7 +64,7 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
             holder.dateText.setText("");
         }
 
-        holder.readText.setText(item.isRead() ? "Read" : "Unread");
+        /*holder.readText.setText(item.isRead() ? "Read" : "Unread");*/
     }
 
     @Override
