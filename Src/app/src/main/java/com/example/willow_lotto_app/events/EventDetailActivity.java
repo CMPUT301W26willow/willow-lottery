@@ -826,8 +826,11 @@ public class EventDetailActivity extends AppCompatActivity {
                 .getLastLocation()
                 .addOnSuccessListener(location -> {
                     if (location != null) {
+                        Log.d("GEO", "Got location: " + location.getLatitude() + ", " + location.getLongitude());
                         reg.put("latitude", location.getLatitude());
                         reg.put("longitude", location.getLongitude());
+                    } else {
+                        Log.d("GEO", "Location is null - saving without coordinates");
                     }
                     saveRegistration(docId, reg);
                 })
