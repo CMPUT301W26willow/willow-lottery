@@ -293,10 +293,8 @@ public class OrganizerLotteryManager {
                 new RegistrationStore.SimpleCallback() {
                     @Override
                     public void onSuccess() {
-                        // CHANGED: once the status update succeeds, the decline/cancel
-                        // itself has already worked. Replacement drawing is now treated
-                        // as a follow-up step instead of deciding whether the whole
-                        // decline action was a failure.
+                        // CHANGED: tries to draw a replacement,
+                        // but does not treat decline as failed if none is available.
                         if (removalStatus == RegistrationStatus.CANCELLED) {
                             sendCancelledNotification(eventId, oldRegistrationId, callback);
                         } else {
