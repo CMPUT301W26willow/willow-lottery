@@ -23,6 +23,9 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.willow_lotto_app.R;
+import com.example.willow_lotto_app.events.poster.EventPlaceholderDrawables;
+import com.example.willow_lotto_app.events.poster.EventPosterLoader;
+import com.example.willow_lotto_app.events.poster.PosterFirestoreCodec;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;

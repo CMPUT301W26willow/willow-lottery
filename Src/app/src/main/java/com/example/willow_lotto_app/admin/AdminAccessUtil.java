@@ -29,6 +29,7 @@ public class AdminAccessUtil {
             "admin2@gmail.com",
             "admin3@gmail.com",
             "carrot@gmail.com",
+            "daisy@gmail.com",
             "willowtestadmin@gmail.com"
     ));
 

@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.willow_lotto_app.R;
 import com.example.willow_lotto_app.events.Event;
-import com.example.willow_lotto_app.events.EventPosterLoader;
+import com.example.willow_lotto_app.events.poster.EventPosterLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,6 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ad
      */
     public interface AdminEventActionListener {
         void onDeleteEventClicked(Event event);
-        void onDeleteImageClicked(Event event);
         void onDeleteCommentsClicked(Event event);
     }
 
@@ -90,11 +89,6 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ad
             }
         });
 
-        holder.deleteImageButton.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onDeleteImageClicked(event);
-            }
-        });
 
         holder.deleteCommentsButton.setOnClickListener(v -> {
             if (listener != null) {
@@ -117,7 +111,6 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ad
         TextView dateText;
         TextView descriptionText;
         Button deleteEventButton;
-        Button deleteImageButton;
         Button deleteCommentsButton;
 
         AdminEventViewHolder(@NonNull View itemView) {
@@ -127,7 +120,6 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ad
             dateText = itemView.findViewById(R.id.admin_event_date);
             descriptionText = itemView.findViewById(R.id.admin_event_description);
             deleteEventButton = itemView.findViewById(R.id.admin_delete_event_button);
-            deleteImageButton = itemView.findViewById(R.id.admin_delete_image_button);
             deleteCommentsButton = itemView.findViewById(R.id.admin_delete_comments_button);
         }
     }

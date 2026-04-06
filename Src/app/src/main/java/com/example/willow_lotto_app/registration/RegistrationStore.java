@@ -140,6 +140,21 @@ public class RegistrationStore {
                 .addOnFailureListener(callback::onFailure);
     }
 
+    /**
+     * Removes a registration document (e.g. organizer rejects someone on the waitlist).
+     */
+    public void deleteRegistration(String registrationId, final SimpleCallback callback) {
+        if (registrationId == null || registrationId.isEmpty()) {
+            callback.onFailure(new IllegalArgumentException("Missing registration id."));
+            return;
+        }
+        db.collection("registrations")
+                .document(registrationId)
+                .delete()
+                .addOnSuccessListener(unused -> callback.onSuccess())
+                .addOnFailureListener(callback::onFailure);
+    }
+
     // US 2:01:03
     // CHANGED: creates a private invitation registration instead of a normal waitlist join
     /**

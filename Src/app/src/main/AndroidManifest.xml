@@ -45,8 +45,8 @@
         <activity android:name=".events.EventsActivity" android:exported="false"/>
         <activity android:name=".notification.NotificationActivity" android:exported="false"/>
         <activity android:name=".ProfileActivity" android:exported="false"/>
-        <activity android:name=".OrganizerDashboardActivity" android:exported="false"/>
-        <activity android:name=".OrganizerMyEventsActivity" android:exported="false"/>
+        <activity android:name=".organizer.ui.OrganizerDashboardActivity" android:exported="false"/>
+        <activity android:name=".organizer.ui.OrganizerMyEventsActivity" android:exported="false"/>
         <activity android:name=".events.CreateEventActivity" android:exported="false"/>
         <activity android:name=".events.EventQrActivity" android:exported="false"/>
         <activity android:name=".AdminLoginActivity" android:exported="false"/>
@@ -74,8 +74,8 @@
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
-                android:name="com.google.android.geo.API_KEY"
-                android:value="AIzaSyDErr9U0sD14iNjpR2flkx2PkUKkN0mpS4"/>
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
         </provider>
 
         <activity android:name=".admin.AdminDashboardActivity" />

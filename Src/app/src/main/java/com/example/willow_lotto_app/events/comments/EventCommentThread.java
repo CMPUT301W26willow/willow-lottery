@@ -1,4 +1,4 @@
-package com.example.willow_lotto_app.events;
+package com.example.willow_lotto_app.events.comments;
 
 import java.util.ArrayList;
 import java.util.List;

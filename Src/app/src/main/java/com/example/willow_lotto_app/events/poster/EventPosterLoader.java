@@ -1,4 +1,4 @@
-package com.example.willow_lotto_app.events;
+package com.example.willow_lotto_app.events.poster;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;

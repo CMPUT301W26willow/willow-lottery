@@ -10,11 +10,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.textfield.TextInputLayout;
-
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
@@ -26,17 +26,12 @@ import java.util.Map;
 
 /**
  * Email/password account registration screen.
- *<p>
- * Responsibilities:
- * - Implements 01.02.01 "Account Registration" by creating a Firebase Auth
- *   user with email and password.
- * - Seeds a profile document in the {@code users} collection so
- *   {@link ProfileActivity} can load and update the same data later.
  */
 public class SignUpActivity extends AppCompatActivity {
 
-    //User Input UI elements
-    TextInputLayout nameInput, emailInput, passwordInput;
+    TextInputLayout nameInput;
+    TextInputLayout emailInput;
+    TextInputLayout passwordInput;
     Button signUpComplete;
     FirebaseAuth mAuth;
     FirebaseFirestore db;
@@ -61,11 +56,9 @@ public class SignUpActivity extends AppCompatActivity {
             finish();
         });
 
-        //Initialising Firebase Related services
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
-        //OnclickListener to allow user to proceed
         signUpComplete.setOnClickListener(view -> {
             String name = textFrom(nameInput).trim();
             String email = textFrom(emailInput).trim();
@@ -78,45 +71,8 @@ public class SignUpActivity extends AppCompatActivity {
                 return;
             }
 
-            /*checkBannedEmailBeforeSignUp(name, email, password, phone);*/
-
-
-
-            mAuth.createUserWithEmailAndPassword(email, password)
-                    .addOnSuccessListener(authResult -> {
-                        String uid = authResult.getUser().getUid();
-
-                        //Mapping User Hashmap (keys match ProfileActivity expectations)
-                        List<String> registeredEvents = new ArrayList<>();
-                        Map<String, Object> user = new HashMap<>();
-                        user.put("name", name);
-                        user.put("email", email);
-                        user.put("phone", phone);
-                        user.put("registeredEvents", registeredEvents);
-                        user.put("isOrganizer", false);
-                        user.put("organizerBanned", false);
-                        user.put("isDeleted", false);
-                        user.put("deletedByAdmin", false);
-                        user.put("isAnonymous", false);
-
-                        db.collection("users")
-                                .document(uid)
-                                .set(user, SetOptions.merge())
-                                .addOnSuccessListener(unused -> {
-                                    Toast.makeText(this, "Account Created", Toast.LENGTH_SHORT).show();
-                                    startActivity(new Intent(SignUpActivity.this, MainActivity.class));
-                                    finish();
-                                })
-                                .addOnFailureListener(e ->
-                                        Toast.makeText(this,
-                                                "Could not save profile: " + (e.getMessage() != null ? e.getMessage() : "unknown error"),
-                                                Toast.LENGTH_LONG).show());
-                    })
-                    .addOnFailureListener(e ->
-                            Toast.makeText(this, authErrorMessage(e), Toast.LENGTH_LONG).show());
-
+            checkBannedEmailBeforeSignUp(name, email, password, phone);
         });
-
     }
 
     /**
@@ -141,48 +97,49 @@ public class SignUpActivity extends AppCompatActivity {
                         Toast.makeText(this, "This email is banned from signing up.", Toast.LENGTH_SHORT).show();
                         return;
                     }
-
-                    /**
-                     * Account creation logic
-                     */
-                    mAuth.createUserWithEmailAndPassword(email, password)
-                            .addOnSuccessListener(authResult -> {
-                                String uid = authResult.getUser().getUid();
-
-                                List<String> registeredEventsList = new ArrayList<>();
-                                Map<String, Object> user = new HashMap<>();
-                                user.put("name", name);
-                                user.put("email", email);
-                                user.put("phone", phone);
-                                user.put("registeredEvents", registeredEventsList);
-
-                                /**
-                                 * Added moderation-related flags for admin flows.
-                                 */
-                                user.put("isOrganizer", false);
-                                user.put("organizerBanned", false);
-                                user.put("isDeleted", false);
-                                user.put("deletedByAdmin", false);
-                                user.put("isAnonymous", false);
-
-                                db.collection("users")
-                                        .document(uid)
-                                        .set(user, SetOptions.merge())
-                                        .addOnSuccessListener(unused -> {
-                                            Toast.makeText(this, "Account Created", Toast.LENGTH_SHORT).show();
-                                            startActivity(new Intent(SignUpActivity.this, MainActivity.class));
-                                            finish();
-                                        })
-                                        .addOnFailureListener(err ->
-                                                Toast.makeText(this,
-                                                        "Could not save profile: " + (err.getMessage() != null ? err.getMessage() : "unknown error"),
-                                                        Toast.LENGTH_LONG).show());
-                            })
-                            .addOnFailureListener(err ->
-                                    Toast.makeText(this, authErrorMessage(err), Toast.LENGTH_LONG).show());
+                    createUserAndSaveProfile(name, email, password, phone);
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Could not verify sign-up eligibility.", Toast.LENGTH_SHORT).show());
+    }
+
+    private void createUserAndSaveProfile(String name, String email, String password, String phone) {
+        mAuth.createUserWithEmailAndPassword(email, password)
+                .addOnSuccessListener(authResult -> {
+                    FirebaseUser firebaseUser = authResult.getUser();
+                    if (firebaseUser == null) {
+                        Toast.makeText(this, R.string.sign_up_auth_user_missing, Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    String uid = firebaseUser.getUid();
+
+                    List<String> registeredEvents = new ArrayList<>();
+                    Map<String, Object> user = new HashMap<>();
+                    user.put("name", name);
+                    user.put("email", email);
+                    user.put("phone", phone);
+                    user.put("registeredEvents", registeredEvents);
+                    user.put("isOrganizer", false);
+                    user.put("organizerBanned", false);
+                    user.put("isDeleted", false);
+                    user.put("deletedByAdmin", false);
+                    user.put("isAnonymous", false);
+
+                    db.collection("users")
+                            .document(uid)
+                            .set(user, SetOptions.merge())
+                            .addOnSuccessListener(unused -> {
+                                Toast.makeText(this, "Account Created", Toast.LENGTH_SHORT).show();
+                                startActivity(new Intent(SignUpActivity.this, MainActivity.class));
+                                finish();
+                            })
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(this,
+                                            "Could not save profile: " + (e.getMessage() != null ? e.getMessage() : "unknown error"),
+                                            Toast.LENGTH_LONG).show());
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, authErrorMessage(e), Toast.LENGTH_LONG).show());
     }
 
     private static String textFrom(TextInputLayout layout) {
@@ -193,12 +150,19 @@ public class SignUpActivity extends AppCompatActivity {
         return cs != null ? cs.toString() : "";
     }
 
-    /** Validates sign-up fields; returns first error message or null if valid. */
     static String validateSignUpInput(String name, String email, String password) {
-        if (name == null || name.trim().isEmpty()) return "Name required";
-        if (email == null || email.trim().isEmpty()) return "Email required";
-        if (password == null || password.isEmpty()) return "Password required";
-        if (password.length() < 6) return "Password must be at least 6 characters";
+        if (name == null || name.trim().isEmpty()) {
+            return "Name required";
+        }
+        if (email == null || email.trim().isEmpty()) {
+            return "Email required";
+        }
+        if (password == null || password.isEmpty()) {
+            return "Password required";
+        }
+        if (password.length() < 6) {
+            return "Password must be at least 6 characters";
+        }
         return null;
     }
 
@@ -215,5 +179,4 @@ public class SignUpActivity extends AppCompatActivity {
         String msg = e != null && e.getMessage() != null ? e.getMessage() : "Sign up failed.";
         return "Could not create account: " + msg;
     }
-
 }

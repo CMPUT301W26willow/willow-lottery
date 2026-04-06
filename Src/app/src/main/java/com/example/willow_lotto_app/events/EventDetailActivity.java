@@ -13,11 +13,23 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.willow_lotto_app.EntrantResponseManager;
-import com.example.willow_lotto_app.OrganizerLotteryManager;
 import com.example.willow_lotto_app.R;
+import com.example.willow_lotto_app.organizer.EventOrganizerAccess;
+import com.example.willow_lotto_app.admin.AdminAccessUtil;
+import com.example.willow_lotto_app.organizer.OrganizerLotteryManager;
+import com.example.willow_lotto_app.notification.NotificationStore;
+import com.example.willow_lotto_app.notification.NotificationTypes;
+import com.example.willow_lotto_app.notification.UserNotification;
 import com.example.willow_lotto_app.registration.Registration;
 import com.example.willow_lotto_app.registration.RegistrationStatus;
 import com.example.willow_lotto_app.registration.RegistrationStore;
+import com.example.willow_lotto_app.events.comments.EventComment;
+import com.example.willow_lotto_app.events.comments.EventCommentDocument;
+import com.example.willow_lotto_app.events.comments.EventCommentPostValidator;
+import com.example.willow_lotto_app.events.comments.EventCommentThread;
+import com.example.willow_lotto_app.events.comments.EventCommentThreadMerge;
+import com.example.willow_lotto_app.events.comments.EventCommentsAdapter;
+import com.example.willow_lotto_app.events.poster.EventPosterLoader;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -62,6 +74,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private RegistrationStore registrationStore;
     private EntrantResponseManager responseManager;
     private OrganizerLotteryManager lotteryManager;
+    private NotificationStore notificationStore;
 
     private String eventId;
     private String currentUserId;
@@ -122,6 +135,7 @@ public class EventDetailActivity extends AppCompatActivity {
         registrationStore = new RegistrationStore();
         responseManager = new EntrantResponseManager();
         lotteryManager = new OrganizerLotteryManager();
+        notificationStore = new NotificationStore();
 
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -391,6 +405,7 @@ public class EventDetailActivity extends AppCompatActivity {
         event.setLimit(waitlistLimit);
 
         event.setDrawSize(getInt(doc, "drawSize"));
+        event.setCoOrganizerIds(EventOrganizerAccess.readCoOrganizerIds(doc));
 
         nameView.setText(event.getName() != null ? event.getName() : "");
         descriptionView.setText(event.getDescription() != null ? event.getDescription() : "");
@@ -624,6 +639,37 @@ public class EventDetailActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Writes an in-app notification when the entrant joins the waiting list (public or private flow).
+     */
+    private void sendWaitlistJoinedInAppNotification() {
+        if (currentUserId == null) {
+            return;
+        }
+        String eventTitle;
+        if (event != null && event.getName() != null && !event.getName().trim().isEmpty()) {
+            eventTitle = event.getName().trim();
+        } else if (nameView != null && nameView.getText() != null && nameView.getText().length() > 0) {
+            eventTitle = nameView.getText().toString().trim();
+        } else {
+            eventTitle = getString(R.string.notif_event_fallback_name);
+        }
+        UserNotification notification = new UserNotification(
+                eventId,
+                eventTitle,
+                getString(R.string.notif_waitlist_joined_body, eventTitle),
+                NotificationTypes.WAITLIST_JOINED);
+        notificationStore.sendNotificationToUser(currentUserId, notification, new NotificationStore.SimpleCallback() {
+            @Override
+            public void onSuccess() {
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+            }
+        });
+    }
+
     // basic join logic , explicitly writes WAITLISTED status
     /**
      * Adds the current user to the waiting list for this event.
@@ -632,7 +678,14 @@ public class EventDetailActivity extends AppCompatActivity {
      * @since 30/03/2026
      */
     private void joinEvent() {
-        if (currentUserId == null) return;
+        if (currentUserId == null) {
+            return;
+        }
+        Integer limit = event != null ? event.getLimit() : null;
+        if (limit != null && limit > 0 && waitingListCount >= limit) {
+            Toast.makeText(this, R.string.waitlist_full_message, Toast.LENGTH_SHORT).show();
+            return;
+        }
         String docId = eventId + "_" + currentUserId;
         Map<String, Object> reg = new HashMap<>();
         reg.put("eventId", eventId);
@@ -647,6 +700,7 @@ public class EventDetailActivity extends AppCompatActivity {
                     waitingListCount++;
                     waitingListView.setText(getString(R.string.event_detail_waiting_list_count, waitingListCount));
                     updateJoinLeaveButton();
+                    sendWaitlistJoinedInAppNotification();
                 })
                 .addOnFailureListener(e -> Toast.makeText(this, "Could not join event", Toast.LENGTH_SHORT).show());
     }
@@ -686,6 +740,11 @@ public class EventDetailActivity extends AppCompatActivity {
         // US 1:05:07
         // CHANGED: accepting a private-event invitation moves the entrant onto the waiting list
         if (RegistrationStatus.PRIVATE_INVITED.getValue().equals(currentStatus)) {
+            Integer limit = event != null ? event.getLimit() : null;
+            if (limit != null && limit > 0 && waitingListCount >= limit) {
+                Toast.makeText(this, R.string.waitlist_full_message, Toast.LENGTH_SHORT).show();
+                return;
+            }
             registrationStore.updateRegistrationStatus(
                     registrationId,
                     RegistrationStatus.WAITLISTED.getValue(),
@@ -696,6 +755,7 @@ public class EventDetailActivity extends AppCompatActivity {
                             joined = true;
                             loadWaitingListCount();
                             updateJoinLeaveButton();
+                            sendWaitlistJoinedInAppNotification();
                             Toast.makeText(EventDetailActivity.this,
                                     "You joined the private event waiting list.",
                                     Toast.LENGTH_SHORT).show();
@@ -819,9 +879,20 @@ public class EventDetailActivity extends AppCompatActivity {
      * Checks if the current user is the event organizer.
      * If so, enables the delete button on all comments.
      */
+// CHANGED: also grants delete access to admins (03.10.01)
     private void checkIfOrganizer() {
-        if (currentUserId != null && event != null
-                && currentUserId.equals(event.getOrganizerId())) {
+        if (currentUserId == null) return;
+
+        // existing organizer check
+        if (event != null && event.isManagedBy(currentUserId)) {
+            commentsAdapter.setIsOrganizer(true);
+            return;
+        }
+
+        // ADDED: also show delete buttons if the current user is an admin
+        com.google.firebase.auth.FirebaseUser firebaseUser =
+                com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        if (firebaseUser != null && AdminAccessUtil.isAdminEmail(firebaseUser.getEmail())) {
             commentsAdapter.setIsOrganizer(true);
         }
     }

@@ -2,6 +2,7 @@ package com.example.willow_lotto_app.events;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -33,6 +34,13 @@ public class Event {
     private Integer limit;      // max spots
     private Integer drawSize;   // lottery winner count
     private java.util.List<String> registeredUsers;
+    /** UIDs with the same dashboard powers as the primary organizer. */
+    private List<String> coOrganizerIds;
+    /**
+     * Count of {@code registrations} with waitlisted status for this event.
+     * {@code -1} means not loaded yet (UI falls back to {@link #registeredUsers} size).
+     */
+    private int waitlistedRegistrationCount = -1;
 
     public Event() {
     }
@@ -131,6 +139,45 @@ public class Event {
 
     public void setRegisteredUsers(java.util.List<String> registeredUsers) {
         this.registeredUsers = registeredUsers;
+    }
+
+    public List<String> getCoOrganizerIds() {
+        return coOrganizerIds;
+    }
+
+    public void setCoOrganizerIds(List<String> coOrganizerIds) {
+        this.coOrganizerIds = coOrganizerIds;
+    }
+
+    /**
+     * Whether {@code uid} is the primary organizer or a co-organizer.
+     */
+    public boolean isManagedBy(String uid) {
+        if (uid == null) {
+            return false;
+        }
+        if (uid.equals(organizerId)) {
+            return true;
+        }
+        return coOrganizerIds != null && coOrganizerIds.contains(uid);
+    }
+
+    public void setWaitlistedRegistrationCount(int count) {
+        this.waitlistedRegistrationCount = count;
+    }
+
+    public int getWaitlistedRegistrationCount() {
+        return waitlistedRegistrationCount;
+    }
+
+    /**
+     * Shown on list cards and used for “spots available” when registration counts are loaded.
+     */
+    public int getWaitlistDisplayCount() {
+        if (waitlistedRegistrationCount >= 0) {
+            return waitlistedRegistrationCount;
+        }
+        return registeredUsers != null ? registeredUsers.size() : 0;
     }
 
     /**

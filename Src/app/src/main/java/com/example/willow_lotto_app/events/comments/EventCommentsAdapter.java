@@ -1,4 +1,4 @@
-package com.example.willow_lotto_app.events;
+package com.example.willow_lotto_app.events.comments;
 
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;

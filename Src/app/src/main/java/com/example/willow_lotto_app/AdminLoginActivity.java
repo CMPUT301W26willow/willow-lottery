@@ -26,7 +26,6 @@ public class AdminLoginActivity extends AppCompatActivity {
     private TextInputEditText passwordEdit;
     private MaterialButton adminAccessButton;
 
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
