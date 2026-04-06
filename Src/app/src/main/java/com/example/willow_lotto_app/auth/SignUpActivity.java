@@ -26,9 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * Email/password account registration screen.
- */
+/** Create a new account with name, email, and password. */
 public class SignUpActivity extends AppCompatActivity {
 
     TextInputLayout nameInput;

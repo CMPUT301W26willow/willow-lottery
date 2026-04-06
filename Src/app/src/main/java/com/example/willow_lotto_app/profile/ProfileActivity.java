@@ -50,14 +50,8 @@ import com.example.willow_lotto_app.admin.AdminDashboardActivity;
 import com.example.willow_lotto_app.organizer.ui.OrganizerDashboardActivity;
 import com.example.willow_lotto_app.organizer.ui.OrganizerMyEventsActivity;
 
-/**
- * Profile management screen for the signed-in user.
- *<p>
- * Responsibilities:
- * - Lets users view and edit basic profile fields backed by Firestore.
- * - Provides navigation into organizer flows (create first event or open
- *   {@link com.example.willow_lotto_app.organizer.ui.OrganizerDashboardActivity} for the latest event).
- * - Exposes registration history for the user based on stored event IDs.
+/*
+ * Profile + notification toggle on users/{uid}, registration history, organizer shortcuts, admin if allow-listed.
  */
 public class ProfileActivity extends AppCompatActivity {
 

@@ -16,10 +16,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.FirebaseAuth;
 
-/**
- * Sample admin entry from the main login screen: email + password via Firebase Auth,
- * then opens {@link AdminDashboardActivity} only if the account is on the allow-list.
- */
+/** Admin sign-in; opens the admin dashboard if the email is allow-listed. */
 public class AdminLoginActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;

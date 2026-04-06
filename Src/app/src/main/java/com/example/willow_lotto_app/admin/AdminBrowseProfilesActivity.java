@@ -21,60 +21,29 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * Administrator screen for browsing user profiles.
- * <p>
- * Responsibilities:
- * - Supports separate organizer and entrant browsing modes.
- * - Allows administrators to remove organizer privileges.
- * - Allows administrators to remove entrant/user profiles.
- * - Bans removed entrant emails from signing up again.
- */
-
+/** Admin screen to browse users, remove organizer role, or delete profiles. */
 public class AdminBrowseProfilesActivity extends AppCompatActivity implements AdminProfileAdapter.AdminProfileActionListener{
+
     /**
-     * Intent extra key used to decide which type of profiles to display.
+     * Intent extra key for {@link #MODE_ORGANIZERS} or {@link #MODE_ENTRANTS}.
      */
     public static final String EXTRA_MODE = "mode";
 
     /**
-     * Mode constant for organizer profile browsing.
+     * Value for {@link #EXTRA_MODE}: list users with {@code isOrganizer=true}.
      */
     public static final String MODE_ORGANIZERS = "organizers";
 
     /**
-     * Mode constant for entrant/user profile browsing.
+     * Value for {@link #EXTRA_MODE}: list all non-deleted users (default if extra missing).
      */
     public static final String MODE_ENTRANTS = "entrants";
 
-    /**
-     * RecyclerView for displaying profiles.
-     */
     private RecyclerView recyclerView;
-
-    /**
-     * Firestore reference.
-     */
     private FirebaseFirestore db;
-
-    /**
-     * Current browsing mode.
-     */
     private String mode;
-
-    /**
-     * Signed-in admin email used for logs.
-     */
     private String adminEmail;
-
-    /**
-     * Backing list for the adapter.
-     */
     private final List<AdminUserItem> userList = new ArrayList<>();
-
-    /**
-     * Adapter used by the RecyclerView.
-     */
     private AdminProfileAdapter adapter;
 
     private String searchQueryNormalized = "";
@@ -105,7 +74,7 @@ public class AdminBrowseProfilesActivity extends AppCompatActivity implements Ad
             mode = MODE_ENTRANTS;
         }
 
-        adapter = new AdminProfileAdapter(userList, this, mode);
+        adapter = new AdminProfileAdapter(userList, this, mode); // mode drives toolbar title + row actions
         recyclerView.setAdapter(adapter);
 
         MaterialToolbar toolbar = findViewById(R.id.admin_profiles_toolbar);
@@ -127,17 +96,7 @@ public class AdminBrowseProfilesActivity extends AppCompatActivity implements Ad
         loadProfiles();
     }
 
-    /**
-     * Loads profiles depending on the current screen mode.
-     * <p>
-     * Organizer mode:
-     * - show users where isOrganizer is true
-     * <p>
-     * Entrant mode:
-     * - show all non-deleted users
-     * <p>
-     * In both cases, soft-deleted users are excluded.
-     */
+    // Organizers: query isOrganizer==true. Entrants: all users. Always skip isDeleted; then search filter.
     private void loadProfiles() {
         if (MODE_ORGANIZERS.equals(mode)) {
             db.collection("users")
@@ -175,6 +134,7 @@ public class AdminBrowseProfilesActivity extends AppCompatActivity implements Ad
         }
     }
 
+    // Narrows userList in place when dashboard passed a search query
     private void applyProfileSearchFilter() {
         if (searchQueryNormalized.isEmpty()) {
             return;
@@ -189,6 +149,10 @@ public class AdminBrowseProfilesActivity extends AppCompatActivity implements Ad
         userList.addAll(filtered);
     }
 
+    /**
+     * @param user profile row
+     * @return true if uid, email, name, or displayName matches {@link #searchQueryNormalized}
+     */
     private boolean profileMatchesSearch(AdminUserItem user) {
         return AdminSearchTextUtil.containsNormalized(user.getUid(), searchQueryNormalized)
                 || AdminSearchTextUtil.containsNormalized(user.getEmail(), searchQueryNormalized)
@@ -197,9 +161,7 @@ public class AdminBrowseProfilesActivity extends AppCompatActivity implements Ad
     }
 
     /**
-     * Called when the admin taps "Remove Organizer Privileges".
-     *
-     * @param user selected user
+     * @param user organizer row selected for demotion
      */
     @Override
     public void onRemoveOrganizerClicked(AdminUserItem user) {
@@ -212,9 +174,7 @@ public class AdminBrowseProfilesActivity extends AppCompatActivity implements Ad
     }
 
     /**
-     * Called when the admin taps "Delete Profile".
-     *
-     * @param user selected user
+     * @param user profile selected for soft-delete and optional email ban
      */
     @Override
     public void onDeleteProfileClicked(AdminUserItem user) {
@@ -227,13 +187,7 @@ public class AdminBrowseProfilesActivity extends AppCompatActivity implements Ad
     }
 
     /**
-     * Removes organizer privileges while still allowing the user to remain
-     * a normal user and/or entrant.
-     * <p>
-     * This also permanently blocks the user from becoming an organizer again
-     * by setting organizerBanned to true.
-     *
-     * @param user selected organizer profile
+     * @param user user document to set {@code isOrganizer=false}, {@code organizerBanned=true}
      */
     private void removeOrganizerPrivileges(AdminUserItem user) {
         Map<String, Object> updates = new HashMap<>();
@@ -245,10 +199,6 @@ public class AdminBrowseProfilesActivity extends AppCompatActivity implements Ad
                 .document(user.getUid())
                 .update(updates)
                 .addOnSuccessListener(unused -> {
-                    /**
-                     * Notify the affected user through the existing in-app
-                     * notification system.
-                     */
                     AdminNotificationHelper.sendAdminNotification(
                             user.getUid(),
                             null,
@@ -257,9 +207,6 @@ public class AdminBrowseProfilesActivity extends AppCompatActivity implements Ad
                             "admin_remove_organizer"
                     );
 
-                    /**
-                     * Write an admin audit log entry.
-                     */
                     AdminNotificationHelper.logAdminAction(
                             adminEmail,
                             "profile",
@@ -276,15 +223,7 @@ public class AdminBrowseProfilesActivity extends AppCompatActivity implements Ad
     }
 
     /**
-     * Soft-deletes the user profile and bans the email from signing up again.
-     * <p>
-     * This does not delete Firebase Authentication from the client because
-     * that is risky for moderation flows. Instead, it:
-     * - marks the profile as deleted
-     * - removes organizer privileges if present
-     * - records the banned email in a banned_emails collection
-     *
-     * @param user selected user profile
+     * @param user profile to mark deleted; non-empty email also writes {@code banned_emails/{email}}
      */
     private void deleteProfileAndBanEmail(AdminUserItem user) {
         Map<String, Object> userUpdates = new HashMap<>();

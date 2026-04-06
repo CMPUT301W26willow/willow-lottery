@@ -14,9 +14,7 @@ import com.example.willow_lotto_app.registration.Registration;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Waitlist rows with organizer actions: invite (lottery slot) or remove from waitlist.
- */
+/** List rows for waitlisted entrants with invite/remove actions. */
 public class OrganizerWaitlistAdapter extends BaseAdapter {
 
     public interface Listener {

@@ -9,14 +9,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Manager class that handles organizer-side private event invitations.
- * It supports searching users and sending private waiting-list invitations.
- *
- * @author Jasdeep Cheema
- * @version 1.0
- * @since 31/03/2026
- */
+/** Search users and send private waitlist invites for an event. */
 public class PrivateEventInviteManager {
 
     /**

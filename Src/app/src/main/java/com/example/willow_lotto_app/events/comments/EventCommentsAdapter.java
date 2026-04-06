@@ -19,9 +19,7 @@ import com.google.firebase.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Top-level comments with expand/collapse replies and emoji reactions.
- */
+/** RecyclerView for event comment threads, replies, and reactions. */
 public final class EventCommentsAdapter extends RecyclerView.Adapter<EventCommentsAdapter.ThreadHolder> {
 
     public interface ThreadListener {

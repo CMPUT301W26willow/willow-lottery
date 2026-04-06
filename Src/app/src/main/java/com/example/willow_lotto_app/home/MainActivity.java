@@ -39,8 +39,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-// Home screen: lists public events from Firestore, search/filters, join/leave waitlist.
-// Bottom nav goes to Events, Notifications, Profile. Cards are EventsAdapter.
+/*
+ * Logged-in home: load public events, filter/search in memory, join/leave via registrations/{eventId_uid}.
+ * Bottom nav to other tabs; card tap opens EventDetailActivity.
+ */
 public class MainActivity extends AppCompatActivity {
 
     private static final String REGISTRATIONS_COLLECTION = "registrations";

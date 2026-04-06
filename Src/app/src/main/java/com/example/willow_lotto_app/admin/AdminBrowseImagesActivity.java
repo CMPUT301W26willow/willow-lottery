@@ -22,38 +22,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Administrator screen for browsing uploaded event images.
- * <p>
- * Current scope:
- * - Uses event posterUri values as the image source.
- * - Lets the admin remove the image by clearing posterUri on the event.
- */
-
+/** Admin screen to view and remove event poster images. */
 public class AdminBrowseImagesActivity extends AppCompatActivity implements AdminImageAdapter.AdminImageActionListener{
-    /**
-     * RecyclerView for image moderation rows.
-     */
+
     private RecyclerView recyclerView;
-
-    /**
-     * Firestore instance.
-     */
     private FirebaseFirestore db;
-
-    /**
-     * Local list of events that currently have images.
-     */
     private final List<Event> imageEvents = new ArrayList<>();
-
-    /**
-     * Adapter used by the RecyclerView.
-     */
     private AdminImageAdapter adapter;
-
-    /**
-     * Signed-in admin email used in audit logs.
-     */
     private String adminEmail;
 
     private String searchQueryNormalized = "";
@@ -68,6 +43,7 @@ public class AdminBrowseImagesActivity extends AppCompatActivity implements Admi
         }
         setContentView(R.layout.activity_admin_browse_images);
 
+        // Optional filter from dashboard search
         searchQueryNormalized = AdminSearchTextUtil.normalizeQuery(
                 getIntent().getStringExtra(AdminIntentExtras.EXTRA_SEARCH_QUERY));
 
@@ -97,9 +73,7 @@ public class AdminBrowseImagesActivity extends AppCompatActivity implements Admi
         loadImages();
     }
 
-    /**
-     * Loads events that currently have a non-empty posterUri.
-     */
+    // All events with non-empty posterUri, not soft-deleted; apply search filter
     private void loadImages() {
         db.collection("events")
                 .get()
@@ -131,6 +105,10 @@ public class AdminBrowseImagesActivity extends AppCompatActivity implements Admi
                         Toast.makeText(this, "Failed to load images", Toast.LENGTH_SHORT).show());
     }
 
+    /**
+     * @param event candidate row
+     * @return true if there is no active search filter, or the event matches {@link #searchQueryNormalized}
+     */
     private boolean imageEventMatchesSearch(Event event) {
         if (searchQueryNormalized.isEmpty()) {
             return true;
@@ -141,9 +119,7 @@ public class AdminBrowseImagesActivity extends AppCompatActivity implements Admi
     }
 
     /**
-     * Shows confirmation before removing an uploaded event image.
-     *
-     * @param event selected event containing the image
+     * @param event event whose poster the admin chose to remove
      */
     @Override
     public void onRemoveImageClicked(Event event) {
@@ -155,6 +131,9 @@ public class AdminBrowseImagesActivity extends AppCompatActivity implements Admi
                 .show();
     }
 
+    /**
+     * @param event event whose poster was cleared; organizer is notified if {@code organizerId} exists
+     */
     private void notifyOrganizerAboutRemovedImage(Event event) {
         db.collection("events")
                 .document(event.getId())
@@ -173,9 +152,7 @@ public class AdminBrowseImagesActivity extends AppCompatActivity implements Admi
     }
 
     /**
-     * Removes the image for the selected event by clearing posterUri.
-     *
-     * @param event selected event
+     * @param event event document to update ({@code posterUri} cleared, {@code updatedAt} set)
      */
     private void removeImage(Event event) {
         Map<String, Object> updates = new HashMap<>();

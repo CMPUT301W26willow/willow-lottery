@@ -32,10 +32,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Events tab: registration history for the signed-in entrant (US 01.02.03).
- * Browse and join flows live on {@link MainActivity}.
- */
+/** Events tab: shows the signed-in user’s registration history. */
 public class EventsActivity extends AppCompatActivity {
 
     private RecyclerView recycler;

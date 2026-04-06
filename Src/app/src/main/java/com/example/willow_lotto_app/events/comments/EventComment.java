@@ -8,14 +8,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Represents a single top-level comment associated with a specific event.
- * <p>
- * These documents are stored in the Firestore hierarchy at:
- * {@code events/{eventId}/comments/{commentId}}.
- * </p>
- * @author Dev Tiwari
- */
+/** One event comment loaded from or sent to Firestore. */
 public final class EventComment {
 
     /** The unique Firestore document ID for this comment. */

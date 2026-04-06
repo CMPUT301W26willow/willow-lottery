@@ -17,19 +17,13 @@ import com.example.willow_lotto_app.events.poster.EventPosterLoader;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * RecyclerView adapter used by the administrator image moderation screen.
- * <p>
- * Current phase-1 design:
- * - The image list is built from event posterUri values.
- * - Removing an image clears the posterUri field on the related event.
- */
-
+/** Lists event posters for admin review; remove is handled by the activity. */
 public class AdminImageAdapter extends RecyclerView.Adapter<AdminImageAdapter.AdminImageViewHolder> {
-    /**
-     * Listener used by the hosting activity to handle image removal.
-     */
+
     public interface AdminImageActionListener {
+        /**
+         * @param event event whose poster should be removed (activity updates Firestore)
+         */
         void onRemoveImageClicked(Event event);
     }
 
@@ -37,10 +31,8 @@ public class AdminImageAdapter extends RecyclerView.Adapter<AdminImageAdapter.Ad
     private final AdminImageActionListener listener;
 
     /**
-     * Creates the adapter for admin image browsing.
-     *
-     * @param events initial event list containing poster images
-     * @param listener callback listener
+     * @param events   initial events with posters; may be null
+     * @param listener receives remove actions; may be null (buttons no-op)
      */
     public AdminImageAdapter(List<Event> events, AdminImageActionListener listener) {
         if (events != null) {
@@ -50,9 +42,7 @@ public class AdminImageAdapter extends RecyclerView.Adapter<AdminImageAdapter.Ad
     }
 
     /**
-     * Replaces the displayed image source list.
-     *
-     * @param updatedEvents new list of events with posters
+     * @param updatedEvents replaces the backing list; may be null to clear
      */
     public void setEvents(List<Event> updatedEvents) {
         eventsWithImages.clear();
@@ -62,6 +52,11 @@ public class AdminImageAdapter extends RecyclerView.Adapter<AdminImageAdapter.Ad
         notifyDataSetChanged();
     }
 
+    /**
+     * @param parent   parent ViewGroup
+     * @param viewType row type (unused)
+     * @return holder for {@code R.layout.item_admin_image}
+     */
     @NonNull
     @Override
     public AdminImageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -70,10 +65,15 @@ public class AdminImageAdapter extends RecyclerView.Adapter<AdminImageAdapter.Ad
         return new AdminImageViewHolder(view);
     }
 
+    /**
+     * @param holder   row views
+     * @param position index in the backing list
+     */
     @Override
     public void onBindViewHolder(@NonNull AdminImageViewHolder holder, int position) {
         Event event = eventsWithImages.get(position);
 
+        // Title / date + poster preview via EventPosterLoader
         holder.imageTitleText.setText(event.getName() != null ? event.getName() : "Event Poster");
         holder.imageSubtitleText.setText(event.getDate() != null ? event.getDate() : "");
 
@@ -91,9 +91,6 @@ public class AdminImageAdapter extends RecyclerView.Adapter<AdminImageAdapter.Ad
         return eventsWithImages.size();
     }
 
-    /**
-     * ViewHolder for a single admin image row.
-     */
     static class AdminImageViewHolder extends RecyclerView.ViewHolder {
         ImageView previewImage;
         TextView imageTitleText;

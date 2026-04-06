@@ -26,9 +26,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-/**
- * Administrator home: platform metrics, search entry point, and shortcuts to moderation screens.
- */
+/** Admin home: counts, search, links to moderation screens, notification log. */
 public class AdminDashboardActivity extends AppCompatActivity {
 
     private View browseEventsCard;
@@ -58,12 +56,14 @@ public class AdminDashboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_admin_dashboard);
 
+        // Must be allow-listed admin (same check as other admin activities, without deep-link guard helper).
         if (!isCurrentUserAdmin()) {
             Toast.makeText(this, R.string.admin_permission_denied, Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
+        // Summary stat TextViews + management card counts
         eventNumber = findViewById(R.id.adminPanelEventNumber);
         userNumber = findViewById(R.id.adminPanelUserNumber);
         waitlistNumber = findViewById(R.id.adminPanelWaitlistNumber);
@@ -80,6 +80,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
         profileButton = findViewById(R.id.AdminPanelProfileButton);
         notifLogCard = findViewById(R.id.adminPanelNotifLogCard);
 
+        // Navigation shortcuts
         profileButton.setOnClickListener(v ->
                 startActivity(new Intent(this, ProfileActivity.class)));
 
@@ -99,6 +100,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
             startActivity(i);
         });
 
+        // Search: IME action or go button opens destination picker, passes query via AdminIntentExtras
         searchInput = findViewById(R.id.admin_dashboard_search_input);
         notifLogCard.setOnClickListener(v -> showNotificationLogDialog());
         searchGoButton = findViewById(R.id.admin_dashboard_search_go);
@@ -118,6 +120,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
         loadDashboardStats();
     }
 
+    // Parallel reads: events, users, registrations; then collectionGroup notifications for notif count.
     private void loadDashboardStats() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         Task<QuerySnapshot> eventsTask = db.collection("events").get();
@@ -168,6 +171,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
                 });
     }
 
+    // Show em dash when stats failed to load
     private void clearStatsNumbers() {
         String dash = "—";
         eventNumber.setText(dash);
@@ -180,6 +184,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
         manageImagesCount.setText(dash);
     }
 
+    // Read all notification subdocs and show title/message/type in one scrollable dialog
     private void showNotificationLogDialog() {
         FirebaseFirestore.getInstance()
                 .collectionGroup("notifications")
@@ -196,7 +201,6 @@ public class AdminDashboardActivity extends AppCompatActivity {
                         return;
                     }
 
-                    // ADDED: build a readable list of every notification's title, message, and type
                     StringBuilder sb = new StringBuilder();
                     for (QueryDocumentSnapshot doc : snapshots) {
                         String title   = doc.getString("title");
@@ -221,6 +225,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
                         Toast.makeText(this, "Failed to load notifications", Toast.LENGTH_SHORT).show());
     }
 
+    // User picks which browse screen receives the search query
     private void showSearchDestinationPicker() {
         String raw = searchInput != null && searchInput.getText() != null
                 ? searchInput.getText().toString().trim()
@@ -236,6 +241,10 @@ public class AdminDashboardActivity extends AppCompatActivity {
                 .show();
     }
 
+    /**
+     * @param destinationIndex index into {@code R.array.admin_search_destinations}
+     * @param query            raw search string to pass as {@link AdminIntentExtras#EXTRA_SEARCH_QUERY}
+     */
     private void launchSearch(int destinationIndex, String query) {
         switch (destinationIndex) {
             case 0:
@@ -261,10 +270,18 @@ public class AdminDashboardActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * @param n integer to show in dashboard tiles
+     * @return locale-formatted string
+     */
     private String formatInt(int n) {
         return intFormat.format(n);
     }
 
+    /**
+     * @param snap {@code events} query snapshot
+     * @return count of documents without {@code isDeleted=true}
+     */
     private static int countActiveEvents(QuerySnapshot snap) {
         int n = 0;
         for (DocumentSnapshot d : snap.getDocuments()) {
@@ -277,6 +294,10 @@ public class AdminDashboardActivity extends AppCompatActivity {
         return n;
     }
 
+    /**
+     * @param snap {@code users} query snapshot
+     * @return count of non-deleted user profiles
+     */
     private static int countActiveUsers(QuerySnapshot snap) {
         int n = 0;
         for (DocumentSnapshot d : snap.getDocuments()) {
@@ -289,6 +310,10 @@ public class AdminDashboardActivity extends AppCompatActivity {
         return n;
     }
 
+    /**
+     * @param usersSnap {@code users} query snapshot
+     * @return non-deleted users with {@code isOrganizer=true}
+     */
     private static int countActiveOrganizers(QuerySnapshot usersSnap) {
         int n = 0;
         for (DocumentSnapshot d : usersSnap.getDocuments()) {
@@ -303,6 +328,10 @@ public class AdminDashboardActivity extends AppCompatActivity {
         return n;
     }
 
+    /**
+     * @param snap {@code events} query snapshot
+     * @return non-deleted events with non-empty {@code posterUri}
+     */
     private static int countEventsWithPoster(QuerySnapshot snap) {
         int n = 0;
         for (DocumentSnapshot d : snap.getDocuments()) {
@@ -318,6 +347,9 @@ public class AdminDashboardActivity extends AppCompatActivity {
         return n;
     }
 
+    /**
+     * @return true if Firebase Auth user email is on the admin allow-list
+     */
     private boolean isCurrentUserAdmin() {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         return currentUser != null && AdminAccessUtil.isAdminEmail(currentUser.getEmail());

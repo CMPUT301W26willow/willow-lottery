@@ -1,11 +1,3 @@
-/**
- * EditEventActivity.java
- * <p>
- * Author: Mehr Dhanda
- * <p>
- * Allows an organizer to update the event poster for an existing event.
- * The image is compressed and stored in Firestore as a data URI in {@code posterUri}.
- */
 package com.example.willow_lotto_app.events;
 
 import android.content.Intent;
@@ -32,9 +24,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * Organizer screen to replace an event poster. Expects {@link #EXTRA_EVENT_ID} in the intent.
- */
+/** Organizer screen to change an event’s poster image. */
 public class EditEventActivity extends AppCompatActivity {
 
     private static final String TAG = "EditEventActivity";

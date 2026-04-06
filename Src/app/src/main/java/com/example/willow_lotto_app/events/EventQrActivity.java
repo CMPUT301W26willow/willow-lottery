@@ -23,21 +23,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-/**
- * EventListActivity.java
- * <p>
- * Displays a simple list of all events stored in Firestore and lets the user open a selected event.
- * <p>
- * Role in application:
- * - Controller/View layer for an older event list flow.
- * - Reads all documents from the Firestore "events" collection.
- * - Launches EventActivity when an event is selected.
- * <p>
- * Outstanding issues:
- * - Still routes to EventActivity instead of the newer EventDetailActivity.
- * - Uses a very simple ListView-based presentation and does not show posters or richer event metadata.
- * - Coexists with EventsActivity, which now provides a more complete event list flow.
- */
+/** Shows a shareable QR code and deep link for one event. */
 
 public class EventQrActivity extends AppCompatActivity {
 

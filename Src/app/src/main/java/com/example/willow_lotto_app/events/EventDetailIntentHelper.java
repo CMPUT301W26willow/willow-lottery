@@ -3,12 +3,7 @@ package com.example.willow_lotto_app.events;
 import android.content.Intent;
 import android.net.Uri;
 
-/**
- * Resolves the event id for {@link EventDetailActivity} from an {@link Intent}
- * (in-app extra or {@code willow-lottery://event/{id}} deep link).
- *
- * @author Dev Tiwari
- */
+/** Reads event id from intent extras or willow-lottery deep links. */
 public final class EventDetailIntentHelper {
 
     public static final String DEEP_LINK_SCHEME = "willow-lottery";

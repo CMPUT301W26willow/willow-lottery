@@ -20,14 +20,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Admin profile list rows: avatar/initials, guest vs registered copy, moderation actions.
- */
+/** Lists user profiles for admins with remove-organizer and delete actions. */
 public class AdminProfileAdapter extends RecyclerView.Adapter<AdminProfileAdapter.AdminProfileViewHolder> {
 
     public interface AdminProfileActionListener {
+        /**
+         * @param user organizer row to strip organizer role from
+         */
         void onRemoveOrganizerClicked(AdminUserItem user);
 
+        /**
+         * @param user profile to soft-delete / ban
+         */
         void onDeleteProfileClicked(AdminUserItem user);
     }
 
@@ -35,6 +39,11 @@ public class AdminProfileAdapter extends RecyclerView.Adapter<AdminProfileAdapte
     private final AdminProfileActionListener listener;
     private final String mode;
 
+    /**
+     * @param users    backing list (same instance is held and mutated by {@link #setUsers(List)})
+     * @param listener moderation callbacks; may be null
+     * @param mode     {@link AdminBrowseProfilesActivity#MODE_ENTRANTS} or {@link AdminBrowseProfilesActivity#MODE_ORGANIZERS}
+     */
     public AdminProfileAdapter(List<AdminUserItem> users,
                                AdminProfileActionListener listener,
                                String mode) {
@@ -43,6 +52,9 @@ public class AdminProfileAdapter extends RecyclerView.Adapter<AdminProfileAdapte
         this.mode = mode;
     }
 
+    /**
+     * @param updatedUsers replaces rows; may be null to clear
+     */
     public void setUsers(List<AdminUserItem> updatedUsers) {
         users.clear();
         if (updatedUsers != null) {
@@ -51,6 +63,11 @@ public class AdminProfileAdapter extends RecyclerView.Adapter<AdminProfileAdapte
         notifyDataSetChanged();
     }
 
+    /**
+     * @param parent   parent ViewGroup
+     * @param viewType unused
+     * @return holder for {@code R.layout.item_admin_profile}
+     */
     @NonNull
     @Override
     public AdminProfileViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -59,10 +76,15 @@ public class AdminProfileAdapter extends RecyclerView.Adapter<AdminProfileAdapte
         return new AdminProfileViewHolder(view);
     }
 
+    /**
+     * @param holder   row holder
+     * @param position index in the backing list
+     */
     @Override
     public void onBindViewHolder(@NonNull AdminProfileViewHolder holder, int position) {
         AdminUserItem user = users.get(position);
 
+        // Anonymous (guest) rows: fixed title + uid only
         if (user.isAnonymous()) {
             holder.titleText.setText(holder.itemView.getContext().getString(R.string.admin_profile_guest_title));
             holder.subtitleText.setText(user.getUid());
@@ -88,6 +110,7 @@ public class AdminProfileAdapter extends RecyclerView.Adapter<AdminProfileAdapte
                     R.string.admin_profile_meta_format, role, user.getUid()));
         }
 
+        // Avatar: Glide URL or fallback initials
         String photo = user.getProfilePhotoUrl();
         if (!photo.isEmpty()) {
             holder.initialsText.setVisibility(View.GONE);
@@ -119,6 +142,7 @@ public class AdminProfileAdapter extends RecyclerView.Adapter<AdminProfileAdapte
             }
         });
 
+        // Remove-organizer: full list in organizer mode, or single organizer rows in entrant mode
         boolean showRemoveOrganizer = AdminBrowseProfilesActivity.MODE_ORGANIZERS.equals(mode)
                 || (AdminBrowseProfilesActivity.MODE_ENTRANTS.equals(mode) && user.isOrganizer());
         if (showRemoveOrganizer) {
@@ -133,6 +157,10 @@ public class AdminProfileAdapter extends RecyclerView.Adapter<AdminProfileAdapte
         }
     }
 
+    /**
+     * @param user row model
+     * @return one or two letter initials for avatar fallback
+     */
     private static String initialsFor(AdminUserItem user) {
         if (user.isAnonymous()) {
             return "GU";
@@ -152,6 +180,10 @@ public class AdminProfileAdapter extends RecyclerView.Adapter<AdminProfileAdapte
                 : source.substring(0, 1).toUpperCase(Locale.ROOT);
     }
 
+    /**
+     * @param word word to take first letter from
+     * @return first character, or empty string if null/empty
+     */
     private static String initial(String word) {
         if (word == null || word.isEmpty()) {
             return "";

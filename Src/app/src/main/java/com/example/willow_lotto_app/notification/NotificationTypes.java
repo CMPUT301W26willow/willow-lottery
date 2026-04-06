@@ -1,9 +1,6 @@
 package com.example.willow_lotto_app.notification;
 
-/**
- * {@code type} values stored on notification documents in
- * {@code users/{uid}/notifications}. Keep in sync with {@link NotificationAdapter} styling.
- */
+/** String constants for notification type fields in Firestore. */
 public final class NotificationTypes {
 
     public static final String LOTTERY_INVITED = "lottery_invited";
