@@ -3,7 +3,10 @@ package com.example.willow_lotto_app.events.comments;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents a single top-level comment associated with a specific event.
@@ -34,6 +37,9 @@ public final class EventComment {
      * Empty string = top-level comment; non-empty = document id of parent comment (Option A).
      */
     private String parentCommentId;
+
+    /** UID → emoji; one reaction per user. */
+    private Map<String, String> reactionByUser;
 
     /** Stored on new top-level comments; legacy docs may omit this field. */
     public static final String TOP_LEVEL_PARENT_ID = "";
@@ -76,7 +82,24 @@ public final class EventComment {
         c.body = doc.getString("body");
         c.createdAt = doc.getTimestamp("createdAt");
         c.parentCommentId = doc.getString("parentCommentId");
+        c.reactionByUser = readReactionMap(doc.get("reactionByUser"));
         return c;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, String> readReactionMap(Object raw) {
+        if (!(raw instanceof Map)) {
+            return Collections.emptyMap();
+        }
+        Map<?, ?> in = (Map<?, ?>) raw;
+        Map<String, String> out = new HashMap<>();
+        for (Map.Entry<?, ?> e : in.entrySet()) {
+            if (e.getKey() == null || e.getValue() == null) {
+                continue;
+            }
+            out.put(e.getKey().toString(), e.getValue().toString());
+        }
+        return out.isEmpty() ? Collections.emptyMap() : out;
     }
 
     public String getParentCommentId() {
@@ -126,6 +149,10 @@ public final class EventComment {
      */
     public Timestamp getCreatedAt() {
         return createdAt;
+    }
+
+    public Map<String, String> getReactionByUser() {
+        return reactionByUser != null ? reactionByUser : Collections.emptyMap();
     }
 
     /**

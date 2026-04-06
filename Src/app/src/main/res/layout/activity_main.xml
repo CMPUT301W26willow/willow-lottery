@@ -85,14 +85,82 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/home_events_recycler"
+        <HorizontalScrollView
+            android:id="@+id/home_filter_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/home_filter_open"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/button_outline_purple"
+                    android:text="@string/home_filter_open"
+                    android:textColor="@color/primaryPurple"
+                    android:textSize="13sp" />
+
+                <Button
+                    android:id="@+id/home_filter_available"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/button_outline_purple"
+                    android:text="@string/home_filter_spots"
+                    android:textColor="@color/primaryPurple"
+                    android:textSize="13sp" />
+
+                <Button
+                    android:id="@+id/home_filter_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/button_outline_purple"
+                    android:text="@string/home_filter_by_date"
+                    android:textColor="@color/primaryPurple"
+                    android:textSize="13sp" />
+
+                <Button
+                    android:id="@+id/home_filter_clear"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:background="@drawable/button_outline_purple"
+                    android:text="@string/home_filter_clear"
+                    android:textColor="@color/primaryPurple"
+                    android:textSize="13sp" />
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginTop="12dp"
-            android:layout_weight="1"
-            android:clipToPadding="false"
-            android:paddingBottom="16dp" />
+            android:layout_marginTop="8dp"
+            android:layout_weight="1">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/home_events_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingBottom="16dp" />
+
+            <TextView
+                android:id="@+id/home_events_empty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/home_no_events_yet"
+                android:textColor="@color/textGray"
+                android:textSize="16sp"
+                android:visibility="gone" />
+        </FrameLayout>
     </LinearLayout>
 
     <View

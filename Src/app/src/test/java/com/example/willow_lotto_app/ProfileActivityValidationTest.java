@@ -19,7 +19,7 @@ public class ProfileActivityValidationTest {
 
     /**
      * Verifies that an empty name field returns a validation error.
-     * Mirrors the null/empty check in {@link ProfileActivity#saveProfile}.
+     * Mirrors the null/empty check in {@link ProfileActivity #saveProfile}.
      */
     // Checks that an empty name returns a validation error
     @Test
@@ -31,7 +31,7 @@ public class ProfileActivityValidationTest {
 
     /**
      * Verifies that an empty email field returns a validation error.
-     * Mirrors the null/empty check in {@link ProfileActivity#saveProfile}.
+     * Mirrors the null/empty check in {@link ProfileActivity #saveProfile}.
      */
     // Checks that an empty email returns a validation error
     @Test
@@ -55,7 +55,7 @@ public class ProfileActivityValidationTest {
 
     /**
      * Verifies that after a profile is deleted it is marked as no longer existing.
-     * Simulates the end state of {@link ProfileActivity#deleteProfile}.
+     * Simulates the end state of {@link ProfileActivity #deleteProfile}.
      */
     // Checks that after deletion the profile is marked as no longer existing
     @Test
@@ -81,7 +81,7 @@ public class ProfileActivityValidationTest {
 
     /**
      * Verifies that a null {@code registeredEvents} list is treated as empty.
-     * Mirrors the null check at the top of {@link ProfileActivity#showRegistrationHistory},
+     * Mirrors the null check at the top of {@link ProfileActivity #showRegistrationHistory},
      * which handles the case where Firestore returns no data for the field.
      */
     // Checks that a null events list (returned by Firestore when none exist) is treated as empty
@@ -108,7 +108,7 @@ public class ProfileActivityValidationTest {
     /**
      * Verifies that the event name is displayed when available rather than the raw event ID.
      * Mirrors the {@code eventName != null} ternary inside
-     * {@link ProfileActivity#showRegistrationHistory}.
+     * {@link ProfileActivity #showRegistrationHistory}.
      */
     // Checks that the event name is shown when available, rather than the raw event ID
     @Test

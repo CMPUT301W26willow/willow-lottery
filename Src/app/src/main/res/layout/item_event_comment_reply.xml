@@ -10,8 +10,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
         <TextView
             android:id="@+id/event_comment_reply_author"
@@ -36,7 +36,48 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
+        android:lineSpacingExtra="2dp"
         android:textColor="#666666"
-        android:textSize="13sp"
-        android:lineSpacingExtra="2dp" />
+        android:textSize="13sp" />
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/event_comment_reply_react_thumbs"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/event_comment_reply_react_heart"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/event_comment_reply_react_laugh"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="2dp"
+                android:textSize="13sp" />
+        </LinearLayout>
+    </HorizontalScrollView>
 </LinearLayout>

@@ -52,7 +52,12 @@ public class RegistrationStore {
         this.db = FirebaseFirestore.getInstance();
     }
 
+
+    // CHANGED: use a stable registration document id so the app can
+    // always find the same registration later.
     public void createWaitlistRegistration(String eventId, String userId, final SimpleCallback callback) {
+        String docId = eventId + "_" + userId;
+
         Registration registration = new Registration(
                 eventId,
                 userId,
@@ -60,8 +65,9 @@ public class RegistrationStore {
         );
 
         db.collection("registrations")
-                .add(registration.toMap())
-                .addOnSuccessListener(documentReference -> callback.onSuccess())
+                .document(docId)
+                .set(registration.toMap())
+                .addOnSuccessListener(unused -> callback.onSuccess())
                 .addOnFailureListener(callback::onFailure);
     }
 
@@ -83,6 +89,27 @@ public class RegistrationStore {
         db.collection("registrations")
                 .whereEqualTo("eventId", eventId)
                 .whereEqualTo("status", status)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Registration> results = new ArrayList<>();
+                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                        results.add(Registration.fromDocument(doc));
+                    }
+                    callback.onSuccess(results);
+                })
+                .addOnFailureListener(callback::onFailure);
+    }
+
+    /**
+     * Loads all registration documents for a given user (any status).
+     */
+    public void getRegistrationsForUser(String userId, final RegistrationListCallback callback) {
+        if (userId == null || userId.trim().isEmpty()) {
+            callback.onSuccess(new ArrayList<>());
+            return;
+        }
+        db.collection("registrations")
+                .whereEqualTo("userId", userId)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Registration> results = new ArrayList<>();

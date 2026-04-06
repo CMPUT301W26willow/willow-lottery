@@ -37,6 +37,7 @@
     <string name="home_event_waitlist_count">%d people on waiting list</string>
     <string name="home_event_deadline">Registration deadline: %1$s</string>
     <string name="waitlist_full_message">This waiting list is full.</string>
+    <string name="event_join_closed_message">This event is no longer open for the waiting list.</string>
     <string name="login_reset_email_sent">If an account exists for that email, you will receive reset instructions.</string>
     <string name="login_sign_in_failed">Sign in failed. Check your email and password.</string>
     <string name="login_validation_email_required">Enter your email.</string>
@@ -45,7 +46,28 @@
     <string name="login_reset_failed">Could not send reset email.</string>
     <string name="login_guest_failed">Could not continue as guest. Try again.</string>
     <string name="sign_up_auth_user_missing">Account was created but could not load user. Try signing in.</string>
-    <string name="home_filter_content_desc">Open Events to filter</string>
+    <string name="home_filter_content_desc">Show or hide event filters</string>
+    <string name="home_filter_open">Open</string>
+    <string name="home_filter_spots">Spots available</string>
+    <string name="home_filter_by_date">By date</string>
+    <string name="home_filter_clear">Clear</string>
+    <string name="home_no_events_yet">No events yet</string>
+    <string name="home_no_open_events">No open events found</string>
+    <string name="home_no_spots_events">No events with spots available</string>
+    <string name="reg_history_title">Registration History</string>
+    <string name="reg_history_empty">You have not registered for any events yet. Browse Home to find one.</string>
+    <string name="reg_history_empty_guest">Sign in to see your registration history.</string>
+    <string name="reg_history_registered_fmt">Registered: %1$s</string>
+    <string name="reg_history_event_date_fmt">Event Date: %1$s</string>
+    <string name="reg_history_badge_waitlist">On Waiting List</string>
+    <string name="reg_history_badge_not_selected">Not Selected</string>
+    <string name="reg_history_badge_enrolled">Enrolled</string>
+    <string name="reg_history_badge_invited">Invited</string>
+    <string name="reg_history_outcome_selected">Selected in lottery</string>
+    <string name="reg_history_outcome_not_selected">Not selected in lottery</string>
+    <string name="reg_history_unknown_date">—</string>
+    <string name="reg_history_unknown_event">Event</string>
+    <string name="reg_history_load_failed">Could not load registration history</string>
     <string name="login_title">Let\'s Sign you in</string>
     <string name="login_email_label">Email Address</string>
     <string name="login_email_hint">Enter your email address</string>
@@ -256,6 +278,10 @@
     <string name="event_detail_replying_to">Replying to %1$s</string>
     <string name="event_detail_reply_cancel">Cancel</string>
     <string name="event_detail_replies_load_failed">Could not load replies</string>
+    <string name="event_detail_comments_load_failed">Could not load comments. Check your connection or Firestore index for comments.</string>
+    <string name="event_detail_comment_delete">Delete</string>
+    <string name="event_detail_react_sign_in">Sign in to react.</string>
+    <string name="event_detail_reaction_failed">Could not update reaction</string>
 
     <string name="notif_event_fallback_name">Event</string>
     <string name="notif_waitlist_joined_body">You joined the waiting list for %1$s. We\'ll notify you here if you\'re selected in the lottery or if the organizer sends an update.</string>
@@ -263,6 +289,7 @@
     <string name="notif_badge_on_waitlist">On waiting list</string>
     <string name="notif_badge_waitlist_update">Waiting list update</string>
     <string name="notif_badge_cancelled">Registration cancelled</string>
+    <string name="notif_badge_not_chosen">Not selected</string>
     <string name="notif_badge_default">Update</string>
     <string name="notif_badge_co_organizer_invite">Co-organizer invite</string>
     <string name="co_invite_dialog_title">Co-organizer invitation</string>

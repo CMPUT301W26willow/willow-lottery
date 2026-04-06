@@ -65,6 +65,14 @@ public class CommentsUnitTest {
                 @Override
                 public void onCollapseReplies(int adapterPosition) {
                 }
+
+                @Override
+                public void onDelete(EventComment comment) {
+                }
+
+                @Override
+                public void onReact(EventComment comment, String emoji) {
+                }
             };
 
     private static EventComment fromSnap(String id, String body, String parentId,
@@ -76,6 +84,7 @@ public class CommentsUnitTest {
         when(doc.getString("body")).thenReturn(body);
         when(doc.getTimestamp("createdAt")).thenReturn(createdAt);
         when(doc.getString("parentCommentId")).thenReturn(parentId);
+        when(doc.get("reactionByUser")).thenReturn(null);
         return EventComment.fromSnapshot(doc);
     }
 
@@ -84,9 +93,11 @@ public class CommentsUnitTest {
         Map<String, Object> top = EventCommentDocument.newDraft("u1", "Alex", "Hello", null);
         assertEquals(EventComment.TOP_LEVEL_PARENT_ID, top.get("parentCommentId"));
         assertTrue(top.get("createdAt") instanceof FieldValue);
+        assertTrue(top.containsKey("reactionByUser"));
 
         Map<String, Object> reply = EventCommentDocument.newDraft("u1", "Alex", "Re", "pid");
         assertEquals("pid", reply.get("parentCommentId"));
+        assertTrue(reply.containsKey("reactionByUser"));
 
         assertEquals("User", EventCommentDocument.newDraft("u1", null, "Hi", null).get("authorName"));
         assertEquals("User", EventCommentDocument.newDraft("u1", "  ", "Hi", null).get("authorName"));

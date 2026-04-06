@@ -4,7 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,10 +27,13 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,8 +41,8 @@ import java.util.Set;
  * Home screen for entrants.
  *<p>
  * Responsibilities:
- * - Implements 01.01.03 "View events available to join" by showing a
- *   limited feed of events the user can browse.
+ * - Implements 01.01.03 "View events available to join" by listing public
+ *   events from Firestore. Registration history is on {@link EventsActivity}.
  * - Wires up bottom navigation to Events, Notifications, and Profile.
  * - Delegates rendering of individual cards to {@link EventsAdapter}.
  */
@@ -46,6 +52,9 @@ public class MainActivity extends AppCompatActivity {
 
     BottomNavigationView bottomNav;
     private RecyclerView homeEventsRecycler;
+    private TextView homeEventsEmpty;
+    private View homeFilterScroll;
+    private EditText homeSearchInput;
     private EventsAdapter adapter;
     private FirebaseFirestore db;
     private String currentUserId;
@@ -58,12 +67,14 @@ public class MainActivity extends AppCompatActivity {
         bottomNav = findViewById(R.id.bottom_nav);
         bottomNav.setSelectedItemId(R.id.nav_home);
         homeEventsRecycler = findViewById(R.id.home_events_recycler);
+        homeEventsEmpty = findViewById(R.id.home_events_empty);
+        homeFilterScroll = findViewById(R.id.home_filter_scroll);
         adapter = new EventsAdapter();
         homeEventsRecycler.setLayoutManager(new LinearLayoutManager(this));
         homeEventsRecycler.setAdapter(adapter);
 
-        EditText homeSearch = findViewById(R.id.home_search_input);
-        homeSearch.addTextChangedListener(new TextWatcher() {
+        homeSearchInput = findViewById(R.id.home_search_input);
+        homeSearchInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
@@ -75,10 +86,37 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 adapter.filter(s != null ? s.toString() : "");
+                updateHomeEmptyState(getString(R.string.home_no_events_yet));
             }
         });
-        findViewById(R.id.home_filter_btn).setOnClickListener(v ->
-                startActivity(new Intent(MainActivity.this, EventsActivity.class)));
+
+        Button homeFilterOpen = findViewById(R.id.home_filter_open);
+        Button homeFilterAvailable = findViewById(R.id.home_filter_available);
+        Button homeFilterDate = findViewById(R.id.home_filter_date);
+        Button homeFilterClear = findViewById(R.id.home_filter_clear);
+        homeFilterOpen.setOnClickListener(v -> {
+            adapter.filterByOpenStatus();
+            updateHomeEmptyState(getString(R.string.home_no_open_events));
+        });
+        homeFilterAvailable.setOnClickListener(v -> {
+            adapter.filterByAvailability();
+            updateHomeEmptyState(getString(R.string.home_no_spots_events));
+        });
+        homeFilterDate.setOnClickListener(v -> {
+            adapter.filterByDate();
+            updateHomeEmptyState(getString(R.string.home_no_events_yet));
+        });
+        homeFilterClear.setOnClickListener(v -> {
+            adapter.clearFilters();
+            String q = homeSearchInput.getText() != null ? homeSearchInput.getText().toString() : "";
+            adapter.filter(q);
+            updateHomeEmptyState(getString(R.string.home_no_events_yet));
+        });
+
+        findViewById(R.id.home_filter_btn).setOnClickListener(v -> {
+            boolean show = homeFilterScroll.getVisibility() != View.VISIBLE;
+            homeFilterScroll.setVisibility(show ? View.VISIBLE : View.GONE);
+        });
 
         db = FirebaseFirestore.getInstance();
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
@@ -89,6 +127,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onJoin(Event event) {
                 if (currentUserId == null) {
+                    return;
+                }
+                if (isEventClosedForJoining(event)) {
+                    Toast.makeText(MainActivity.this,
+                            R.string.event_join_closed_message,
+                            Toast.LENGTH_SHORT).show();
                     return;
                 }
                 Integer lim = event.getLimit();
@@ -161,11 +205,19 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    // Load events (limit 10) then current user's joined IDs.
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadEvents();
+    }
+
+    /**
+     * Loads all public events from Firestore (public, non-deleted),
+     * then applies the current home search query and empty state.
+     */
     private void loadEvents() {
 
         db.collection("events")
-                .limit(10)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Event> list = new ArrayList<>();
@@ -174,7 +226,6 @@ public class MainActivity extends AppCompatActivity {
                         if (isDeleted != null && isDeleted) {
                             continue;
                         }
-                        // added to not run loop if event is private
                         Boolean isPrivate = doc.getBoolean("isPrivate");
                         if (isPrivate != null && isPrivate) {
                             continue;
@@ -188,20 +239,65 @@ public class MainActivity extends AppCompatActivity {
                         event.setPosterUri(getString(doc, "posterUri"));
                         event.setRegistrationStart(getString(doc, "registrationStart"));
                         event.setRegistrationEnd(getString(doc, "registrationEnd"));
-                        event.setRegisteredUsers(readStringList(doc, "registeredUsers"));
+                        List<String> registeredUsers =
+                                doc.get("registeredUsers") instanceof List
+                                        ? castStringList(doc.get("registeredUsers"))
+                                        : readStringList(doc, "registeredUsers");
+                        event.setRegisteredUsers(registeredUsers);
                         WaitlistCountLoader.applyWaitlistLimitFromDoc(doc, event);
                         list.add(event);
                     }
                     adapter.setEvents(list);
+                    String q = homeSearchInput.getText() != null ? homeSearchInput.getText().toString() : "";
+                    adapter.filter(q);
+                    updateHomeEmptyState(getString(R.string.home_no_events_yet));
                     WaitlistCountLoader.loadWaitlistedCounts(db, list,
-                            () -> runOnUiThread(() -> adapter.notifyDataSetChanged()));
+                            () -> runOnUiThread(() -> {
+                                adapter.notifyDataSetChanged();
+                                updateHomeEmptyState(getString(R.string.home_no_events_yet));
+                            }));
                     if (currentUserId != null) {
                         loadJoinedEventIds(joined -> adapter.setJoinedEventIds(joined));
                     } else {
                         adapter.setJoinedEventIds(new HashSet<>());
                     }
+                })
+                .addOnFailureListener(e -> {
+                    adapter.setEvents(new ArrayList<>());
+                    String msg = "Could not load events";
+                    homeEventsEmpty.setText(msg);
+                    homeEventsEmpty.setVisibility(View.VISIBLE);
+                    homeEventsRecycler.setVisibility(View.GONE);
+                    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
                 });
 
+    }
+
+    private void updateHomeEmptyState(String defaultEmptyMessage) {
+        if (homeEventsEmpty == null) {
+            return;
+        }
+        if (adapter.getItemCount() == 0) {
+            homeEventsEmpty.setText(defaultEmptyMessage);
+            homeEventsEmpty.setVisibility(View.VISIBLE);
+            homeEventsRecycler.setVisibility(View.GONE);
+        } else {
+            homeEventsEmpty.setVisibility(View.GONE);
+            homeEventsRecycler.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private static List<String> castStringList(Object o) {
+        List<String> out = new ArrayList<>();
+        if (!(o instanceof List)) {
+            return out;
+        }
+        for (Object x : (List<?>) o) {
+            if (x != null) {
+                out.add(x.toString());
+            }
+        }
+        return out;
     }
 
     // Query registrations where userId = currentUser → set of eventIds.
@@ -247,5 +343,27 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return out;
+    }
+
+    /** True if registration has ended or the event date is in the past (yyyy-MM-dd compare). */
+    private static boolean isEventClosedForJoining(Event event) {
+        if (event == null) {
+            return false;
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        String today = sdf.format(new Date());
+        String registrationEnd = event.getRegistrationEnd();
+        if (registrationEnd != null && !registrationEnd.trim().isEmpty()) {
+            if (registrationEnd.trim().compareTo(today) < 0) {
+                return true;
+            }
+        }
+        String eventDate = event.getDate();
+        if (eventDate != null && !eventDate.trim().isEmpty()) {
+            if (eventDate.trim().compareTo(today) < 0) {
+                return true;
+            }
+        }
+        return false;
     }
 }
