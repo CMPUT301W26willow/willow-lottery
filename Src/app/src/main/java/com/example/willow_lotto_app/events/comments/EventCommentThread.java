@@ -89,7 +89,7 @@ public final class EventCommentThread {
 
     /**
      * Returns the list of child comments.
-     *
+     * <p>
      * Note: This list may be empty if {@link #expanded} has never been true
      * or if the top-level comment has no replies.
      *

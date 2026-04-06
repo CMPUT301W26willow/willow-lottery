@@ -1,8 +1,8 @@
 /**
  * EditEventActivity.java
- *
+ * <p>
  * Author: Mehr Dhanda
- *
+ * <p>
  * Allows an organizer to update the event poster for an existing event.
  * The image is compressed and stored in Firestore as a data URI in {@code posterUri}.
  */
