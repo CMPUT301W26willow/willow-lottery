@@ -37,6 +37,7 @@ public final class EventCommentDocument {
         } else {
             comment.put("parentCommentId", EventComment.TOP_LEVEL_PARENT_ID);
         }
+        comment.put("reactionByUser", new HashMap<String, Object>());
         return comment;
     }
 }
