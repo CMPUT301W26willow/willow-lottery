@@ -119,6 +119,12 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
                 badgeBg = R.drawable.bg_notif_badge_neutral;
                 badgeTextColor = R.color.textGray;
                 break;
+            case NotificationTypes.LOTTERY_NOT_CHOSEN:
+                iconRes = R.drawable.ic_notification_waitlist;
+                badgeStr = R.string.notif_badge_not_chosen;
+                badgeBg = R.drawable.bg_notif_badge_neutral;
+                badgeTextColor = R.color.textGray;
+                break;
             case NotificationTypes.CO_ORGANIZER_INVITE:
                 iconRes = R.drawable.ic_notification_info;
                 badgeStr = R.string.notif_badge_co_organizer_invite;
