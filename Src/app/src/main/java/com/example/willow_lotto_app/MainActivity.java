@@ -33,7 +33,7 @@ import java.util.Set;
 
 /**
  * Home screen for entrants.
- *
+ *<p>
  * Responsibilities:
  * - Implements 01.01.03 "View events available to join" by showing a
  *   limited feed of events the user can browse.
@@ -161,6 +161,14 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // CHANGED: refresh the events list whenever the user returns from
+    // EventDetailActivity so joined/waitlist info stays up to date.
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadEvents();
+    }
+
     // Load events (limit 10) then current user's joined IDs.
     private void loadEvents() {
 
@@ -234,7 +242,7 @@ public class MainActivity extends AppCompatActivity {
         return o != null ? o.toString() : "";
     }
 
-    @SuppressWarnings("unchecked")
+
     private static List<String> readStringList(QueryDocumentSnapshot doc, String field) {
         List<String> out = new ArrayList<>();
         Object o = doc.get(field);

@@ -23,7 +23,7 @@ import java.util.Map;
 
 /**
  * Administrator screen for browsing user profiles.
- *
+ * <p>
  * Responsibilities:
  * - Supports separate organizer and entrant browsing modes.
  * - Allows administrators to remove organizer privileges.
@@ -129,13 +129,13 @@ public class AdminBrowseProfilesActivity extends AppCompatActivity implements Ad
 
     /**
      * Loads profiles depending on the current screen mode.
-     *
+     * <p>
      * Organizer mode:
      * - show users where isOrganizer is true
-     *
+     * <p>
      * Entrant mode:
      * - show all non-deleted users
-     *
+     * <p>
      * In both cases, soft-deleted users are excluded.
      */
     private void loadProfiles() {
@@ -229,7 +229,7 @@ public class AdminBrowseProfilesActivity extends AppCompatActivity implements Ad
     /**
      * Removes organizer privileges while still allowing the user to remain
      * a normal user and/or entrant.
-     *
+     * <p>
      * This also permanently blocks the user from becoming an organizer again
      * by setting organizerBanned to true.
      *
@@ -277,7 +277,7 @@ public class AdminBrowseProfilesActivity extends AppCompatActivity implements Ad
 
     /**
      * Soft-deletes the user profile and bans the email from signing up again.
-     *
+     * <p>
      * This does not delete Firebase Authentication from the client because
      * that is risky for moderation flows. Instead, it:
      * - marks the profile as deleted

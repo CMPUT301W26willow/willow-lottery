@@ -16,15 +16,15 @@ import java.util.List;
 
 /**
  * OrganizerLotteryManager.java
- *
+ *<p>
  * Implements the core organizer-side lottery logic for selecting entrants, drawing replacements, and sending notifications.
- *
+ *<p>
  * Role in application:
  * - Service/manager layer for organizer lottery operations.
  * - Reads event draw size and registration state from Firestore.
  * - Enforces capacity before inviting additional entrants.
  * - Sends invitation and replacement notifications through NotificationStore.
- *
+ *<p>
  * Outstanding issues:
  * - Random selection currently relies on in-memory shuffling and does not yet include audit logging or deterministic reproducibility.
  * - The manager depends on the registrations collection being populated with consistent status values.
@@ -292,12 +292,26 @@ public class OrganizerLotteryManager {
                 removalStatus.getValue(),
                 new RegistrationStore.SimpleCallback() {
                     @Override
-                    public void onSuccess() { //if the entrant was cancelled, notify them before drawing a replacement
-                        // if declined draw replacement
+                    public void onSuccess() {
+                        // CHANGED: tries to draw a replacement,
+                        // but does not treat decline as failed if none is available.
                         if (removalStatus == RegistrationStatus.CANCELLED) {
                             sendCancelledNotification(eventId, oldRegistrationId, callback);
                         } else {
-                            drawReplacement(eventId, callback);
+                            drawReplacement(eventId, new LotteryCallback() {
+                                @Override
+                                public void onSuccess(String message, List<Registration> affectedRegistrations) {
+                                    // CHANGED: if replacement succeeds too, report both results together.
+                                    callback.onSuccess("Invitation declined. " + message, affectedRegistrations);
+                                }
+
+                                @Override
+                                public void onFailure(Exception e) {
+                                    // CHANGED: do not report decline as failed just because
+                                    // no replacement could be drawn.
+                                    callback.onSuccess("Invitation declined.", new ArrayList<>());
+                                }
+                            });
                         }
                     }
 

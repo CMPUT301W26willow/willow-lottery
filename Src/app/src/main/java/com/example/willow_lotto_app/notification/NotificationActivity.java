@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.willow_lotto_app.MainActivity;
 import com.example.willow_lotto_app.ProfileActivity;
 import com.example.willow_lotto_app.R;
+import com.example.willow_lotto_app.events.EventDetailActivity;
 import com.example.willow_lotto_app.organizer.EventOrganizerAccess;
 import com.example.willow_lotto_app.events.EventsActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -29,13 +30,13 @@ import java.util.List;
 
 /**
  * NotificationActivity displays the current signed-in user's in-app notifications.
- *
+ *<p>
  * Role in application:
  * - Acts as the controller/view layer for the notifications screen.
  * - Reads notification documents from Firestore under:
  *   users/{uid}/notifications
  * - Displays them in a RecyclerView using NotificationAdapter.
- *
+ *<p>
  * Current limitations / outstanding issues:
  * - Notifications are currently read-only.
  * - Notifications are not yet marked as read when opened.
@@ -147,22 +148,40 @@ public class NotificationActivity extends AppCompatActivity {
         return value == null ? "" : value.toString();
     }
 
+    // CHANGED: co-organizer invites still open the accept/decline dialog,
+    // while regular event notifications now open the related event detail page.
     private void onNotificationClicked(UserNotificationItem item) {
-        if (item == null || !NotificationTypes.CO_ORGANIZER_INVITE.equals(item.getType())) {
+        if (item == null) {
             return;
         }
+
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) {
             return;
         }
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.co_invite_dialog_title)
-                .setMessage(R.string.co_invite_dialog_message)
-                .setPositiveButton(R.string.co_invite_accept, (d, w) ->
-                        respondToCoOrganizerInvite(item, user.getUid(), true))
-                .setNegativeButton(R.string.co_invite_decline, (d, w) ->
-                        respondToCoOrganizerInvite(item, user.getUid(), false))
-                .show();
+
+        // CHANGED: special dialog flow for co-organizer invites.
+        if (NotificationTypes.CO_ORGANIZER_INVITE.equals(item.getType())) {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.co_invite_dialog_title)
+                    .setMessage(R.string.co_invite_dialog_message)
+                    .setPositiveButton(R.string.co_invite_accept, (d, w) ->
+                            respondToCoOrganizerInvite(item, user.getUid(), true))
+                    .setNegativeButton(R.string.co_invite_decline, (d, w) ->
+                            respondToCoOrganizerInvite(item, user.getUid(), false))
+                    .show();
+            return;
+        }
+
+        // CHANGED: open the event tied to the notification for normal event-related notifications.
+        if (!TextUtils.isEmpty(item.getEventId())) {
+            Intent intent = new Intent(this, EventDetailActivity.class);
+            intent.putExtra(EventDetailActivity.EXTRA_EVENT_ID, item.getEventId());
+            startActivity(intent);
+            return;
+        }
+
+        Toast.makeText(this, "No event linked to this notification.", Toast.LENGTH_SHORT).show();
     }
 
     private void respondToCoOrganizerInvite(UserNotificationItem item, String uid, boolean accept) {

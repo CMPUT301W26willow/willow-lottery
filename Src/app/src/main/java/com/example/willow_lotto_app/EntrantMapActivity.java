@@ -1,3 +1,18 @@
+/**
+ * EntrantMapActivity.java
+ * <p>
+ * Author: Mehr Dhanda
+ * <p>
+ * Displays a Google Map showing the locations where entrants joined
+ * the waiting list for a specific event. Each entrant is represented
+ * by a map marker at their recorded location.
+ * <p>
+ * Role: Controller in the MVC pattern.
+ * <p>
+ * Outstanding issues:
+ * - Event ID is currently hardcoded as "event1". Should be passed dynamically via Intent.
+ * - No clustering for overlapping markers.
+ */
 package com.example.willow_lotto_app;
 
 import android.os.Bundle;
@@ -56,12 +71,23 @@ public class EntrantMapActivity extends AppCompatActivity implements OnMapReadyC
         }
     }
 
+    /**
+     * Called when the Google Map is ready to use.
+     * Loads entrant locations from Firestore and places markers on the map.
+     *
+     * @param googleMap The GoogleMap instance that is ready.
+     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         loadEntrantLocations();
     }
 
+    /**
+     * Fetches entrant documents from the Firestore waitingList subcollection.
+     * For each entrant with valid latitude and longitude fields, adds a marker
+     * to the map at their location.
+     */
     private void loadEntrantLocations() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         List<LatLng> points = new ArrayList<>();

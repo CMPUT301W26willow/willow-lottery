@@ -256,6 +256,10 @@
     <string name="event_detail_replying_to">Replying to %1$s</string>
     <string name="event_detail_reply_cancel">Cancel</string>
     <string name="event_detail_replies_load_failed">Could not load replies</string>
+    <string name="event_detail_comments_load_failed">Could not load comments. Check your connection or Firestore index for comments.</string>
+    <string name="event_detail_comment_delete">Delete</string>
+    <string name="event_detail_react_sign_in">Sign in to react.</string>
+    <string name="event_detail_reaction_failed">Could not update reaction</string>
 
     <string name="notif_event_fallback_name">Event</string>
     <string name="notif_waitlist_joined_body">You joined the waiting list for %1$s. We\'ll notify you here if you\'re selected in the lottery or if the organizer sends an update.</string>

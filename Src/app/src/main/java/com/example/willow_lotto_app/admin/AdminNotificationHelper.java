@@ -10,7 +10,7 @@ import java.util.Map;
 
 /**
  * Helper class for admin-generated notifications and moderation logs.
- *
+ * <p>
  * Responsibilities:
  * - Sends in-app notifications to a user's notifications subcollection.
  * - Writes admin audit logs to a top-level admin_logs collection.
