@@ -19,8 +19,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.NestedScrollView;
 
-import com.example.willow_lotto_app.EntrantMapActivity;
+import com.example.willow_lotto_app.entrant.EntrantMapActivity;
 import com.example.willow_lotto_app.R;
+import com.example.willow_lotto_app.events.AcceptedEntrantsActivity;
 import com.example.willow_lotto_app.events.CancelledEntrantsActivity;
 import com.example.willow_lotto_app.events.CreateEventActivity;
 import com.example.willow_lotto_app.events.InvitedEntrantsActivity;
@@ -51,17 +52,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-/**
- * OrganizerDashboardActivity.java
- *
- *
- * Displays the organizer dashboard screen, including the waiting list of entrants,
- * lottery controls, geolocation toggle, and map view button.
- *
- * Role: Controller in the MVC pattern.
- *
- * Outstanding issues:
- * - Event ID is passed via Intent but defaults to null if not provided.
+
+/*
+ * One-event organizer UI (needs EXTRA_EVENT_ID): waitlist list, lottery, export, map, invites.
  */
 
 public class OrganizerDashboardActivity extends AppCompatActivity {
@@ -259,6 +252,9 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         Button viewInvitedButton = findViewById(R.id.viewInvitedButton);
         viewInvitedButton.setOnClickListener(v -> openInvitedEntrants());
 
+        Button viewEnrolledButton = findViewById(R.id.viewEnrolledButton);
+        viewEnrolledButton.setOnClickListener(v -> openAcceptedEntrants());
+
         Button viewCancelledButton = findViewById(R.id.viewCancelledButton);
         viewCancelledButton.setOnClickListener(v -> {
             Intent i = new Intent(this, CancelledEntrantsActivity.class);
@@ -423,6 +419,33 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
         Intent i = new Intent(this, InvitedEntrantsActivity.class);
         i.putExtra(InvitedEntrantsActivity.EXTRA_EVENT_ID, eventId);
         startActivity(i);
+    }
+
+    private void openAcceptedEntrants() {
+        Intent i = new Intent(this, AcceptedEntrantsActivity.class);
+        i.putExtra(AcceptedEntrantsActivity.EXTRA_EVENT_ID, eventId);
+        startActivity(i);
+    }
+
+    /**
+     * “Slots filled” counts invited + accepted; offer both lists (US 02.06.03).
+     */
+    private void showSlotsFilledListChooser() {
+        String[] labels = new String[]{
+                getString(R.string.organizer_slots_filled_option_invited),
+                getString(R.string.organizer_slots_filled_option_enrolled)
+        };
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.organizer_slots_filled_dialog_title)
+                .setItems(labels, (d, which) -> {
+                    if (which == 0) {
+                        openInvitedEntrants();
+                    } else {
+                        openAcceptedEntrants();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 
     private void openEntrantMap() {
@@ -756,7 +779,7 @@ public class OrganizerDashboardActivity extends AppCompatActivity {
             scrollToView(R.id.drawSizeInput);
             drawSizeInput.requestFocus();
         });
-        findViewById(R.id.organizer_stat_card_filled).setOnClickListener(v -> openInvitedEntrants());
+        findViewById(R.id.organizer_stat_card_filled).setOnClickListener(v -> showSlotsFilledListChooser());
         findViewById(R.id.organizer_stat_card_open).setOnClickListener(v -> {
             scrollToView(R.id.runLotteryButton);
             Toast.makeText(this, R.string.organizer_stat_open_hint, Toast.LENGTH_SHORT).show();

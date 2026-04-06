@@ -195,4 +195,13 @@ public class CommentsUnitTest {
         bad.setData(Uri.parse("https://x.com/e/1"));
         assertNull(EventDetailIntentHelper.resolveEventId(bad));
     }
+
+    @Test
+    public void intent_parseEventIdFromScannedPayload() {
+        assertEquals("abc", EventDetailIntentHelper.parseEventIdFromScannedPayload("willow-lottery://event/abc"));
+        assertEquals("x", EventDetailIntentHelper.parseEventIdFromScannedPayload("  willow-lottery://event/x  "));
+        assertNull(EventDetailIntentHelper.parseEventIdFromScannedPayload("https://example.com"));
+        assertNull(EventDetailIntentHelper.parseEventIdFromScannedPayload(""));
+        assertNull(EventDetailIntentHelper.parseEventIdFromScannedPayload(null));
+    }
 }

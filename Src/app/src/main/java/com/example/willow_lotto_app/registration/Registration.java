@@ -8,24 +8,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Model class representing a single registration document in the Firestore "registrations" collection.
- *<p>
- * Role in application:
- * - Serves as the main data model for entrant state in the lottery workflow.
- * - Stores the relationship between a user and an event, along with the user's current registration status.
- *<p>
- * Firestore fields represented here:
- * - eventId
- * - userId
- * - status
- * - createdAt
- * - updatedAt
- *<p>
- * Outstanding issues:
- * - This class does not currently validate status values on assignment.
- * - It assumes Firestore document fields use the exact expected names.
- */
+/** One user–event registration row from the registrations collection. */
 
 public class Registration {
     private String id;

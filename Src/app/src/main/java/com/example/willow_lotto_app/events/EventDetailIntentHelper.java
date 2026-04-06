@@ -3,12 +3,9 @@ package com.example.willow_lotto_app.events;
 import android.content.Intent;
 import android.net.Uri;
 
-/**
- * Resolves the event id for {@link EventDetailActivity} from an {@link Intent}
- * (in-app extra or {@code willow-lottery://event/{id}} deep link).
- *
- * @author Dev Tiwari
- */
+import androidx.annotation.Nullable;
+
+/** Reads event id from intent extras or willow-lottery deep links. */
 public final class EventDetailIntentHelper {
 
     public static final String DEEP_LINK_SCHEME = "willow-lottery";
@@ -38,5 +35,23 @@ public final class EventDetailIntentHelper {
             return fromLink != null && !fromLink.isEmpty() ? fromLink : null;
         }
         return null;
+    }
+
+    /**
+     * Parses a QR / barcode raw string (same format as {@link com.example.willow_lotto_app.util.QRCodeHelper}).
+     *
+     * @return event id or {@code null} if not a {@code willow-lottery://event/{id}} link
+     */
+    @Nullable
+    public static String parseEventIdFromScannedPayload(@Nullable String raw) {
+        if (raw == null) {
+            return null;
+        }
+        String trimmed = raw.trim();
+        if (trimmed.isEmpty()) {
+            return null;
+        }
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(trimmed));
+        return resolveEventId(intent);
     }
 }

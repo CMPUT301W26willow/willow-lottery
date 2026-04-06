@@ -14,10 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Loads per-event waitlisted registration counts for {@link Event} cards and filters.
- * Uses chunked {@code whereIn} queries (max 30 IDs per Firestore constraint).
- */
+/** Loads waitlist counts and limits onto Event models from Firestore. */
 public final class WaitlistCountLoader {
 
     private WaitlistCountLoader() {

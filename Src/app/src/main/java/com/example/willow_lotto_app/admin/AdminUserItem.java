@@ -2,9 +2,7 @@ package com.example.willow_lotto_app.admin;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 
-/**
- * User row model for admin profile browsing.
- */
+/** One user row for admin profile lists (from Firestore users docs). */
 public class AdminUserItem {
     private final String uid;
     private final String name;
@@ -14,6 +12,15 @@ public class AdminUserItem {
     private final boolean isOrganizer;
     private final boolean isAnonymous;
 
+    /**
+     * @param uid             user document id
+     * @param name            display name field
+     * @param displayName     alternate display name field
+     * @param email           user email
+     * @param profilePhotoUrl photo URL for avatar
+     * @param isOrganizer     whether the user is marked as an organizer
+     * @param isAnonymous     whether the profile represents a guest / anonymous user
+     */
     public AdminUserItem(
             String uid,
             String name,
@@ -59,6 +66,12 @@ public class AdminUserItem {
         return isAnonymous;
     }
 
+    /**
+     * Builds a row model from a {@code users} collection document (tries several photo URL field names).
+     *
+     * @param doc Firestore user snapshot
+     * @return populated {@link AdminUserItem}
+     */
     public static AdminUserItem fromDocument(DocumentSnapshot doc) {
         String uid = doc.getId();
         String name = doc.getString("name");
@@ -81,6 +94,12 @@ public class AdminUserItem {
                 Boolean.TRUE.equals(isAnonymous));
     }
 
+    /**
+     * @param a first candidate URL string
+     * @param b second candidate URL string
+     * @param c third candidate URL string
+     * @return first non-null, non-blank trimmed value, or null if all blank
+     */
     private static String firstNonNull(String a, String b, String c) {
         if (a != null && !a.trim().isEmpty()) {
             return a.trim();

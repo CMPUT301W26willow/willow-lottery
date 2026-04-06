@@ -1,10 +1,6 @@
 package com.example.willow_lotto_app.events.comments;
 
-/**
- * Validation for posting event comments (used by {@link EventDetailActivity}).
- *
- * @author Dev Tiwari
- */
+/** Simple checks before posting an event comment. */
 public final class EventCommentPostValidator {
 
     private EventCommentPostValidator() {

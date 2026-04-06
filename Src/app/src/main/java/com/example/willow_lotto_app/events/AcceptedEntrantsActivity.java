@@ -2,7 +2,6 @@ package com.example.willow_lotto_app.events;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -20,23 +19,26 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Organizer list of entrants with cancelled registration for an event. */
-public class CancelledEntrantsActivity extends AppCompatActivity {
+/**
+ * Organizer list of entrants who accepted an invitation ({@link RegistrationStatus#ACCEPTED}),
+ * i.e. final enrolled for lottery-selected spots.
+ */
+public class AcceptedEntrantsActivity extends AppCompatActivity {
 
     public static final String EXTRA_EVENT_ID = "event_id";
 
-    private ListView cancelledListView;
-    private TextView cancelledEmpty;
-    private ArrayAdapter<String> adapter;
-    private ArrayList<String> entrantNames;
+    private ListView acceptedListView;
+    private TextView acceptedEmpty;
     private String eventId;
     private RegistrationStore registrationRepository;
     private FirebaseFirestore db;
 
+    private final List<String> entrantNames = new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_cancelled_entrants);
+        setContentView(R.layout.activity_accepted_entrants);
 
         db = FirebaseFirestore.getInstance();
         registrationRepository = new RegistrationStore();
@@ -48,94 +50,88 @@ public class CancelledEntrantsActivity extends AppCompatActivity {
             return;
         }
 
-        cancelledListView = findViewById(R.id.cancelledListView);
-        cancelledEmpty = findViewById(R.id.cancelled_empty);
-        entrantNames = new ArrayList<>();
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, entrantNames);
-        cancelledListView.setAdapter(adapter);
+        acceptedListView = findViewById(R.id.acceptedListView);
+        acceptedEmpty = findViewById(R.id.accepted_empty);
 
-        Button backButton = findViewById(R.id.backButton);
+        Button backButton = findViewById(R.id.accepted_back_button);
         backButton.setOnClickListener(v -> finish());
 
-        loadCancelledEntrants();
+        loadAcceptedEntrants();
     }
 
-    /**
-     * Loads the list of cancelled entrants from Firestore using the registration repository.
-     * Fetches all registrations with CANCELLED status for the current event,
-     * then loads each entrant's name from the users collection.
-     */
-    private void loadCancelledEntrants() {
+    private void loadAcceptedEntrants() {
         registrationRepository.getRegistrationsForEventByStatus(
                 eventId,
-                RegistrationStatus.CANCELLED.getValue(),
+                RegistrationStatus.ACCEPTED.getValue(),
                 new RegistrationStore.RegistrationListCallback() {
                     @Override
-                    public void onSuccess(List<Registration> registrations) {
-                        if (registrations.isEmpty()) {
-                            cancelledEmpty.setVisibility(View.VISIBLE);
-                            cancelledListView.setVisibility(View.GONE);
+                    public void onSuccess(List<Registration> result) {
+                        if (result.isEmpty()) {
+                            acceptedEmpty.setVisibility(TextView.VISIBLE);
+                            acceptedListView.setVisibility(ListView.GONE);
                             return;
                         }
 
                         List<String> userIds = new ArrayList<>();
-                        for (Registration registration : registrations) {
-                            userIds.add(registration.getUserId());
+                        for (Registration reg : result) {
+                            userIds.add(reg.getUserId());
                         }
-                        loadUserNames(userIds);
+                        loadUserNamesOrdered(userIds);
                     }
 
                     @Override
                     public void onFailure(Exception e) {
-                        Log.e("CancelledEntrants", "Failed to load cancelled entrants", e);
-                        Toast.makeText(CancelledEntrantsActivity.this, "Failed to load cancelled entrants.", Toast.LENGTH_SHORT).show();
+                        Log.e("AcceptedEntrants", "Failed to load enrolled entrants", e);
+                        Toast.makeText(AcceptedEntrantsActivity.this,
+                                R.string.organizer_enrolled_load_failed, Toast.LENGTH_SHORT).show();
                     }
-                }
-        );
+                });
     }
 
-    /**
-     * Loads usernames from Firestore for a list of user IDs.
-     * Falls back to email, then userId if name is not available.
-     *
-     * @param userIds List of user IDs to fetch names for.
-     */
-    private void loadUserNames(List<String> userIds) {
+    private void loadUserNamesOrdered(List<String> userIds) {
         entrantNames.clear();
         if (userIds.isEmpty()) {
-            adapter.notifyDataSetChanged();
             return;
+        }
+        for (int i = 0; i < userIds.size(); i++) {
+            entrantNames.add(userIds.get(i));
         }
 
         final int[] completed = {0};
-        for (String userId : userIds) {
+        final int n = userIds.size();
+        for (int i = 0; i < n; i++) {
+            final int index = i;
+            String userId = userIds.get(i);
             db.collection("users")
                     .document(userId)
                     .get()
                     .addOnSuccessListener(documentSnapshot -> {
                         String name = documentSnapshot.getString("name");
                         String email = documentSnapshot.getString("email");
-
                         if (name != null && !name.trim().isEmpty()) {
-                            entrantNames.add(name);
+                            entrantNames.set(index, name);
                         } else if (email != null && !email.trim().isEmpty()) {
-                            entrantNames.add(email);
-                        } else {
-                            entrantNames.add(userId);
+                            entrantNames.set(index, email);
                         }
-
                         completed[0]++;
-                        if (completed[0] == userIds.size()) {
-                            adapter.notifyDataSetChanged();
+                        if (completed[0] == n) {
+                            bindList();
                         }
                     })
                     .addOnFailureListener(e -> {
-                        entrantNames.add(userId);
                         completed[0]++;
-                        if (completed[0] == userIds.size()) {
-                            adapter.notifyDataSetChanged();
+                        if (completed[0] == n) {
+                            bindList();
                         }
                     });
         }
+    }
+
+    private void bindList() {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this, android.R.layout.simple_list_item_1, entrantNames);
+        acceptedListView.setAdapter(adapter);
+        acceptedEmpty.setVisibility(TextView.GONE);
+        acceptedListView.setVisibility(ListView.VISIBLE);
     }
 }

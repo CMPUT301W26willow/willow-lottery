@@ -1,8 +1,8 @@
 package com.example.willow_lotto_app.organizer;
 
 import android.content.ActivityNotFoundException;
+import android.content.ClipData;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
@@ -10,7 +10,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.FileProvider;
 
-import com.example.willow_lotto_app.EntrantListCsvExporter;
+import com.example.willow_lotto_app.entrant.EntrantListCsvExporter;
 import com.example.willow_lotto_app.R;
 import com.example.willow_lotto_app.registration.Registration;
 import com.example.willow_lotto_app.registration.RegistrationStore;
@@ -25,11 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Builds the entrant CSV for an event and opens the system share sheet.
- * Shared by {@link com.example.willow_lotto_app.organizer.ui.OrganizerDashboardActivity}
- * and {@link com.example.willow_lotto_app.organizer.ui.OrganizerMyEventsActivity}.
- */
+/** Builds entrant CSV for an event and opens the share sheet. */
 public final class OrganizerEntrantExportHelper {
 
     private static final String TAG = "OrganizerEntrantExport";
@@ -130,6 +126,9 @@ public final class OrganizerEntrantExportHelper {
 
     private static void shareCsvOnUiThread(AppCompatActivity activity, String eventId, String csv) {
         activity.runOnUiThread(() -> {
+            if (activity.isFinishing()) {
+                return;
+            }
             try {
                 File dir = new File(activity.getCacheDir(), "exports");
                 if (!dir.exists() && !dir.mkdirs()) {
@@ -147,12 +146,11 @@ public final class OrganizerEntrantExportHelper {
                 share.setType("text/csv");
                 share.putExtra(Intent.EXTRA_STREAM, uri);
                 share.putExtra(Intent.EXTRA_SUBJECT, activity.getString(R.string.organizer_export_csv_subject));
+                share.setClipData(ClipData.newUri(activity.getContentResolver(), "csv", uri));
                 share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 Intent chooser = Intent.createChooser(share, activity.getString(R.string.organizer_export_csv_chooser));
-                PackageManager pm = activity.getPackageManager();
-                if (chooser.resolveActivity(pm) == null) {
-                    Toast.makeText(activity, R.string.organizer_export_csv_no_app, Toast.LENGTH_LONG).show();
-                    return;
+                if (chooser != null) {
+                    chooser.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 }
                 activity.startActivity(chooser);
             } catch (ActivityNotFoundException e) {

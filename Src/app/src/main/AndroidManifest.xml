@@ -5,8 +5,19 @@
     <!--Please don't remove this permission it is required for notifications to work-->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
+    <!-- So ACTION_SEND / chooser can resolve targets on API 30+ (CSV share). -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+            <data android:mimeType="*/*" />
+        </intent>
+    </queries>
 
     <application
         android:allowBackup="true"
@@ -28,7 +39,7 @@
 
         <activity
 
-            android:name=".LoginActivity"
+            android:name=".auth.LoginActivity"
             android:exported="true">
 
             <intent-filter>
@@ -41,15 +52,19 @@
 
 
         <!-- Main screens -->
-        <activity android:name=".MainActivity" android:exported="false"/>
+        <activity android:name=".home.MainActivity" android:exported="false"/>
         <activity android:name=".events.EventsActivity" android:exported="false"/>
         <activity android:name=".notification.NotificationActivity" android:exported="false"/>
-        <activity android:name=".ProfileActivity" android:exported="false"/>
+        <activity android:name=".profile.ProfileActivity" android:exported="false"/>
         <activity android:name=".organizer.ui.OrganizerDashboardActivity" android:exported="false"/>
         <activity android:name=".organizer.ui.OrganizerMyEventsActivity" android:exported="false"/>
         <activity android:name=".events.CreateEventActivity" android:exported="false"/>
         <activity android:name=".events.EventQrActivity" android:exported="false"/>
-        <activity android:name=".AdminLoginActivity" android:exported="false"/>
+        <activity
+            android:name=".events.ScanEventQrActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        <activity android:name=".auth.AdminLoginActivity" android:exported="false"/>
         <!-- Handles deep links like willow-lottery://event/{eventId} -->
         <activity android:name=".events.EventDetailActivity" android:exported="true">
             <intent-filter>
@@ -63,10 +78,11 @@
                     android:host="event" />
             </intent-filter>
         </activity>
-        <activity android:name=".SignUpActivity" android:exported="false"/>
+        <activity android:name=".auth.SignUpActivity" android:exported="false"/>
         <activity android:name=".events.EditEventActivity" android:exported="false"/>
-        <activity android:name=".EntrantMapActivity" android:exported="false"/>
+        <activity android:name=".entrant.EntrantMapActivity" android:exported="false"/>
         <activity android:name=".events.InvitedEntrantsActivity" android:exported="false"/>
+        <activity android:name=".events.AcceptedEntrantsActivity" android:exported="false"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"

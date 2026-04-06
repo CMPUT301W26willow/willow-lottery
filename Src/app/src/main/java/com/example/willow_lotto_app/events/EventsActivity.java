@@ -3,6 +3,7 @@ package com.example.willow_lotto_app.events;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -11,10 +12,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.willow_lotto_app.MainActivity;
+import com.example.willow_lotto_app.home.MainActivity;
 import com.example.willow_lotto_app.R;
 import com.example.willow_lotto_app.notification.NotificationActivity;
-import com.example.willow_lotto_app.ProfileActivity;
+import com.example.willow_lotto_app.profile.ProfileActivity;
 import com.example.willow_lotto_app.registration.Registration;
 import com.example.willow_lotto_app.registration.RegistrationStatus;
 import com.example.willow_lotto_app.registration.RegistrationStore;
@@ -32,10 +33,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Events tab: registration history for the signed-in entrant (US 01.02.03).
- * Browse and join flows live on {@link MainActivity}.
- */
+/** Events tab: shows the signed-in user’s registration history. */
 public class EventsActivity extends AppCompatActivity {
 
     private RecyclerView recycler;
@@ -54,6 +52,10 @@ public class EventsActivity extends AppCompatActivity {
         emptyView = findViewById(R.id.events_empty);
         BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
         bottomNav.setSelectedItemId(R.id.nav_events);
+
+        ImageButton scanQr = findViewById(R.id.events_scan_qr_btn);
+        scanQr.setOnClickListener(v ->
+                startActivity(new Intent(this, ScanEventQrActivity.class)));
 
         adapter = new RegistrationHistoryAdapter();
         recycler.setLayoutManager(new LinearLayoutManager(this));

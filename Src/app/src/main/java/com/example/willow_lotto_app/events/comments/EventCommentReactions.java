@@ -2,10 +2,7 @@ package com.example.willow_lotto_app.events.comments;
 
 import java.util.Map;
 
-/**
- * Emoji reactions on event comments. Stored as {@code reactionByUser}: map from user UID to emoji
- * (one reaction per user; tap the same emoji again to remove).
- */
+/** Emoji reaction strings and counts for comment documents. */
 public final class EventCommentReactions {
 
     public static final String THUMBS = "\uD83D\uDC4D";

@@ -5,22 +5,7 @@ import com.google.firebase.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * NotificationStore is a small Firestore data-access helper responsible for
- * writing notification documents to a user's notifications subcollection.
- *<p>
- * Role in application:
- * - Acts as a repository/store layer between business logic and Firestore.
- * - Used by organizer lottery logic to send in-app notifications to users.
- *<p>
- * Design note:
- * - This class keeps Firestore write logic out of activities and managers.
- *<p>
- * Current limitations / outstanding issues:
- * - Only supports writing notifications; there is no update/delete API yet.
- * - Does not currently support marking notifications as read.
- * - Error handling is delegated to callbacks and not centralized.
- */
+/** Data for one notification written to Firestore. */
 
 public class UserNotification {
     private String eventId;

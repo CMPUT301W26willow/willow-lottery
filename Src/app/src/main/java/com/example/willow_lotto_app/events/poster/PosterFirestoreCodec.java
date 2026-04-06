@@ -12,10 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * Compresses a picked image into a JPEG data URI suitable for storing in Firestore {@code posterUri}.
- * Firestore documents are capped at ~1 MiB; we keep the JPEG payload small so the event document stays safe.
- */
+/** Turns a picked image into a small JPEG data URI for posterUri. */
 public final class PosterFirestoreCodec {
 
     /** Target max JPEG size before base64 (~400KB encoded) so the rest of the event document fits under 1 MiB. */

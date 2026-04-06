@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.willow_lotto_app.EntrantResponseManager;
+import com.example.willow_lotto_app.entrant.EntrantResponseManager;
 import com.example.willow_lotto_app.R;
 import com.example.willow_lotto_app.organizer.EventOrganizerAccess;
 import com.example.willow_lotto_app.admin.AdminAccessUtil;
@@ -47,17 +47,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Detailed view for a single event.
- * Responsibilities:
- * - Displays event metadata, poster, and registration period (02.01.04).
- * - Implements 01.01.01 / 01.01.02 "Join/Leave Events" by letting the user
- *   join or leave the waiting list for this event.
- * - Implements 01.05.01 - 01.05.07
- * - Supports deep links from QR codes (willow-lottery://event/{id}).
- * @author Jasdeep Cheema and Dev Tiwari
- * @version 2.0
- * @since 30/03/2026
+/*
+ * Single-event screen: details, waitlist join/leave, comments subcollection, organizer tools if allowed.
+ * Deep links and lottery/invite flows are wired through helpers and RegistrationStore.
  */
 public class EventDetailActivity extends AppCompatActivity {
 

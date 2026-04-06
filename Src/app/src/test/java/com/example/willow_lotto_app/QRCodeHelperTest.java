@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import com.example.willow_lotto_app.util.QRCodeHelper;
+
 /**
  * Unit tests for {@link QRCodeHelper}.
  * Only tests string payload generation (no Android Bitmap).

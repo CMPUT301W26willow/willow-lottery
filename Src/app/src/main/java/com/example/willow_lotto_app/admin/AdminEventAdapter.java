@@ -17,22 +17,18 @@ import com.example.willow_lotto_app.events.poster.EventPosterLoader;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * RecyclerView adapter used by the administrator event moderation screen.
- *<p>
- * Responsibilities:
- * - Displays event cards in the admin dashboard.
- * - Lets the admin remove events.
- * - Lets the admin remove event images.
- * - Lets the admin remove comments for an event.
- */
-
+/** Lists events for admin moderation; delete actions run in the activity. */
 public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.AdminEventViewHolder> {
-    /**
-     * Listener used by the hosting activity to respond to admin event actions.
-     */
+
     public interface AdminEventActionListener {
+        /**
+         * @param event event to soft-delete
+         */
         void onDeleteEventClicked(Event event);
+
+        /**
+         * @param event event whose comments should be marked removed
+         */
         void onDeleteCommentsClicked(Event event);
     }
 
@@ -40,10 +36,8 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ad
     private final AdminEventActionListener listener;
 
     /**
-     * Creates the adapter with an initial event list.
-     *
-     * @param events initial events
-     * @param listener action listener
+     * @param events   initial list; may be null
+     * @param listener action callbacks; may be null
      */
     public AdminEventAdapter(List<Event> events, AdminEventActionListener listener) {
         if (events != null) {
@@ -53,9 +47,7 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ad
     }
 
     /**
-     * Replaces the event list and refreshes the display.
-     *
-     * @param updatedEvents new event list
+     * @param updatedEvents replaces backing list; may be null to clear
      */
     public void setEvents(List<Event> updatedEvents) {
         events.clear();
@@ -65,6 +57,11 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ad
         notifyDataSetChanged();
     }
 
+    /**
+     * @param parent   parent ViewGroup
+     * @param viewType unused view type
+     * @return holder for {@code R.layout.item_admin_event}
+     */
     @NonNull
     @Override
     public AdminEventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -73,10 +70,15 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ad
         return new AdminEventViewHolder(view);
     }
 
+    /**
+     * @param holder   row holder
+     * @param position index in the backing list
+     */
     @Override
     public void onBindViewHolder(@NonNull AdminEventViewHolder holder, int position) {
         Event event = events.get(position);
 
+        // Poster + copy; buttons delegate to activity
         holder.nameText.setText(event.getName() != null ? event.getName() : "");
         holder.dateText.setText(event.getDate() != null ? event.getDate() : "");
         holder.descriptionText.setText(event.getDescription() != null ? event.getDescription() : "");
@@ -102,9 +104,6 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ad
         return events.size();
     }
 
-    /**
-     * ViewHolder for a single admin event row.
-     */
     static class AdminEventViewHolder extends RecyclerView.ViewHolder {
         ImageView posterImage;
         TextView nameText;

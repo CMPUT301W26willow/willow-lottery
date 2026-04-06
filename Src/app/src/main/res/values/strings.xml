@@ -34,6 +34,13 @@
     <string name="profile_delete_profile">Delete profile</string>
 
     <string name="home_search_hint">Search events…</string>
+    <string name="home_scan_qr_content_desc">Scan event QR code</string>
+    <string name="scan_event_qr_title">Scan event QR</string>
+    <string name="scan_event_qr_hint">Point the camera at an event QR code (willow-lottery link).</string>
+    <string name="scan_event_qr_permission_denied">Camera permission is required to scan a QR code.</string>
+    <string name="scan_event_qr_invalid">This QR code is not a Willow event link.</string>
+    <string name="scan_event_qr_camera_failed">Could not start the camera.</string>
+    <string name="events_scan_qr_content_desc">Scan event QR code</string>
     <string name="home_event_waitlist_count">%d people on waiting list</string>
     <string name="home_event_deadline">Registration deadline: %1$s</string>
     <string name="waitlist_full_message">This waiting list is full.</string>
@@ -168,6 +175,13 @@
     <string name="organizer_co_pending_label">%1$s (invited)</string>
     <string name="organizer_stat_open_hint">Use Run lottery to invite people from the waiting list into open slots.</string>
     <string name="organizer_export_csv_subject">Entrant list</string>
+    <string name="organizer_view_enrolled_entrants">View enrolled entrants</string>
+    <string name="organizer_enrolled_entrants_title">Enrolled entrants</string>
+    <string name="organizer_no_enrolled_entrants">No enrolled entrants yet.</string>
+    <string name="organizer_enrolled_load_failed">Could not load enrolled entrants.</string>
+    <string name="organizer_slots_filled_dialog_title">Slots filled</string>
+    <string name="organizer_slots_filled_option_invited">Invited (pending acceptance)</string>
+    <string name="organizer_slots_filled_option_enrolled">Enrolled (accepted)</string>
 
     <string name="admin_panel_title">Admin Dashboard</string>
     <string name="admin_panel_profile_button">Profile</string>

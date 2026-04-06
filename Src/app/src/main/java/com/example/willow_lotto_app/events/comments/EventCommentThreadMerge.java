@@ -5,11 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Merges fresh top-level comments from Firestore with existing UI threads (preserves replies / expanded state).
- *
- * @author Dev Tiwari
- */
+/** Merges new comment snapshots with existing threads (keeps replies and expand state). */
 public final class EventCommentThreadMerge {
 
     private EventCommentThreadMerge() {

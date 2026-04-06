@@ -15,9 +15,7 @@ import com.example.willow_lotto_app.events.Event;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Lists events owned by the signed-in organizer with actions to open the dashboard or export CSV.
- */
+/** RecyclerView rows for the organizer’s event list. */
 public class OrganizerMyEventsAdapter extends RecyclerView.Adapter<OrganizerMyEventsAdapter.Holder> {
 
     public interface Listener {

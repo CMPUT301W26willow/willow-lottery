@@ -1,4 +1,4 @@
-package com.example.willow_lotto_app;
+package com.example.willow_lotto_app.auth;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,6 +13,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.willow_lotto_app.R;
+import com.example.willow_lotto_app.home.MainActivity;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -25,6 +27,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/*
+ * Launcher sign-in (Firebase email/password), then MainActivity. Links to sign-up and admin login.
+ * Merges a default users/{uid} doc on success so older accounts get expected fields.
+ */
 public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
