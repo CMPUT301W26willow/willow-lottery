@@ -1,6 +1,7 @@
 package com.example.willow_lotto_app.events;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -32,8 +33,10 @@ import com.example.willow_lotto_app.events.comments.EventCommentsAdapter;
 import com.example.willow_lotto_app.events.poster.EventPosterLoader;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -61,8 +64,12 @@ public class EventDetailActivity extends AppCompatActivity {
     private static final String REGISTRATIONS_COLLECTION = "registrations";
     /** Subcollection under each {@code events/{eventId}} document. */
     private static final String COMMENTS_SUBCOLLECTION = "comments";
-    /** Fetched then filtered client-side to top-level (legacy docs may lack parentCommentId). */
-    private static final int COMMENTS_FETCH_LIMIT = 100;
+    private static final String TAG_COMMENTS = "EventDetailComments";
+    /**
+     * Recent docs in the comments collection; top-level threads are filtered client-side so no
+     * composite index is required (see {@link #attachCommentsListener}).
+     */
+    private static final int COMMENTS_FETCH_LIMIT = 200;
     private static final int REPLIES_PAGE_LIMIT = 30;
 
     public static final String EXTRA_EVENT_ID = "event_id";
@@ -182,11 +189,7 @@ public class EventDetailActivity extends AppCompatActivity {
 
             @Override
             public void onExpandReplies(EventCommentThread thread, int adapterPosition) {
-                if (thread.getReplies().isEmpty()) {
-                    loadRepliesForThread(thread, adapterPosition);
-                } else {
-                    commentsAdapter.notifyItemChanged(adapterPosition);
-                }
+                loadRepliesForThread(thread, adapterPosition);
             }
 
             @Override
@@ -198,8 +201,14 @@ public class EventDetailActivity extends AppCompatActivity {
             public void onDelete(EventComment comment) {
                 deleteComment(comment);
             }
+
+            @Override
+            public void onReact(EventComment comment, String emoji) {
+                toggleCommentReaction(comment, emoji);
+            }
         });
         commentsRecyclerView.setAdapter(commentsAdapter);
+        commentsAdapter.setCurrentUserId(currentUserId);
         postCommentButton.setOnClickListener(v -> postComment());
         replyBannerCancel.setOnClickListener(v -> clearReplyTarget());
 
@@ -235,7 +244,14 @@ public class EventDetailActivity extends AppCompatActivity {
                 .orderBy("createdAt", Query.Direction.DESCENDING)
                 .limit(COMMENTS_FETCH_LIMIT)
                 .addSnapshotListener((snap, error) -> {
-                    if (error != null || snap == null) {
+                    if (error != null) {
+                        Log.e(TAG_COMMENTS, "comments listener failed", error);
+                        Toast.makeText(this, R.string.event_detail_comments_load_failed, Toast.LENGTH_LONG).show();
+                        commentsEmptyView.setText(R.string.event_detail_comments_load_failed);
+                        commentsEmptyView.setVisibility(View.VISIBLE);
+                        return;
+                    }
+                    if (snap == null) {
                         return;
                     }
                     List<EventComment> topLevel = new ArrayList<>();
@@ -245,8 +261,10 @@ public class EventDetailActivity extends AppCompatActivity {
                             topLevel.add(c);
                         }
                     }
+                    topLevel.sort((a, b) -> EventComment.createdTimeAscending().compare(b, a));
                     commentsAdapter.setThreads(
                             EventCommentThreadMerge.merge(topLevel, commentsAdapter.getThreads()));
+                    commentsEmptyView.setText(R.string.event_detail_comments_empty);
                     commentsEmptyView.setVisibility(topLevel.isEmpty() ? View.VISIBLE : View.GONE);
                 });
     }
@@ -273,6 +291,7 @@ public class EventDetailActivity extends AppCompatActivity {
                     commentsAdapter.notifyItemChanged(adapterPosition);
                 })
                 .addOnFailureListener(e -> {
+                    Log.e(TAG_COMMENTS, "loadReplies failed parentId=" + parentId, e);
                     thread.setLoadingReplies(false);
                     commentsAdapter.notifyItemChanged(adapterPosition);
                     Toast.makeText(this, R.string.event_detail_replies_load_failed, Toast.LENGTH_SHORT).show();
@@ -306,13 +325,70 @@ public class EventDetailActivity extends AppCompatActivity {
         }
     }
 
+    private void toggleCommentReaction(EventComment comment, String emoji) {
+        if (currentUserId == null) {
+            Toast.makeText(this, R.string.event_detail_react_sign_in, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (comment == null || comment.getDocumentId() == null || emoji == null) {
+            return;
+        }
+        DocumentReference ref = db.collection("events")
+                .document(eventId)
+                .collection(COMMENTS_SUBCOLLECTION)
+                .document(comment.getDocumentId());
+        db.runTransaction(transaction -> {
+            DocumentSnapshot snap = transaction.get(ref);
+            if (!snap.exists()) {
+                throw new FirebaseFirestoreException(
+                        "Comment missing",
+                        FirebaseFirestoreException.Code.ABORTED);
+            }
+            Map<String, Object> existing = copyReactionMapForWrite(snap.get("reactionByUser"));
+            Object prev = existing.get(currentUserId);
+            String prevStr = prev != null ? prev.toString() : null;
+            if (emoji.equals(prevStr)) {
+                existing.remove(currentUserId);
+            } else {
+                existing.put(currentUserId, emoji);
+            }
+            transaction.update(ref, "reactionByUser", existing);
+            return null;
+        }).addOnSuccessListener(v -> {
+            if (!comment.isTopLevel()) {
+                String parentId = comment.getParentCommentId();
+                if (parentId != null) {
+                    refreshRepliesIfExpanded(parentId);
+                }
+            }
+        }).addOnFailureListener(e -> {
+            Log.e(TAG_COMMENTS, "reaction transaction failed", e);
+            Toast.makeText(this, R.string.event_detail_reaction_failed, Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Object> copyReactionMapForWrite(Object raw) {
+        Map<String, Object> out = new HashMap<>();
+        if (!(raw instanceof Map)) {
+            return out;
+        }
+        for (Map.Entry<?, ?> e : ((Map<?, ?>) raw).entrySet()) {
+            if (e.getKey() != null && e.getValue() != null) {
+                out.put(e.getKey().toString(), e.getValue());
+            }
+        }
+        return out;
+    }
+
     private void updateCommentComposerState() {
         boolean signedIn = currentUserId != null;
+        commentsAdapter.setCurrentUserId(currentUserId);
         commentInput.setEnabled(signedIn);
         postCommentButton.setEnabled(signedIn);
         if (!signedIn) {
             commentInput.setHint(getString(R.string.event_detail_comment_sign_in));
-            replyBanner.setVisibility(View.GONE);
+            clearReplyTarget();
         } else {
             commentInput.setHint(getString(R.string.event_detail_comment_hint));
         }
@@ -348,11 +424,13 @@ public class EventDetailActivity extends AppCompatActivity {
                                 postCommentButton.setEnabled(true);
                             })
                             .addOnFailureListener(e -> {
+                                Log.e(TAG_COMMENTS, "post comment failed", e);
                                 Toast.makeText(this, R.string.event_detail_comment_failed, Toast.LENGTH_SHORT).show();
                                 postCommentButton.setEnabled(true);
                             });
                 })
                 .addOnFailureListener(e -> {
+                    Log.e(TAG_COMMENTS, "load user for post comment failed", e);
                     Toast.makeText(this, R.string.event_detail_comment_failed, Toast.LENGTH_SHORT).show();
                     postCommentButton.setEnabled(true);
                 });

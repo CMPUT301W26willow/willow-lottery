@@ -1,8 +1,12 @@
 // Paste inside: match /databases/{database}/documents { ... }
-// so comments work with EventDetailActivity (events/{eventId}/comments).
+// EventDetailActivity: events/{eventId}/comments
+//
+// IMPORTANT: Reactions use transaction.update("reactionByUser", ...). If allow update is false,
+// reactions will always fail with PERMISSION_DENIED.
 
 match /events/{eventId}/comments/{commentId} {
   allow read: if true;
+
   allow create: if request.auth != null
     && request.resource.data.authorId == request.auth.uid
     && request.resource.data.authorName is string
@@ -11,8 +15,9 @@ match /events/{eventId}/comments/{commentId} {
     && request.resource.data.body is string
     && request.resource.data.body.size() > 0
     && request.resource.data.body.size() <= 2000
-    && request.resource.data.keys().hasAll(['parentCommentId'])
+    && request.resource.data.keys().hasAll(['parentCommentId', 'reactionByUser'])
     && request.resource.data.parentCommentId is string
+    && request.resource.data.reactionByUser is map
     && (
       request.resource.data.parentCommentId == ""
       || (
@@ -20,5 +25,24 @@ match /events/{eventId}/comments/{commentId} {
         && request.resource.data.parentCommentId.size() <= 200
       )
     );
-  allow update, delete: if false;
+
+  // One reaction per signed-in user (client writes whole map; only reactionByUser may change).
+  allow update: if request.auth != null
+    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactionByUser'])
+    && request.resource.data.reactionByUser is map
+    && request.resource.data.reactionByUser.size() <= 500;
+
+  allow delete: if request.auth != null && (
+    resource.data.authorId == request.auth.uid
+    || (
+      exists(/databases/$(database)/documents/events/$(eventId))
+      && (
+        get(/databases/$(database)/documents/events/$(eventId)).data.organizerId == request.auth.uid
+        || (
+          get(/databases/$(database)/documents/events/$(eventId)).data.coOrganizerIds is list
+          && request.auth.uid in get(/databases/$(database)/documents/events/$(eventId)).data.coOrganizerIds
+        )
+      )
+    )
+  );
 }
