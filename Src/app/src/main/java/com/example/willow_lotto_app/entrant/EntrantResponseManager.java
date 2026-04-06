@@ -17,8 +17,12 @@ public class EntrantResponseManager {
     private final RegistrationStore registrationRepository;
 
     public EntrantResponseManager() {
-        this.db = FirebaseFirestore.getInstance();
-        this.registrationRepository = new RegistrationStore();
+        this(FirebaseFirestore.getInstance(), new RegistrationStore());
+    }
+
+    public EntrantResponseManager(FirebaseFirestore db, RegistrationStore registrationRepository) {
+        this.db = db;
+        this.registrationRepository = registrationRepository;
     }
 
 
