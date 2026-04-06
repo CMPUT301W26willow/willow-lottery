@@ -267,6 +267,7 @@
     <string name="notif_badge_on_waitlist">On waiting list</string>
     <string name="notif_badge_waitlist_update">Waiting list update</string>
     <string name="notif_badge_cancelled">Registration cancelled</string>
+    <string name="notif_badge_not_chosen">Not selected</string>
     <string name="notif_badge_default">Update</string>
     <string name="notif_badge_co_organizer_invite">Co-organizer invite</string>
     <string name="co_invite_dialog_title">Co-organizer invitation</string>
