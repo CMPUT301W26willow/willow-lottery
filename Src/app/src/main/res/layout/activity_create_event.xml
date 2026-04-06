@@ -148,7 +148,7 @@
                     android:layout_height="wrap_content"
                     android:text="Set Limit"
                     android:layout_marginStart="8dp"
-                    android:background="@drawable/button_primary_purple"
+                    android:backgroundTint="@color/buttonBlue"
                     android:textColor="@android:color/white"/>
             </LinearLayout>
 
@@ -273,7 +273,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/create_event_submit"
-                android:background="@drawable/button_primary_purple"
+                android:backgroundTint="@color/buttonBlue"
                 android:textColor="@android:color/white"/>
         </LinearLayout>
     </ScrollView>

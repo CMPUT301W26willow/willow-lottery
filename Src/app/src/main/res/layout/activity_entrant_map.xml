@@ -17,6 +17,6 @@
         android:layout_alignParentBottom="true"
         android:text="Back"
         android:textColor="@android:color/white"
-        android:background="@drawable/button_primary_purple"/>
+        android:backgroundTint="@color/buttonBlue"/>
 
 </RelativeLayout>
