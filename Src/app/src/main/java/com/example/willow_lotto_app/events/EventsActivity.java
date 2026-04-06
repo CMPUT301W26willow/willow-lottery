@@ -109,6 +109,15 @@ public class EventsActivity extends AppCompatActivity {
         adapter.setOnJoinLeaveListener(new EventsAdapter.OnJoinLeaveListener() {
             @Override
             public void onJoin(Event event) {
+
+                // CHANGED: stop users from joining waitlists for past events
+                // or events whose registration period has ended.
+                if (isEventClosedForJoining(event)) {
+                    Toast.makeText(EventsActivity.this,
+                            "This event is no longer open for the waiting list.",
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 if (currentUserId == null) {
                     return;
                 }
@@ -200,6 +209,14 @@ public class EventsActivity extends AppCompatActivity {
         });
     }
 
+    // CHANGED: refresh the events list whenever the user returns from
+    // EventDetailActivity so joined/waitlist info stays up to date.
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadEvents();
+    }
+
     /**
      * Loads all events from Firestore and populates the RecyclerView.
      * Also loads the user's joined event IDs to reflect join state.
@@ -280,5 +297,33 @@ public class EventsActivity extends AppCompatActivity {
     private static String getString(QueryDocumentSnapshot doc, String field) {
         Object o = doc.get(field);
         return o != null ? o.toString() : "";
+    }
+    //changed
+    private boolean isEventClosedForJoining(Event event) {
+        if (event == null) {
+            return false;
+        }
+
+        java.text.SimpleDateFormat sdf =
+                new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US);
+        String today = sdf.format(new java.util.Date());
+
+        String registrationEnd = event.getRegistrationEnd();
+        if (registrationEnd != null && !registrationEnd.trim().isEmpty()) {
+            // CHANGED: block joining if registration has already ended.
+            if (registrationEnd.trim().compareTo(today) < 0) {
+                return true;
+            }
+        }
+
+        String eventDate = event.getDate();
+        if (eventDate != null && !eventDate.trim().isEmpty()) {
+            // CHANGED: block joining if the event date has already passed.
+            if (eventDate.trim().compareTo(today) < 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

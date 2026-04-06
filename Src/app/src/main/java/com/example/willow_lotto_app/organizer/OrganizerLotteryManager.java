@@ -292,12 +292,28 @@ public class OrganizerLotteryManager {
                 removalStatus.getValue(),
                 new RegistrationStore.SimpleCallback() {
                     @Override
-                    public void onSuccess() { //if the entrant was cancelled, notify them before drawing a replacement
-                        // if declined draw replacement
+                    public void onSuccess() {
+                        // CHANGED: once the status update succeeds, the decline/cancel
+                        // itself has already worked. Replacement drawing is now treated
+                        // as a follow-up step instead of deciding whether the whole
+                        // decline action was a failure.
                         if (removalStatus == RegistrationStatus.CANCELLED) {
                             sendCancelledNotification(eventId, oldRegistrationId, callback);
                         } else {
-                            drawReplacement(eventId, callback);
+                            drawReplacement(eventId, new LotteryCallback() {
+                                @Override
+                                public void onSuccess(String message, List<Registration> affectedRegistrations) {
+                                    // CHANGED: if replacement succeeds too, report both results together.
+                                    callback.onSuccess("Invitation declined. " + message, affectedRegistrations);
+                                }
+
+                                @Override
+                                public void onFailure(Exception e) {
+                                    // CHANGED: do not report decline as failed just because
+                                    // no replacement could be drawn.
+                                    callback.onSuccess("Invitation declined.", new ArrayList<>());
+                                }
+                            });
                         }
                     }
 
