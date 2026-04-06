@@ -557,7 +557,7 @@ public class ProfileActivity extends AppCompatActivity {
     /**
      * Validates profile fields; returns error message or null if valid.
      */
-    static String validateProfileInput(String name, String email) {
+    public static String validateProfileInput(String name, String email) {
         if (name == null || name.trim().isEmpty() ||
                 email == null || email.trim().isEmpty()) {
             return "Name and Email required";
