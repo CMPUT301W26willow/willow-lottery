@@ -160,7 +160,7 @@ public class NotificationActivity extends AppCompatActivity {
             return;
         }
 
-        // CHANGED: keep the existing special dialog flow for co-organizer invites.
+        // CHANGED: special dialog flow for co-organizer invites.
         if (NotificationTypes.CO_ORGANIZER_INVITE.equals(item.getType())) {
             new AlertDialog.Builder(this)
                     .setTitle(R.string.co_invite_dialog_title)
