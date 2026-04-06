@@ -1,5 +1,7 @@
 package com.example.willow_lotto_app.admin;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,9 +29,9 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ad
         void onDeleteEventClicked(Event event);
 
         /**
-         * @param event event whose comments should be marked removed
+         * @param event event to view before deleting
          */
-        void onDeleteCommentsClicked(Event event);
+        void onViewEventClicked(Event event);
     }
 
     private final List<Event> events = new ArrayList<>();
@@ -56,6 +58,8 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ad
         }
         notifyDataSetChanged();
     }
+
+
 
     /**
      * @param parent   parent ViewGroup
@@ -92,9 +96,9 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ad
         });
 
 
-        holder.deleteCommentsButton.setOnClickListener(v -> {
+        holder.viewEventButton.setOnClickListener(v -> {
             if (listener != null) {
-                listener.onDeleteCommentsClicked(event);
+                listener.onViewEventClicked(event);
             }
         });
     }
@@ -110,7 +114,7 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ad
         TextView dateText;
         TextView descriptionText;
         Button deleteEventButton;
-        Button deleteCommentsButton;
+        Button viewEventButton;
 
         AdminEventViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -119,7 +123,7 @@ public class AdminEventAdapter extends RecyclerView.Adapter<AdminEventAdapter.Ad
             dateText = itemView.findViewById(R.id.admin_event_date);
             descriptionText = itemView.findViewById(R.id.admin_event_description);
             deleteEventButton = itemView.findViewById(R.id.admin_delete_event_button);
-            deleteCommentsButton = itemView.findViewById(R.id.admin_delete_comments_button);
+            viewEventButton = itemView.findViewById(R.id.admin_view_event_button);
         }
     }
 }

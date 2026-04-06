@@ -1,6 +1,7 @@
 package com.example.willow_lotto_app.admin;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.willow_lotto_app.R;
 import com.example.willow_lotto_app.events.Event;
+import com.example.willow_lotto_app.events.EventDetailActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -21,8 +23,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.content.Intent;
+import com.example.willow_lotto_app.events.EventDetailActivity;
+
 /** Admin screen to browse events, delete them, or clear their comments. */
-public class AdminBrowseEventsActivity extends AppCompatActivity implements AdminEventAdapter.AdminEventActionListener{
+public class AdminBrowseEventsActivity extends AppCompatActivity
+        implements AdminEventAdapter.AdminEventActionListener{
 
     private RecyclerView recyclerView;
     private FirebaseFirestore db;
@@ -132,17 +138,11 @@ public class AdminBrowseEventsActivity extends AppCompatActivity implements Admi
                 .show();
     }
 
-    /**
-     * @param event event whose thread comments should be marked removed
-     */
     @Override
-    public void onDeleteCommentsClicked(Event event) {
-        new AlertDialog.Builder(this)
-                .setTitle("Delete Event Comments")
-                .setMessage("Are you sure you want to remove comments for this event that violate app policy?")
-                .setPositiveButton("Confirm", (dialog, which) -> removeEventComments(event))
-                .setNegativeButton("Cancel", null)
-                .show();
+    public void onViewEventClicked(Event event) {
+        Intent intent = new Intent(this, EventDetailActivity.class);
+        intent.putExtra(EventDetailActivity.EXTRA_EVENT_ID, event.getId());
+        startActivity(intent);
     }
 
     /**
