@@ -161,6 +161,14 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // CHANGED: refresh the events list whenever the user returns from
+    // EventDetailActivity so joined/waitlist info stays up to date.
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadEvents();
+    }
+
     // Load events (limit 10) then current user's joined IDs.
     private void loadEvents() {
 
