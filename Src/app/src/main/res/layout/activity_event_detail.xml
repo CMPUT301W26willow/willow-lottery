@@ -258,24 +258,34 @@
                         android:padding="10dp"
                         android:layout_marginBottom="8dp"/>
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/event_detail_comment_post_btn"
+                        style="@style/Widget.MaterialComponents.Button"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="52dp"
+                        android:layout_marginBottom="16dp"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
                         android:text="@string/event_detail_comment_post"
                         android:textAllCaps="false"
-                        android:background="@drawable/button_primary_purple"
                         android:textColor="@android:color/white"
-                        android:layout_marginBottom="16dp"/>
+                        app:backgroundTint="@color/primary"
+                        app:cornerRadius="10dp"
+                        app:rippleColor="@color/primaryDark" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/event_detail_join_leave_btn"
+                        style="@style/Widget.MaterialComponents.Button"
                         android:layout_width="match_parent"
                         android:layout_height="56dp"
-                        android:background="@drawable/button_primary_blue"
-                        android:textColor="@android:color/white"
+                        android:insetTop="0dp"
+                        android:insetBottom="0dp"
                         android:textAllCaps="false"
-                        android:textSize="16sp"/>
+                        android:textColor="@android:color/white"
+                        android:textSize="16sp"
+                        app:backgroundTint="@color/primary"
+                        app:cornerRadius="10dp"
+                        app:rippleColor="@color/primaryDark" />
                     <Button
                         android:id="@+id/event_detail_accept_btn"
                         android:layout_width="match_parent"
