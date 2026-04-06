@@ -61,7 +61,8 @@
                 android:layout_height="40dp"
                 android:layout_marginTop="10dp"
                 android:text="Remove Event"
-                android:textAllCaps="false" />
+                android:textAllCaps="false"
+                android:backgroundTint="@color/buttonBlue"/>
 
             <Button
                 android:id="@+id/admin_delete_comments_button"
@@ -69,7 +70,9 @@
                 android:layout_height="40dp"
                 android:layout_marginTop="8dp"
                 android:text="Remove Comments"
-                android:textAllCaps="false" />
+                android:textAllCaps="false"
+                android:backgroundTint="@color/buttonBlue"
+                />
         </LinearLayout>
 
     </LinearLayout>
