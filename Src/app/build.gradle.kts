@@ -52,6 +52,13 @@ dependencies {
     implementation("com.google.zxing:core:3.5.2")
     implementation("com.github.bumptech.glide:glide:4.16.0")
 
+    // In-app QR scan for event deep links (US 01.06.01)
+    implementation("androidx.camera:camera-core:1.4.1")
+    implementation("androidx.camera:camera-camera2:1.4.1")
+    implementation("androidx.camera:camera-lifecycle:1.4.1")
+    implementation("androidx.camera:camera-view:1.4.1")
+    implementation("com.google.mlkit:barcode-scanning:17.3.0")
+
     // Unit testing
     testImplementation(libs.junit)
     // Robolectric for running Android unit tests on the JVM

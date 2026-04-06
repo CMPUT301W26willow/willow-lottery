@@ -3,6 +3,7 @@ package com.example.willow_lotto_app.events;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,6 +52,10 @@ public class EventsActivity extends AppCompatActivity {
         emptyView = findViewById(R.id.events_empty);
         BottomNavigationView bottomNav = findViewById(R.id.bottom_nav);
         bottomNav.setSelectedItemId(R.id.nav_events);
+
+        ImageButton scanQr = findViewById(R.id.events_scan_qr_btn);
+        scanQr.setOnClickListener(v ->
+                startActivity(new Intent(this, ScanEventQrActivity.class)));
 
         adapter = new RegistrationHistoryAdapter();
         recycler.setLayoutManager(new LinearLayoutManager(this));

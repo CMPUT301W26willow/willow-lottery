@@ -507,6 +507,17 @@
                 app:strokeColor="@color/primary" />
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/viewEnrolledButton"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/organizer_view_enrolled_entrants"
+                android:textAllCaps="false"
+                app:cornerRadius="12dp"
+                app:strokeColor="@color/primary" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/viewCancelledButton"
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
