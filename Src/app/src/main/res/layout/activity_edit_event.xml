@@ -34,7 +34,7 @@
             android:layout_height="48dp"
             android:text="Upload Event Poster"
             android:textColor="@android:color/white"
-            android:background="@drawable/button_primary_purple"
+            android:backgroundTint="@color/buttonBlue"
             android:layout_marginBottom="16dp"/>
 
         <TextView
@@ -51,7 +51,7 @@
             android:layout_height="48dp"
             android:text="Back"
             android:textColor="@android:color/white"
-            android:background="@drawable/button_primary_purple"/>
+            android:backgroundTint="@color/buttonBlue"/>
 
     </LinearLayout>
 </ScrollView>

@@ -481,7 +481,8 @@
                         android:text="@string/organizer_export_entrants_csv"
                         android:textAllCaps="false"
                         app:cornerRadius="12dp"
-                        app:strokeColor="@color/primary" />
+                        app:strokeColor="@color/primary"
+                        android:textColor="@color/primary"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -504,7 +505,9 @@
                 android:text="Cancel invited entrants"
                 android:textAllCaps="false"
                 app:cornerRadius="12dp"
-                app:strokeColor="@color/primary" />
+                app:strokeColor="@color/primary"
+                android:textColor="@color/primary"
+                />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/viewEnrolledButton"
@@ -515,7 +518,9 @@
                 android:text="@string/organizer_view_enrolled_entrants"
                 android:textAllCaps="false"
                 app:cornerRadius="12dp"
-                app:strokeColor="@color/primary" />
+                app:strokeColor="@color/primary"
+                android:textColor="@color/primary"
+                />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/viewCancelledButton"
@@ -526,7 +531,9 @@
                 android:text="View cancelled entrants"
                 android:textAllCaps="false"
                 app:cornerRadius="12dp"
-                app:strokeColor="@color/primary" />
+                app:strokeColor="@color/primary"
+                android:textColor="@color/primary"
+                />
 
             <LinearLayout
                 android:id="@+id/geolocationRow"
@@ -559,7 +566,9 @@
                 android:text="View entrant map"
                 android:textAllCaps="false"
                 app:cornerRadius="12dp"
-                app:strokeColor="@color/primary" />
+                app:strokeColor="@color/primary"
+                android:textColor="@color/primary"
+                />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -588,7 +597,9 @@
                 android:text="@string/organizer_co_remove_title"
                 android:textAllCaps="false"
                 app:cornerRadius="12dp"
-                app:strokeColor="@color/primary" />
+                app:strokeColor="@color/primary"
+                android:textColor="@color/primary"
+                />
 
             <!-- Invite -->
             <TextView
@@ -656,7 +667,9 @@
                             android:text="Invite"
                             android:textAllCaps="false"
                             app:cornerRadius="12dp"
-                            app:strokeColor="@color/primary" />
+                            app:strokeColor="@color/primary"
+                            android:textColor="@color/primary"
+                            />
                     </LinearLayout>
 
                     <com.google.android.material.button.MaterialButton
@@ -668,7 +681,9 @@
                         android:text="@string/organizer_co_add_button"
                         android:textAllCaps="false"
                         app:cornerRadius="12dp"
-                        app:strokeColor="@color/primary" />
+                        app:strokeColor="@color/primary"
+                        android:textColor="@color/primary"
+                        />
 
                     <ListView
                         android:id="@+id/searchResultsListView"
@@ -688,7 +703,9 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="16dp"
                 android:text="@string/back_to_profile"
-                android:textAllCaps="false" />
+                android:textAllCaps="false"
+                android:textColor="@color/primary"
+                />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </LinearLayout>

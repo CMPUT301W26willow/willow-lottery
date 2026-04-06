@@ -87,6 +87,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="14dp"
             android:text="@string/admin_remove_organizer_privileges"
+            android:textColor="@color/primary"
             android:textAllCaps="false"
             app:strokeColor="@color/borderGray" />
 

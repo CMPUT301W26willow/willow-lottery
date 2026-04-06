@@ -606,7 +606,9 @@
                         android:text="@string/organizer_my_events_button"
                         android:textAllCaps="false"
                         app:cornerRadius="12dp"
-                        app:strokeColor="@color/primary" />
+                        app:strokeColor="@color/primary"
+                        android:textColor="@color/primary"
+                        />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
