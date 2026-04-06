@@ -75,6 +75,17 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Checks whether the email entered during sign-up has been banned by an administrator.
+     *<p>
+     * If the email is banned, sign-up is stopped.
+     * If the email is not banned, the existing account creation logic runs.
+     *
+     * @param name entered name
+     * @param email entered email
+     * @param password entered password
+     * @param phone default phone value
+     */
     private void checkBannedEmailBeforeSignUp(String name, String email, String password, String phone) {
         String emailKey = email.toLowerCase(Locale.CANADA).trim();
 

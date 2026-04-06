@@ -37,17 +37,17 @@ import java.util.concurrent.Executors;
 
 /**
  * CreateEventActivity.java
- *
+ * <p>
  * Author: Mehr Dhanda
- *
+ * <p>
  * Organizer "Create Event" form.
- *
+ * <p>
  * Responsibilities:
  * - Collects core event fields and validates required ones.
  * - Allows organizer to optionally set a waiting list limit (02.03.01).
  * - Stores an optional poster as a compressed JPEG data URI in Firestore ({@code posterUri}).
  * - On success, navigates to {@link EventQrActivity}.
- *
+ * <p>
  * Outstanding issues:
  * - waitlistLimit is optional; if not set, no limit is enforced on the entrant side yet.
  */

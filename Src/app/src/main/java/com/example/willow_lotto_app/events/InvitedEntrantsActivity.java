@@ -1,13 +1,13 @@
 /**
  * InvitedEntrantsActivity.java
- *
+ *<p>
  * Author: Mehr Dhanda
- *
+ *<p>
  * Displays a list of entrants who have been invited (selected by lottery)
  * but have not yet accepted. Allows the organizer to cancel individual entrants.
- *
+ *<p>
  * Role: Controller in the MVC pattern.
- *
+ *<p>
  * Outstanding issues:
  * - Event ID must be passed via Intent from OrganizerDashboardActivity.
  */
@@ -114,7 +114,7 @@ public class InvitedEntrantsActivity extends AppCompatActivity {
     }
 
     /**
-     * Loads user names from Firestore for a list of user IDs,
+     * Loads usernames from Firestore for a list of user IDs,
      * then sets up the list adapter with cancel buttons.
      *
      * @param userIds List of user IDs to fetch names for.

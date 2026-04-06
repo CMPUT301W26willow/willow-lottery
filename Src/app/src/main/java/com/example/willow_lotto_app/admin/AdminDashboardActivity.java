@@ -20,6 +20,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.NumberFormat;
@@ -35,6 +36,8 @@ public class AdminDashboardActivity extends AppCompatActivity {
     private View browseProfilesCard;
     private View browseOrganizersCard;
     private View profileButton;
+    private View notifLogCard;
+
 
     private TextView eventNumber;
     private TextView userNumber;
@@ -49,12 +52,6 @@ public class AdminDashboardActivity extends AppCompatActivity {
     private ImageButton searchGoButton;
 
     private final NumberFormat intFormat = NumberFormat.getIntegerInstance(Locale.getDefault());
-
-    private TextView infoEventCard,infoUserCard,infoWaitlistCard,infoNotifCard;
-
-    private FirebaseFirestore db;
-
-    Integer statEvents,statUsers,statWaitlist,statNotif;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +78,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
         browseProfilesCard = findViewById(R.id.adminPanelProfileManageCard);
         browseOrganizersCard = findViewById(R.id.adminPanelOrganizersManageCard);
         profileButton = findViewById(R.id.AdminPanelProfileButton);
+        notifLogCard = findViewById(R.id.adminPanelNotifLogCard);
 
         profileButton.setOnClickListener(v ->
                 startActivity(new Intent(this, ProfileActivity.class)));
@@ -105,6 +103,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
                 startActivity(new Intent(this, AdminBrowseEventsActivity.class)));
 
         searchInput = findViewById(R.id.admin_dashboard_search_input);
+        notifLogCard.setOnClickListener(v -> showNotificationLogDialog());
         searchGoButton = findViewById(R.id.admin_dashboard_search_go);
         searchGoButton.setOnClickListener(v -> showSearchDestinationPicker());
         searchInput.setOnEditorActionListener((v, actionId, event) -> {
@@ -184,6 +183,47 @@ public class AdminDashboardActivity extends AppCompatActivity {
         manageImagesCount.setText(dash);
     }
 
+    private void showNotificationLogDialog() {
+        FirebaseFirestore.getInstance()
+                .collectionGroup("notifications")
+                .get()
+                .addOnSuccessListener(snapshots -> {
+                    if (isFinishing() || isDestroyed()) return;
+
+                    if (snapshots.isEmpty()) {
+                        new AlertDialog.Builder(this)
+                                .setTitle("Notification Log")
+                                .setMessage("No notifications found.")
+                                .setPositiveButton("OK", null)
+                                .show();
+                        return;
+                    }
+
+                    // ADDED: build a readable list of every notification's title, message, and type
+                    StringBuilder sb = new StringBuilder();
+                    for (QueryDocumentSnapshot doc : snapshots) {
+                        String title   = doc.getString("title");
+                        String message = doc.getString("message");
+                        String type    = doc.getString("type");
+                        sb.append("● ")
+                                .append(title != null ? title : "(no title)")
+                                .append("\n")
+                                .append(message != null ? message : "")
+                                .append("\n")
+                                .append(type != null ? "[" + type + "]" : "")
+                                .append("\n\n");
+                    }
+
+                    new AlertDialog.Builder(this)
+                            .setTitle("Notification Log (" + snapshots.size() + ")")
+                            .setMessage(sb.toString().trim())
+                            .setPositiveButton("Close", null)
+                            .show();
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, "Failed to load notifications", Toast.LENGTH_SHORT).show());
+    }
+
     private void showSearchDestinationPicker() {
         String raw = searchInput != null && searchInput.getText() != null
                 ? searchInput.getText().toString().trim()
@@ -215,7 +255,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
                         .putExtra(AdminBrowseProfilesActivity.EXTRA_MODE, AdminBrowseProfilesActivity.MODE_ORGANIZERS)
                         .putExtra(AdminIntentExtras.EXTRA_SEARCH_QUERY, query));
                 break;
-            case 3:
+            case 3: 
                 startActivity(new Intent(this, AdminBrowseImagesActivity.class)
                         .putExtra(AdminIntentExtras.EXTRA_SEARCH_QUERY, query));
                 break;
