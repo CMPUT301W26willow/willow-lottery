@@ -571,8 +571,8 @@ public class ProfileActivity extends AppCompatActivity {
     /**
      * Retrieves and displays current user registration history in an alert dialogue
      */
-// CHANGED: reads eventName directly from the registration document
-// instead of doing a secondary lookup on the events collection
+// CHANGED: falls back to events collection lookup if eventName is missing
+// from older registration documents that were created before eventName was stored
     private void showRegistrationHistory() {
         if (mAuth.getCurrentUser() == null) return;
         String uid = mAuth.getCurrentUser().getUid();
@@ -590,23 +590,71 @@ public class ProfileActivity extends AppCompatActivity {
                         return;
                     }
 
-                    // CHANGED: read eventName directly from the registration document
-                    // no secondary events collection lookup needed
                     StringBuilder history = new StringBuilder();
+                    AtomicInteger remaining = new AtomicInteger(snap.getDocuments().size());
+
                     for (DocumentSnapshot doc : snap.getDocuments()) {
                         String eventName = doc.getString("eventName");
                         String status = doc.getString("status");
-                        history.append("• ")
-                                .append(eventName != null ? eventName : "(Unknown Event)")
-                                .append(status != null ? " — " + status : "")
-                                .append("\n\n");
-                    }
+                        String eventId = doc.getString("eventId");
 
-                    new AlertDialog.Builder(this)
-                            .setTitle("Registration History")
-                            .setMessage(history.toString().trim())
-                            .setPositiveButton("OK", null)
-                            .show();
+                        if (eventName != null && !eventName.isEmpty()) {
+                            // eventName already stored on registration, use it directly
+                            history.append("• ")
+                                    .append(eventName)
+                                    .append(status != null ? " — " + status : "")
+                                    .append("\n\n");
+                            if (remaining.decrementAndGet() == 0) {
+                                new AlertDialog.Builder(this)
+                                        .setTitle("Registration History")
+                                        .setMessage(history.toString().trim())
+                                        .setPositiveButton("OK", null)
+                                        .show();
+                            }
+                        } else if (eventId != null && !eventId.isEmpty()) {
+                            // eventName missing, fall back to events collection lookup
+                            db.collection("events").document(eventId)
+                                    .get()
+                                    .addOnSuccessListener(eventDoc -> {
+                                        String fetchedName = eventDoc.getString("name");
+                                        history.append("• ")
+                                                .append(fetchedName != null ? fetchedName : eventId)
+                                                .append(status != null ? " — " + status : "")
+                                                .append("\n\n");
+                                        if (remaining.decrementAndGet() == 0) {
+                                            new AlertDialog.Builder(this)
+                                                    .setTitle("Registration History")
+                                                    .setMessage(history.toString().trim())
+                                                    .setPositiveButton("OK", null)
+                                                    .show();
+                                        }
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        history.append("• (Unknown Event)")
+                                                .append(status != null ? " — " + status : "")
+                                                .append("\n\n");
+                                        if (remaining.decrementAndGet() == 0) {
+                                            new AlertDialog.Builder(this)
+                                                    .setTitle("Registration History")
+                                                    .setMessage(history.toString().trim())
+                                                    .setPositiveButton("OK", null)
+                                                    .show();
+                                        }
+                                    });
+                        } else {
+                            // no eventName and no eventId, show unknown
+                            history.append("• (Unknown Event)")
+                                    .append(status != null ? " — " + status : "")
+                                    .append("\n\n");
+                            if (remaining.decrementAndGet() == 0) {
+                                new AlertDialog.Builder(this)
+                                        .setTitle("Registration History")
+                                        .setMessage(history.toString().trim())
+                                        .setPositiveButton("OK", null)
+                                        .show();
+                            }
+                        }
+                    }
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Failed to load registration history", Toast.LENGTH_SHORT).show());
