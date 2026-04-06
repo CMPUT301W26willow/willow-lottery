@@ -815,8 +815,9 @@ public class EventDetailActivity extends AppCompatActivity {
      */
     private void declineInvitation() {
         // US 1:05:07
-        // CHANGED: declining a private-event invite just marks it declined
+
         if (RegistrationStatus.PRIVATE_INVITED.getValue().equals(currentStatus)) {
+            // CHANGED: remove the private invitation record completely when declined.
             registrationStore.deleteRegistration(
                     registrationId,
                     new RegistrationStore.SimpleCallback() {
