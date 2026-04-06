@@ -20,12 +20,12 @@ import java.util.Set;
 
 /**
  * EventsAdapter.java
- *
+ * <p>
  * Author: Mehr Dhanda
- *
+ * <p>
  * RecyclerView adapter for event cards on Home and Events screens.
  * Supports keyword filtering across event name, description, and date.
- *
+ * <p>
  * Responsibilities:
  * - Binds Firestore-backed {@link Event} models to {@code item_event.xml}
  *   cards, including poster, title, date, and short description.
@@ -35,7 +35,7 @@ import java.util.Set;
  *     {@link OnJoinLeaveListener}.
  *   - Opening detailed event view (01.01.03) via
  *     {@link OnEventClickListener}.
- *
+ * <p>
  * Outstanding issues:
  * - Search is client-side only; does not query Firestore directly.
  */
@@ -155,7 +155,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.EventViewH
 
     /**
      * Filters events to show which ones are open
-     * compars the end date to todays date
+     * compares the end date to today's date
      * events with no end date are treated as open
      */
 

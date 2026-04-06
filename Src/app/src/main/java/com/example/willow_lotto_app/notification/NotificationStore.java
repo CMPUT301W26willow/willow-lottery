@@ -4,7 +4,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 /**
  * NotificationStore handles writing notification documents to Firestore.
- *
+ *<p>
  * - Checks the user's notificationsEnabled preference before sending.
  * - If the user has opted out, the notification is silently skipped.
  * - If the user has opted in (or the field is absent), the notification

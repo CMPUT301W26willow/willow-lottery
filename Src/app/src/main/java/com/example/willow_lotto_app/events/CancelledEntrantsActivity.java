@@ -1,14 +1,14 @@
 /**
  * CancelledEntrantsActivity.java
- *
+ * <p>
  * Author: Mehr Dhanda
- *
+ * <p>
  * Displays a list of entrants who have cancelled their registration
  * for a specific event. Fetches cancelled registrations from Firebase
  * Firestore and displays entrant names in a ListView.
- *
+ * <p>
  * Role: Controller in the MVC pattern.
- *
+ * <p>
  * Outstanding issues:
  * - Event ID must be passed via Intent from OrganizerDashboardActivity.
  */
@@ -111,7 +111,7 @@ public class CancelledEntrantsActivity extends AppCompatActivity {
     }
 
     /**
-     * Loads user names from Firestore for a list of user IDs.
+     * Loads usernames from Firestore for a list of user IDs.
      * Falls back to email, then userId if name is not available.
      *
      * @param userIds List of user IDs to fetch names for.
