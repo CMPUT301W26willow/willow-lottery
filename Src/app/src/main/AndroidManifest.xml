@@ -13,7 +13,6 @@
         android:name="android.hardware.camera"
         android:required="false" />
 
-    <!-- So ACTION_SEND / chooser can resolve targets on API 30+ (CSV share). -->
     <queries>
         <intent>
             <action android:name="android.intent.action.SEND" />
@@ -31,27 +30,18 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Willow_Lotto_app">
 
-
-        <!-- App starts here -->
-
-
         <meta-data
-            android:name="com.google.android.maps.v2.API_KEY"
+            android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDErr9U0sD14iNjpR2flkx2PkUKkN0mpS4"/>
 
         <activity
-
             android:name=".auth.LoginActivity"
             android:exported="true">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
-
-
 
         <!-- Main screens -->
         <activity android:name=".home.MainActivity" android:exported="false"/>
@@ -67,14 +57,11 @@
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity android:name=".auth.AdminLoginActivity" android:exported="false"/>
-        <!-- Handles deep links like willow-lottery://event/{eventId} -->
         <activity android:name=".events.EventDetailActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
                 <data
                     android:scheme="willow-lottery"
                     android:host="event" />
@@ -85,6 +72,7 @@
         <activity android:name=".entrant.EntrantMapActivity" android:exported="false"/>
         <activity android:name=".events.InvitedEntrantsActivity" android:exported="false"/>
         <activity android:name=".events.AcceptedEntrantsActivity" android:exported="false"/>
+        <activity android:name=".events.CancelledEntrantsActivity" android:exported="false"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -102,6 +90,5 @@
         <activity android:name=".admin.AdminBrowseImagesActivity" />
 
     </application>
-
 
 </manifest>
