@@ -258,7 +258,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
                         .putExtra(AdminBrowseProfilesActivity.EXTRA_MODE, AdminBrowseProfilesActivity.MODE_ORGANIZERS)
                         .putExtra(AdminIntentExtras.EXTRA_SEARCH_QUERY, query));
                 break;
-            case 3:
+            case 3: 
                 startActivity(new Intent(this, AdminBrowseImagesActivity.class)
                         .putExtra(AdminIntentExtras.EXTRA_SEARCH_QUERY, query));
                 break;
