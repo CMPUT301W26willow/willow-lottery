@@ -1,4 +1,4 @@
-package com.example.willow_lotto_app;
+package com.example.willow_lotto_app.entrant;
 
 import com.example.willow_lotto_app.registration.RegistrationStatus;
 import com.example.willow_lotto_app.registration.RegistrationStore;

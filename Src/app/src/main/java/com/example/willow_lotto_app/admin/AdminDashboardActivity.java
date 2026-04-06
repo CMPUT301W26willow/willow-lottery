@@ -12,7 +12,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.willow_lotto_app.ProfileActivity;
+import com.example.willow_lotto_app.profile.ProfileActivity;
 import com.example.willow_lotto_app.R;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;

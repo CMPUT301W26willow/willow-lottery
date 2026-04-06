@@ -1,19 +1,4 @@
-/**
- * EntrantMapActivity.java
- * <p>
- * Author: Mehr Dhanda
- * <p>
- * Displays a Google Map showing the locations where entrants joined
- * the waiting list for a specific event. Each entrant is represented
- * by a map marker at their recorded location.
- * <p>
- * Role: Controller in the MVC pattern.
- * <p>
- * Outstanding issues:
- * - Event ID is currently hardcoded as "event1". Should be passed dynamically via Intent.
- * - No clustering for overlapping markers.
- */
-package com.example.willow_lotto_app;
+package com.example.willow_lotto_app.entrant;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -21,6 +6,7 @@ import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.willow_lotto_app.R;
 import com.example.willow_lotto_app.registration.RegistrationStatus;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;

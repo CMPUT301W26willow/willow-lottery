@@ -1,4 +1,4 @@
-package com.example.willow_lotto_app;
+package com.example.willow_lotto_app.profile;
 
 import android.app.AlertDialog;
 import android.content.Intent;
@@ -14,6 +14,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.willow_lotto_app.R;
+import com.example.willow_lotto_app.auth.LoginActivity;
+import com.example.willow_lotto_app.home.MainActivity;
 import com.google.firebase.auth.FirebaseUser;
 
 import com.google.android.gms.tasks.Task;

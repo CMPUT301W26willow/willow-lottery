@@ -1,4 +1,4 @@
-package com.example.willow_lotto_app;
+package com.example.willow_lotto_app.util;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;

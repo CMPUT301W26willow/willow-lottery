@@ -14,7 +14,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.willow_lotto_app.QRCodeHelper;
+import com.example.willow_lotto_app.util.QRCodeHelper;
 import com.example.willow_lotto_app.R;
 import com.google.android.material.appbar.MaterialToolbar;
 

@@ -1,4 +1,4 @@
-package com.example.willow_lotto_app;
+package com.example.willow_lotto_app.home;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,11 +14,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.willow_lotto_app.R;
 import com.example.willow_lotto_app.events.Event;
 import com.example.willow_lotto_app.events.EventDetailActivity;
 import com.example.willow_lotto_app.events.EventsActivity;
 import com.example.willow_lotto_app.events.EventsAdapter;
 import com.example.willow_lotto_app.notification.NotificationActivity;
+import com.example.willow_lotto_app.profile.ProfileActivity;
 import com.example.willow_lotto_app.registration.RegistrationStatus;
 import com.example.willow_lotto_app.registration.WaitlistCountLoader;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -37,15 +39,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Home screen for entrants.
- *<p>
- * Responsibilities:
- * - Implements 01.01.03 "View events available to join" by listing public
- *   events from Firestore. Registration history is on {@link EventsActivity}.
- * - Wires up bottom navigation to Events, Notifications, and Profile.
- * - Delegates rendering of individual cards to {@link EventsAdapter}.
- */
+// Home screen: lists public events from Firestore, search/filters, join/leave waitlist.
+// Bottom nav goes to Events, Notifications, Profile. Cards are EventsAdapter.
 public class MainActivity extends AppCompatActivity {
 
     private static final String REGISTRATIONS_COLLECTION = "registrations";
@@ -64,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Event list
         bottomNav = findViewById(R.id.bottom_nav);
         bottomNav.setSelectedItemId(R.id.nav_home);
         homeEventsRecycler = findViewById(R.id.home_events_recycler);
@@ -73,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
         homeEventsRecycler.setLayoutManager(new LinearLayoutManager(this));
         homeEventsRecycler.setAdapter(adapter);
 
+        // Search box: filter adapter as user types
         homeSearchInput = findViewById(R.id.home_search_input);
         homeSearchInput.addTextChangedListener(new TextWatcher() {
             @Override
@@ -90,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Filter chips: open spots, availability, date, clear (re-applies search text)
         Button homeFilterOpen = findViewById(R.id.home_filter_open);
         Button homeFilterAvailable = findViewById(R.id.home_filter_available);
         Button homeFilterDate = findViewById(R.id.home_filter_date);
@@ -113,16 +111,19 @@ public class MainActivity extends AppCompatActivity {
             updateHomeEmptyState(getString(R.string.home_no_events_yet));
         });
 
+        // Toggle filter row visibility
         findViewById(R.id.home_filter_btn).setOnClickListener(v -> {
             boolean show = homeFilterScroll.getVisibility() != View.VISIBLE;
             homeFilterScroll.setVisibility(show ? View.VISIBLE : View.GONE);
         });
 
+        // Signed-in user id for registrations and joined state
         db = FirebaseFirestore.getInstance();
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         }
         adapter.setCurrentUserId(currentUserId);
+        // Join: write registrations/{eventId_userId} waitlisted; Leave: delete that doc
         adapter.setOnJoinLeaveListener(new EventsAdapter.OnJoinLeaveListener() {
             @Override
             public void onJoin(Event event) {
@@ -173,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
                         .addOnFailureListener(e -> Toast.makeText(MainActivity.this, "Could not leave event", Toast.LENGTH_SHORT).show());
             }
         });
+        // Open event detail
         adapter.setOnEventClickListener(event -> {
             Intent intent = new Intent(MainActivity.this, EventDetailActivity.class);
             intent.putExtra(EventDetailActivity.EXTRA_EVENT_ID, event.getId());
@@ -180,6 +182,7 @@ public class MainActivity extends AppCompatActivity {
         });
         loadEvents();
 
+        // Bottom navigation
         bottomNav.setOnItemSelectedListener(item -> {
 
             if (item.getItemId() == R.id.nav_home) {
@@ -211,16 +214,14 @@ public class MainActivity extends AppCompatActivity {
         loadEvents();
     }
 
-    /**
-     * Loads all public events from Firestore (public, non-deleted),
-     * then applies the current home search query and empty state.
-     */
+    // Pull events from Firestore, skip private/deleted, fill adapter, waitlist counts, joined ids
     private void loadEvents() {
 
         db.collection("events")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<Event> list = new ArrayList<>();
+                    // Map each doc to Event; registeredUsers may be stored as List or other shape
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                         Boolean isDeleted = doc.getBoolean("isDeleted");
                         if (isDeleted != null && isDeleted) {
@@ -251,11 +252,13 @@ public class MainActivity extends AppCompatActivity {
                     String q = homeSearchInput.getText() != null ? homeSearchInput.getText().toString() : "";
                     adapter.filter(q);
                     updateHomeEmptyState(getString(R.string.home_no_events_yet));
+                    // Refresh per-event waitlist numbers from Firestore
                     WaitlistCountLoader.loadWaitlistedCounts(db, list,
                             () -> runOnUiThread(() -> {
                                 adapter.notifyDataSetChanged();
                                 updateHomeEmptyState(getString(R.string.home_no_events_yet));
                             }));
+                    // Which events this user already joined (registration docs)
                     if (currentUserId != null) {
                         loadJoinedEventIds(joined -> adapter.setJoinedEventIds(joined));
                     } else {
@@ -273,6 +276,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    // Show empty message vs recycler depending on filtered item count
     private void updateHomeEmptyState(String defaultEmptyMessage) {
         if (homeEventsEmpty == null) {
             return;
@@ -287,6 +291,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Firestore sometimes returns a raw List; normalize to List<String>
     private static List<String> castStringList(Object o) {
         List<String> out = new ArrayList<>();
         if (!(o instanceof List)) {
@@ -300,7 +305,7 @@ public class MainActivity extends AppCompatActivity {
         return out;
     }
 
-    // Query registrations where userId = currentUser → set of eventIds.
+    // registrations where userId matches: collect eventId strings
     private void loadJoinedEventIds(OnJoinedLoadedListener listener) {
         if (currentUserId == null) {
             listener.onLoaded(new HashSet<>());
@@ -325,12 +330,13 @@ public class MainActivity extends AppCompatActivity {
         void onLoaded(Set<String> joinedEventIds);
     }
 
+    // Safe string from Firestore field (null becomes "")
     private static String getString(QueryDocumentSnapshot doc, String field) {
         Object o = doc.get(field);
         return o != null ? o.toString() : "";
     }
 
-
+    // Build string list from a list-typed field on the snapshot
     private static List<String> readStringList(QueryDocumentSnapshot doc, String field) {
         List<String> out = new ArrayList<>();
         Object o = doc.get(field);
@@ -345,7 +351,7 @@ public class MainActivity extends AppCompatActivity {
         return out;
     }
 
-    /** True if registration has ended or the event date is in the past (yyyy-MM-dd compare). */
+    // Block join if registration end or event date is before today (yyyy-MM-dd string compare)
     private static boolean isEventClosedForJoining(Event event) {
         if (event == null) {
             return false;

@@ -7,6 +7,8 @@ import static org.junit.Assert.assertFalse;
 
 import org.junit.Test;
 
+import com.example.willow_lotto_app.profile.ProfileActivity;
+
 import java.util.ArrayList;
 import java.util.List;
 

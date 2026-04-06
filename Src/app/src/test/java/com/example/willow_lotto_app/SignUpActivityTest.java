@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
+import com.example.willow_lotto_app.auth.SignUpActivity;
+
 /**
  * Unit tests for {@link SignUpActivity#validateSignUpInput}.
  */

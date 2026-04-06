@@ -11,10 +11,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.willow_lotto_app.MainActivity;
+import com.example.willow_lotto_app.home.MainActivity;
 import com.example.willow_lotto_app.R;
 import com.example.willow_lotto_app.notification.NotificationActivity;
-import com.example.willow_lotto_app.ProfileActivity;
+import com.example.willow_lotto_app.profile.ProfileActivity;
 import com.example.willow_lotto_app.registration.Registration;
 import com.example.willow_lotto_app.registration.RegistrationStatus;
 import com.example.willow_lotto_app.registration.RegistrationStore;

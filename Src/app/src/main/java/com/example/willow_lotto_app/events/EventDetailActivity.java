@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.willow_lotto_app.EntrantResponseManager;
+import com.example.willow_lotto_app.entrant.EntrantResponseManager;
 import com.example.willow_lotto_app.R;
 import com.example.willow_lotto_app.organizer.EventOrganizerAccess;
 import com.example.willow_lotto_app.admin.AdminAccessUtil;

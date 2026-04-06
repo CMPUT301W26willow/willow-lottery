@@ -19,7 +19,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.NestedScrollView;
 
-import com.example.willow_lotto_app.EntrantMapActivity;
+import com.example.willow_lotto_app.entrant.EntrantMapActivity;
 import com.example.willow_lotto_app.R;
 import com.example.willow_lotto_app.events.CancelledEntrantsActivity;
 import com.example.willow_lotto_app.events.CreateEventActivity;

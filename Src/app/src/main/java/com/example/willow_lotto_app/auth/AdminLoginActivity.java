@@ -1,4 +1,4 @@
-package com.example.willow_lotto_app;
+package com.example.willow_lotto_app.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,6 +9,7 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.willow_lotto_app.R;
 import com.example.willow_lotto_app.admin.AdminAccessUtil;
 import com.example.willow_lotto_app.admin.AdminDashboardActivity;
 import com.google.android.material.button.MaterialButton;

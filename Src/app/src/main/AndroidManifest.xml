@@ -28,7 +28,7 @@
 
         <activity
 
-            android:name=".LoginActivity"
+            android:name=".auth.LoginActivity"
             android:exported="true">
 
             <intent-filter>
@@ -41,15 +41,15 @@
 
 
         <!-- Main screens -->
-        <activity android:name=".MainActivity" android:exported="false"/>
+        <activity android:name=".home.MainActivity" android:exported="false"/>
         <activity android:name=".events.EventsActivity" android:exported="false"/>
         <activity android:name=".notification.NotificationActivity" android:exported="false"/>
-        <activity android:name=".ProfileActivity" android:exported="false"/>
+        <activity android:name=".profile.ProfileActivity" android:exported="false"/>
         <activity android:name=".organizer.ui.OrganizerDashboardActivity" android:exported="false"/>
         <activity android:name=".organizer.ui.OrganizerMyEventsActivity" android:exported="false"/>
         <activity android:name=".events.CreateEventActivity" android:exported="false"/>
         <activity android:name=".events.EventQrActivity" android:exported="false"/>
-        <activity android:name=".AdminLoginActivity" android:exported="false"/>
+        <activity android:name=".auth.AdminLoginActivity" android:exported="false"/>
         <!-- Handles deep links like willow-lottery://event/{eventId} -->
         <activity android:name=".events.EventDetailActivity" android:exported="true">
             <intent-filter>
@@ -63,9 +63,9 @@
                     android:host="event" />
             </intent-filter>
         </activity>
-        <activity android:name=".SignUpActivity" android:exported="false"/>
+        <activity android:name=".auth.SignUpActivity" android:exported="false"/>
         <activity android:name=".events.EditEventActivity" android:exported="false"/>
-        <activity android:name=".EntrantMapActivity" android:exported="false"/>
+        <activity android:name=".entrant.EntrantMapActivity" android:exported="false"/>
         <activity android:name=".events.InvitedEntrantsActivity" android:exported="false"/>
 
         <provider
