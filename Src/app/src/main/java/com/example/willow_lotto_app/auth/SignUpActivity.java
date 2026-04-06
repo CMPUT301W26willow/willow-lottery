@@ -150,7 +150,7 @@ public class SignUpActivity extends AppCompatActivity {
         return cs != null ? cs.toString() : "";
     }
 
-    static String validateSignUpInput(String name, String email, String password) {
+    public static String validateSignUpInput(String name, String email, String password) {
         if (name == null || name.trim().isEmpty()) {
             return "Name required";
         }

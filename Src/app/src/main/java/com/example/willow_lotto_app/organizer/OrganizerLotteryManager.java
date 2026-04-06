@@ -38,9 +38,41 @@ public class OrganizerLotteryManager {
     private static final String TAG = "OrganizerLotteryManager";
 
     public OrganizerLotteryManager() {
-        this.db = FirebaseFirestore.getInstance();
-        this.registrationRepository = new RegistrationStore();
-        this.notificationRepository = new NotificationStore();
+        this(FirebaseFirestore.getInstance(), new RegistrationStore(), new NotificationStore());
+    }
+
+    /**
+     * For tests: inject Firestore and stores to verify draw / replacement logic without hitting production.
+     */
+    public OrganizerLotteryManager(
+            FirebaseFirestore db,
+            RegistrationStore registrationRepository,
+            NotificationStore notificationRepository) {
+        this.db = db;
+        this.registrationRepository = registrationRepository;
+        this.notificationRepository = notificationRepository;
+    }
+
+    /**
+     * Counts registrations that occupy a draw slot (invited or accepted).
+     */
+    public static int countFilledInvitationSlots(List<Registration> registrations) {
+        if (registrations == null || registrations.isEmpty()) {
+            return 0;
+        }
+        int filled = 0;
+        for (Registration registration : registrations) {
+            RegistrationStatus status = registration.getStatusEnum();
+            if (status == RegistrationStatus.INVITED || status == RegistrationStatus.ACCEPTED) {
+                filled++;
+            }
+        }
+        return filled;
+    }
+
+    /** How many waitlisted entrants to promote in one draw given caps. */
+    public static int computeActualDrawCount(int numberToDraw, int remainingSpots, int waitlistPoolSize) {
+        return Math.min(Math.min(numberToDraw, remainingSpots), waitlistPoolSize);
     }
 
     private interface EventNameCallback {
@@ -127,10 +159,10 @@ public class OrganizerLotteryManager {
 
                                         Collections.shuffle(waitlistedRegistrations);
 
-                                        int actualDrawCount = Math.min(
-                                                Math.min(numberToDraw, remainingSpots),
-                                                waitlistedRegistrations.size()
-                                        );
+                                        int actualDrawCount = computeActualDrawCount(
+                                                numberToDraw,
+                                                remainingSpots,
+                                                waitlistedRegistrations.size());
 
                                         if (actualDrawCount <= 0) {
                                             callback.onFailure(new Exception("No spots remaining."));
@@ -699,16 +731,7 @@ public class OrganizerLotteryManager {
         registrationRepository.getRegistrationsForEvent(eventId, new RegistrationStore.RegistrationListCallback() {
             @Override
             public void onSuccess(List<Registration> registrations) {
-                int filled = 0;
-
-                for (Registration registration : registrations) {
-                    RegistrationStatus status = registration.getStatusEnum();
-                    if (status == RegistrationStatus.INVITED || status == RegistrationStatus.ACCEPTED) {
-                        filled++;
-                    }
-                }
-
-                callback.onSuccess(filled);
+                callback.onSuccess(countFilledInvitationSlots(registrations));
             }
 
             @Override

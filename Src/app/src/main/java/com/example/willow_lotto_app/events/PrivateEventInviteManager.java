@@ -69,9 +69,37 @@ public class PrivateEventInviteManager {
      * @since 31/03/2026
      */
     public PrivateEventInviteManager() {
-        this.db = FirebaseFirestore.getInstance();
-        this.registrationStore = new RegistrationStore();
-        this.notificationStore = new NotificationStore();
+        this(FirebaseFirestore.getInstance(), new RegistrationStore(), new NotificationStore());
+    }
+
+    /**
+     * For tests: {@code searchUsers} still uses {@code db}; invite path uses injected stores only.
+     */
+    public PrivateEventInviteManager(
+            FirebaseFirestore db,
+            RegistrationStore registrationStore,
+            NotificationStore notificationStore) {
+        this.db = db;
+        this.registrationStore = registrationStore;
+        this.notificationStore = notificationStore;
+    }
+
+    /**
+     * Same matching rules as {@link #searchUsers}; extracted for unit tests.
+     */
+    public static boolean matchesPrivateUserSearch(String name, String email, String phone, String query) {
+        String lower = query == null ? "" : query.trim().toLowerCase();
+        if (lower.isEmpty()) {
+            return true;
+        }
+        String n = safeLowerField(name);
+        String e = safeLowerField(email);
+        String p = safeLowerField(phone);
+        return n.contains(lower) || e.contains(lower) || p.contains(lower);
+    }
+
+    private static String safeLowerField(String value) {
+        return value == null ? "" : value.trim().toLowerCase();
     }
 
     // US 2:01:03
@@ -86,14 +114,13 @@ public class PrivateEventInviteManager {
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<DocumentSnapshot> matches = new ArrayList<>();
-                    String lower = query == null ? "" : query.trim().toLowerCase();
 
                     for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
-                        String name = safeLower(doc.getString("name"));
-                        String email = safeLower(doc.getString("email"));
-                        String phone = safeLower(doc.getString("phone"));
-
-                        if (name.contains(lower) || email.contains(lower) || phone.contains(lower)) {
+                        if (matchesPrivateUserSearch(
+                                doc.getString("name"),
+                                doc.getString("email"),
+                                doc.getString("phone"),
+                                query)) {
                             matches.add(doc);
                         }
                     }
@@ -151,13 +178,4 @@ public class PrivateEventInviteManager {
         );
     }
 
-    /**
-     * Safely converts a string to lowercase for search comparison.
-     *
-     * @param value input string value
-     * @return lowercase trimmed string, or empty string if null
-     */
-    private String safeLower(String value) {
-        return value == null ? "" : value.trim().toLowerCase();
-    }
 }
