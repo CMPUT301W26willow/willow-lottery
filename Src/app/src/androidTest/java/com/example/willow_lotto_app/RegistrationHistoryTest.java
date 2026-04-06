@@ -55,18 +55,34 @@ public class RegistrationHistoryTest {
         registrations.add(reg3);
     }
 
-    /**
-     * Helper that mimics the history string building logic in showRegistrationHistory
-     */
+    // CHANGED: updated helper to match the new showRegistrationHistory logic
+    // which falls back to eventId if eventName is missing
     private String buildHistoryString(List<Map<String, String>> regs) {
         StringBuilder history = new StringBuilder();
         for (Map<String, String> doc : regs) {
             String eventName = doc.get("eventName");
             String status = doc.get("status");
-            history.append("• ")
-                    .append(eventName != null ? eventName : "(Unknown Event)")
-                    .append(status != null ? " — " + status : "")
-                    .append("\n\n");
+            String eventId = doc.get("eventId");
+
+            if (eventName != null && !eventName.isEmpty()) {
+                // eventName present, use it directly
+                history.append("• ")
+                        .append(eventName)
+                        .append(status != null ? " — " + status : "")
+                        .append("\n\n");
+            } else if (eventId != null && !eventId.isEmpty()) {
+                // eventName missing, fall back to eventId as placeholder
+                // in real code this would trigger a Firestore lookup
+                history.append("• ")
+                        .append(eventId)
+                        .append(status != null ? " — " + status : "")
+                        .append("\n\n");
+            } else {
+                // neither eventName nor eventId present
+                history.append("• (Unknown Event)")
+                        .append(status != null ? " — " + status : "")
+                        .append("\n\n");
+            }
         }
         return history.toString().trim();
     }
@@ -105,10 +121,11 @@ public class RegistrationHistoryTest {
     }
 
     /**
-     * Tests that a null eventName falls back to Unknown Event
+     * Tests that a null eventName falls back to eventId when eventId is present
+     * CHANGED: updated to match new fallback logic in showRegistrationHistory
      */
     @Test
-    public void testNullEventNameFallsBackToUnknown() {
+    public void testNullEventNameFallsBackToEventId() {
         List<Map<String, String>> regs = new ArrayList<>();
         Map<String, String> reg = new HashMap<>();
         reg.put("eventId", "event_004");
@@ -116,8 +133,38 @@ public class RegistrationHistoryTest {
         reg.put("status", "waitlisted");
         regs.add(reg);
 
+        // when eventName is null, the helper falls back to eventId
+        String result = buildHistoryString(regs);
+        assertTrue(result.contains("event_004"));
+    }
+
+    // ADDED: tests that when both eventName and eventId are missing
+    // the entry shows (Unknown Event) instead of crashing
+    @Test
+    public void testMissingEventNameAndEventIdShowsUnknown() {
+        List<Map<String, String>> regs = new ArrayList<>();
+        Map<String, String> reg = new HashMap<>();
+        reg.put("eventId", null);
+        reg.put("eventName", null);
+        reg.put("status", "waitlisted");
+        regs.add(reg);
+
         String result = buildHistoryString(regs);
         assertTrue(result.contains("(Unknown Event)"));
+    }
+
+    // ADDED: tests that an empty eventName string also falls back correctly
+    @Test
+    public void testEmptyEventNameFallsBackToEventId() {
+        List<Map<String, String>> regs = new ArrayList<>();
+        Map<String, String> reg = new HashMap<>();
+        reg.put("eventId", "event_005");
+        reg.put("eventName", "");
+        reg.put("status", "waitlisted");
+        regs.add(reg);
+
+        String result = buildHistoryString(regs);
+        assertTrue(result.contains("event_005"));
     }
 
     /**
@@ -127,7 +174,7 @@ public class RegistrationHistoryTest {
     public void testNullStatusDoesNotCrash() {
         List<Map<String, String>> regs = new ArrayList<>();
         Map<String, String> reg = new HashMap<>();
-        reg.put("eventId", "event_005");
+        reg.put("eventId", "event_006");
         reg.put("eventName", "Yoga Class");
         reg.put("status", null);
         regs.add(reg);
@@ -140,17 +187,8 @@ public class RegistrationHistoryTest {
      * Tests that an empty registration list produces an empty string
      */
     @Test
-    public void testEmptyRegistr9yMnTm4NSzvG9rrwjM2ec8xZgh1cafXH8() {
+    public void testEmptyRegistration() {
         String result = buildHistoryString(new ArrayList<>());
         assertEquals("", result);
-    }
-
-    /**
-     * Tests that showRegistrationHistory requires a signed in user
-     * UNIMPLEMENTED - requires Firestore and Firebase Auth
-     */
-    @Test
-    public void testShowRegistrationHistoryRequiresSignedInUser() {
-        // left unimplemented matching the pattern of NotficationSentUnselected
     }
 }
