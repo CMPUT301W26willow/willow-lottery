@@ -100,6 +100,27 @@ public class RegistrationStore {
                 .addOnFailureListener(callback::onFailure);
     }
 
+    /**
+     * Loads all registration documents for a given user (any status).
+     */
+    public void getRegistrationsForUser(String userId, final RegistrationListCallback callback) {
+        if (userId == null || userId.trim().isEmpty()) {
+            callback.onSuccess(new ArrayList<>());
+            return;
+        }
+        db.collection("registrations")
+                .whereEqualTo("userId", userId)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Registration> results = new ArrayList<>();
+                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                        results.add(Registration.fromDocument(doc));
+                    }
+                    callback.onSuccess(results);
+                })
+                .addOnFailureListener(callback::onFailure);
+    }
+
     public void findRegistration(String eventId, String userId, final RegistrationCallback callback) {
         db.collection("registrations")
                 .whereEqualTo("eventId", eventId)
