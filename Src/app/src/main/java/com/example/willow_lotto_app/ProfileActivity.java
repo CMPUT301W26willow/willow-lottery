@@ -571,8 +571,8 @@ public class ProfileActivity extends AppCompatActivity {
     /**
      * Retrieves and displays current user registration history in an alert dialogue
      */
-    // CHANGED: reads from the registrations collection instead of registeredEvents
-// array on the user document, since that array is never populated
+// CHANGED: reads eventName directly from the registration document
+// instead of doing a secondary lookup on the events collection
     private void showRegistrationHistory() {
         if (mAuth.getCurrentUser() == null) return;
         String uid = mAuth.getCurrentUser().getUid();
@@ -590,53 +590,23 @@ public class ProfileActivity extends AppCompatActivity {
                         return;
                     }
 
-                    // collect all event IDs from the registrations
-                    List<String> eventIds = new ArrayList<>();
-                    for (DocumentSnapshot doc : snap.getDocuments()) {
-                        String eventId = doc.getString("eventId");
-                        if (eventId != null && !eventId.isEmpty()) {
-                            eventIds.add(eventId);
-                        }
-                    }
-
-                    if (eventIds.isEmpty()) {
-                        new AlertDialog.Builder(this)
-                                .setTitle("Registration History")
-                                .setMessage("You have not registered for any events yet.")
-                                .setPositiveButton("OK", null)
-                                .show();
-                        return;
-                    }
-
-                    // fetch each event name
+                    // CHANGED: read eventName directly from the registration document
+                    // no secondary events collection lookup needed
                     StringBuilder history = new StringBuilder();
-                    AtomicInteger remaining = new AtomicInteger(eventIds.size());
-                    for (String eventId : eventIds) {
-                        db.collection("events").document(eventId)
-                                .get()
-                                .addOnSuccessListener(eventDoc -> {
-                                    String eventName = eventDoc.getString("name");
-                                    history.append("• ")
-                                            .append(eventName != null ? eventName : eventId)
-                                            .append("\n\n");
-                                    if (remaining.decrementAndGet() == 0) {
-                                        new AlertDialog.Builder(ProfileActivity.this)
-                                                .setTitle("Registration History")
-                                                .setMessage(history.toString().trim())
-                                                .setPositiveButton("OK", null)
-                                                .show();
-                                    }
-                                })
-                                .addOnFailureListener(e -> {
-                                    if (remaining.decrementAndGet() == 0) {
-                                        new AlertDialog.Builder(ProfileActivity.this)
-                                                .setTitle("Registration History")
-                                                .setMessage(history.toString().trim())
-                                                .setPositiveButton("OK", null)
-                                                .show();
-                                    }
-                                });
+                    for (DocumentSnapshot doc : snap.getDocuments()) {
+                        String eventName = doc.getString("eventName");
+                        String status = doc.getString("status");
+                        history.append("• ")
+                                .append(eventName != null ? eventName : "(Unknown Event)")
+                                .append(status != null ? " — " + status : "")
+                                .append("\n\n");
                     }
+
+                    new AlertDialog.Builder(this)
+                            .setTitle("Registration History")
+                            .setMessage(history.toString().trim())
+                            .setPositiveButton("OK", null)
+                            .show();
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Failed to load registration history", Toast.LENGTH_SHORT).show());
