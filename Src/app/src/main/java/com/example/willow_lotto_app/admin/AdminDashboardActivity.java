@@ -84,6 +84,8 @@ public class AdminDashboardActivity extends AppCompatActivity {
         profileButton.setOnClickListener(v ->
                 startActivity(new Intent(this, ProfileActivity.class)));
 
+        browseEventsCard.setOnClickListener(v ->
+                startActivity(new Intent(this, AdminBrowseEventsActivity.class)));
 
         browseImagesCard.setOnClickListener(v ->
                 startActivity(new Intent(this, AdminBrowseImagesActivity.class)));
