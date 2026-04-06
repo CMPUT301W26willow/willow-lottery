@@ -688,8 +688,9 @@ public class EventDetailActivity extends AppCompatActivity {
 
         // declined users
         if (RegistrationStatus.DECLINED.getValue().equals(currentStatus)) {
-            joinLeaveBtn.setText("Invitation Declined");
-            joinLeaveBtn.setEnabled(false);
+            joinLeaveBtn.setText(R.string.event_join_waiting_list);
+            joinLeaveBtn.setEnabled(true);
+            joinLeaveBtn.setOnClickListener(v -> joinEvent());
             return;
         }
 
@@ -756,6 +757,13 @@ public class EventDetailActivity extends AppCompatActivity {
      * @since 30/03/2026
      */
     private void joinEvent() {
+
+        // CHANGED: stop users from joining past events
+        // or events whose registration window has already closed.
+        if (isEventClosedForJoining()) {
+            Toast.makeText(this, "This event is no longer open for the waiting list.", Toast.LENGTH_SHORT).show();
+            return;
+        }
         if (currentUserId == null) {
             return;
         }
@@ -885,15 +893,17 @@ public class EventDetailActivity extends AppCompatActivity {
      */
     private void declineInvitation() {
         // US 1:05:07
-        // CHANGED: declining a private-event invite just marks it declined
+
         if (RegistrationStatus.PRIVATE_INVITED.getValue().equals(currentStatus)) {
-            registrationStore.updateRegistrationStatus(
+            // CHANGED: remove the private invitation record completely when declined.
+            registrationStore.deleteRegistration(
                     registrationId,
-                    RegistrationStatus.DECLINED.getValue(),
                     new RegistrationStore.SimpleCallback() {
                         @Override
                         public void onSuccess() {
-                            currentStatus = RegistrationStatus.DECLINED.getValue();
+                            joined = false;
+                            registrationId = null;
+                            currentStatus = null;
                             updateJoinLeaveButton();
                             Toast.makeText(EventDetailActivity.this,
                                     "You declined the private event invitation.",
@@ -991,5 +1001,33 @@ public class EventDetailActivity extends AppCompatActivity {
                         Toast.makeText(this, "Comment deleted.", Toast.LENGTH_SHORT).show())
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Failed to delete comment.", Toast.LENGTH_SHORT).show());
+    }
+    //changed
+    private boolean isEventClosedForJoining() {
+        if (event == null) {
+            return false;
+        }
+
+        java.text.SimpleDateFormat sdf =
+                new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US);
+        String today = sdf.format(new java.util.Date());
+
+        String registrationEnd = event.getRegistrationEnd();
+        if (registrationEnd != null && !registrationEnd.trim().isEmpty()) {
+            // CHANGED: if registrationEnd is before today, joining is blocked.
+            if (registrationEnd.trim().compareTo(today) < 0) {
+                return true;
+            }
+        }
+
+        String eventDate = event.getDate();
+        if (eventDate != null && !eventDate.trim().isEmpty()) {
+            // CHANGED: if the event date is before today, joining is blocked.
+            if (eventDate.trim().compareTo(today) < 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

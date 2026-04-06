@@ -37,6 +37,7 @@
     <string name="home_event_waitlist_count">%d people on waiting list</string>
     <string name="home_event_deadline">Registration deadline: %1$s</string>
     <string name="waitlist_full_message">This waiting list is full.</string>
+    <string name="event_join_closed_message">This event is no longer open for the waiting list.</string>
     <string name="login_reset_email_sent">If an account exists for that email, you will receive reset instructions.</string>
     <string name="login_sign_in_failed">Sign in failed. Check your email and password.</string>
     <string name="login_validation_email_required">Enter your email.</string>

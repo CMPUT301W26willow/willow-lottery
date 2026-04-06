@@ -91,10 +91,8 @@ public class OrganizerMyEventsActivity extends AppCompatActivity implements Orga
             if (isDeleted != null && isDeleted) {
                 continue;
             }
-            Boolean isPrivate = doc.getBoolean("isPrivate");
-            if (isPrivate != null && isPrivate) {
-                continue;
-            }
+
+            // CHANGED: do not hide private events on the organizer's own events screen.
             Event e = new Event();
             e.setId(doc.getId());
             e.setName(doc.getString("name"));

@@ -27,10 +27,13 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -39,7 +42,7 @@ import java.util.Set;
  *<p>
  * Responsibilities:
  * - Implements 01.01.03 "View events available to join" by listing public
- *   events from Firestore (same dataset as {@link EventsActivity}).
+ *   events from Firestore. Registration history is on {@link EventsActivity}.
  * - Wires up bottom navigation to Events, Notifications, and Profile.
  * - Delegates rendering of individual cards to {@link EventsAdapter}.
  */
@@ -126,6 +129,12 @@ public class MainActivity extends AppCompatActivity {
                 if (currentUserId == null) {
                     return;
                 }
+                if (isEventClosedForJoining(event)) {
+                    Toast.makeText(MainActivity.this,
+                            R.string.event_join_closed_message,
+                            Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 Integer lim = event.getLimit();
                 if (lim != null && lim > 0 && event.getWaitlistDisplayCount() >= lim) {
                     Toast.makeText(MainActivity.this, R.string.waitlist_full_message, Toast.LENGTH_SHORT).show();
@@ -196,8 +205,14 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadEvents();
+    }
+
     /**
-     * Loads all public events from Firestore (same rules as {@link EventsActivity}),
+     * Loads all public events from Firestore (public, non-deleted),
      * then applies the current home search query and empty state.
      */
     private void loadEvents() {
@@ -328,5 +343,27 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return out;
+    }
+
+    /** True if registration has ended or the event date is in the past (yyyy-MM-dd compare). */
+    private static boolean isEventClosedForJoining(Event event) {
+        if (event == null) {
+            return false;
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        String today = sdf.format(new Date());
+        String registrationEnd = event.getRegistrationEnd();
+        if (registrationEnd != null && !registrationEnd.trim().isEmpty()) {
+            if (registrationEnd.trim().compareTo(today) < 0) {
+                return true;
+            }
+        }
+        String eventDate = event.getDate();
+        if (eventDate != null && !eventDate.trim().isEmpty()) {
+            if (eventDate.trim().compareTo(today) < 0) {
+                return true;
+            }
+        }
+        return false;
     }
 }

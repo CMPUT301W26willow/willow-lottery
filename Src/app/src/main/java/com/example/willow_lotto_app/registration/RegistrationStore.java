@@ -52,7 +52,12 @@ public class RegistrationStore {
         this.db = FirebaseFirestore.getInstance();
     }
 
+
+    // CHANGED: use a stable registration document id so the app can
+    // always find the same registration later.
     public void createWaitlistRegistration(String eventId, String userId, final SimpleCallback callback) {
+        String docId = eventId + "_" + userId;
+
         Registration registration = new Registration(
                 eventId,
                 userId,
@@ -60,8 +65,9 @@ public class RegistrationStore {
         );
 
         db.collection("registrations")
-                .add(registration.toMap())
-                .addOnSuccessListener(documentReference -> callback.onSuccess())
+                .document(docId)
+                .set(registration.toMap())
+                .addOnSuccessListener(unused -> callback.onSuccess())
                 .addOnFailureListener(callback::onFailure);
     }
 
