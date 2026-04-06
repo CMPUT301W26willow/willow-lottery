@@ -8,30 +8,20 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Helper class for admin-generated notifications and moderation logs.
- * <p>
- * Responsibilities:
- * - Sends in-app notifications to a user's notifications subcollection.
- * - Writes admin audit logs to a top-level admin_logs collection.
- */
-
+/** Sends in-app notifications and writes admin_logs audit rows. */
 public class AdminNotificationHelper {
-    /**
-     * Private constructor because this is a static helper class.
-     */
+
     private AdminNotificationHelper() {
     }
 
     /**
-     * Sends an in-app notification to a target user using the same notification
-     * structure already used elsewhere in the project.
+     * Sends an in-app notification to the user’s notifications subcollection.
      *
-     * @param targetUserId UID of the user receiving the notification
-     * @param eventId related event ID, or null if not applicable
-     * @param title short notification title
-     * @param message full notification message
-     * @param type notification type string
+     * @param targetUserId Firebase Auth uid of the recipient; no-op if null or blank
+     * @param eventId      related event id, or null if not tied to an event
+     * @param title        notification title
+     * @param message      notification body
+     * @param type         app-specific type string for filtering or display
      */
     public static void sendAdminNotification(
             String targetUserId,
@@ -61,13 +51,13 @@ public class AdminNotificationHelper {
     }
 
     /**
-     * Writes an admin moderation log entry for auditing and debugging.
+     * Appends a moderation audit row to the {@code admin_logs} collection.
      *
-     * @param adminEmail email of the admin performing the action
-     * @param targetType type of entity being moderated, for example "event" or "profile"
-     * @param targetId document ID of the entity being moderated
-     * @param action action that was performed
-     * @param details extra detail string for debugging
+     * @param adminEmail email of the signed-in admin (may be null)
+     * @param targetType moderated entity kind, e.g. {@code "event"} or {@code "profile"}
+     * @param targetId   Firestore document id of the moderated entity
+     * @param action     short action label, e.g. {@code "delete_event"}
+     * @param details    human-readable detail for support and debugging
      */
     public static void logAdminAction(
             String adminEmail,

@@ -15,9 +15,7 @@ import com.example.willow_lotto_app.R;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Adapter for registration history cards on the Events tab.
- */
+/** RecyclerView rows for registration history on the Events tab. */
 public class RegistrationHistoryAdapter extends RecyclerView.Adapter<RegistrationHistoryAdapter.Holder> {
 
     public interface Listener {

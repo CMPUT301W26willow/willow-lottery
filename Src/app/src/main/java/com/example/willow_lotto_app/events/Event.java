@@ -5,21 +5,8 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Model class representing an event document stored in the Firestore "events" collection.
- * <p>
- * Role in application:
- * - Serves as the core event data model used across event listing, event detail,
- *   organizer flows, and lottery-related screens.
- * - Stores basic event metadata such as title, description, organizer, registration
- *   period, poster URI, draw size, and registered users.
- * <p>
- * Outstanding issues:
- * - This model currently stores both "limit" and "drawSize", but their usage is not
- *   fully standardized across the application.
- * - Some screens still only populate a subset of these fields.
- * - There is no helper method yet for converting this object directly to or from
- *   Firestore maps/documents.
+/*
+ * Event fields from Firestore; not every screen fills every property (limit/drawSize may be null).
  */
 
 public class Event {

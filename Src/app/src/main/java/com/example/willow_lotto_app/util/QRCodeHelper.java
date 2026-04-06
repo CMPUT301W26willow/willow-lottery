@@ -8,6 +8,7 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
+/** Builds event deep-link text and QR code bitmaps. */
 public final class QRCodeHelper {
 
     public static final String SCHEME = "willow-lottery://event/";

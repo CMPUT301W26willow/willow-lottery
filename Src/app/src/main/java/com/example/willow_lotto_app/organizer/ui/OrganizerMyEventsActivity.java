@@ -28,10 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Lists every event created by the signed-in organizer (excluding soft-deleted documents).
- * Each row can open {@link OrganizerDashboardActivity} or run the same entrant CSV export as the dashboard.
- */
+/** Lists the signed-in organizer’s events and opens tools per event. */
 public class OrganizerMyEventsActivity extends AppCompatActivity implements OrganizerMyEventsAdapter.Listener {
 
     private RecyclerView recyclerView;

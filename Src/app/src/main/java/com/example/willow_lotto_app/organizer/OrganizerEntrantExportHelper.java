@@ -25,11 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Builds the entrant CSV for an event and opens the system share sheet.
- * Shared by {@link com.example.willow_lotto_app.organizer.ui.OrganizerDashboardActivity}
- * and {@link com.example.willow_lotto_app.organizer.ui.OrganizerMyEventsActivity}.
- */
+/** Builds entrant CSV for an event and opens the share sheet. */
 public final class OrganizerEntrantExportHelper {
 
     private static final String TAG = "OrganizerEntrantExport";

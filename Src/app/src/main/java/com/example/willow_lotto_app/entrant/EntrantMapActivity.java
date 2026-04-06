@@ -22,10 +22,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Organizer map of entrant join locations. Uses {@code registrations} (waitlisted, with
- * optional {@code latitude}/{@code longitude}) and legacy {@code events/{id}/waitingList}.
- */
+/** Map showing where waitlisted entrants joined for one event. */
 public class EntrantMapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final String TAG = "EntrantMapActivity";

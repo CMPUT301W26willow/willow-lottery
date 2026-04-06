@@ -5,11 +5,7 @@ import com.google.firebase.firestore.FieldValue;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Builds the Firestore map for {@code events/{eventId}/comments} documents.
- *
- * @author Dev Tiwari
- */
+/** Builds Firestore field maps for new comment documents. */
 public final class EventCommentDocument {
 
     private EventCommentDocument() {

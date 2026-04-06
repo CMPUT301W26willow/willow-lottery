@@ -14,21 +14,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * OrganizerLotteryManager.java
- *<p>
- * Implements the core organizer-side lottery logic for selecting entrants, drawing replacements, and sending notifications.
- *<p>
- * Role in application:
- * - Service/manager layer for organizer lottery operations.
- * - Reads event draw size and registration state from Firestore.
- * - Enforces capacity before inviting additional entrants.
- * - Sends invitation and replacement notifications through NotificationStore.
- *<p>
- * Outstanding issues:
- * - Random selection currently relies on in-memory shuffling and does not yet include audit logging or deterministic reproducibility.
- * - The manager depends on the registrations collection being populated with consistent status values.
- * - Selected/cancelled/final-enrolled list screens are still separate UI concerns and are not managed directly here.
+/*
+ * Lottery draws: pick from waitlisted regs, update statuses, send notifications via NotificationStore.
+ * Uses RegistrationStore for writes; shuffle is in-memory only.
  */
 
 public class OrganizerLotteryManager {

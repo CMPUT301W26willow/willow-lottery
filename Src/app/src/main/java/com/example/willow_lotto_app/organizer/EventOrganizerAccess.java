@@ -5,9 +5,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Whether the signed-in user may manage an event (primary or co-organizer).
- */
+/** Tells if a user is the organizer or a co-organizer for an event. */
 public final class EventOrganizerAccess {
 
     private EventOrganizerAccess() {

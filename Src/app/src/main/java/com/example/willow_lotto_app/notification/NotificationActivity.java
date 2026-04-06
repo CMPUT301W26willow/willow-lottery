@@ -28,21 +28,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * NotificationActivity displays the current signed-in user's in-app notifications.
- *<p>
- * Role in application:
- * - Acts as the controller/view layer for the notifications screen.
- * - Reads notification documents from Firestore under:
- *   users/{uid}/notifications
- * - Displays them in a RecyclerView using NotificationAdapter.
- *<p>
- * Current limitations / outstanding issues:
- * - Notifications are currently read-only.
- * - Notifications are not yet marked as read when opened.
- * - Tapping a notification does not yet open the related event.
- * - Event names are not currently resolved here unless added separately.
- */
+/** Lists in-app notifications for the signed-in user. */
 
 public class NotificationActivity extends AppCompatActivity {
 

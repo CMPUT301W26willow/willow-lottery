@@ -2,9 +2,7 @@ package com.example.willow_lotto_app.events;
 
 import androidx.annotation.NonNull;
 
-/**
- * Row model for the Events tab registration history list (US 01.02.03).
- */
+/** One row in the Events tab registration history list. */
 public class RegistrationHistoryItem {
 
     public enum Outcome {

@@ -27,6 +27,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/*
+ * Launcher sign-in (Firebase email/password), then MainActivity. Links to sign-up and admin login.
+ * Merges a default users/{uid} doc on success so older accounts get expected fields.
+ */
 public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;

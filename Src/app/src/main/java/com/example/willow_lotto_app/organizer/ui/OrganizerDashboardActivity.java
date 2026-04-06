@@ -51,17 +51,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-/**
- * OrganizerDashboardActivity.java
- *
- *
- * Displays the organizer dashboard screen, including the waiting list of entrants,
- * lottery controls, geolocation toggle, and map view button.
- *
- * Role: Controller in the MVC pattern.
- *
- * Outstanding issues:
- * - Event ID is passed via Intent but defaults to null if not provided.
+
+/*
+ * One-event organizer UI (needs EXTRA_EVENT_ID): waitlist list, lottery, export, map, invites.
  */
 
 public class OrganizerDashboardActivity extends AppCompatActivity {

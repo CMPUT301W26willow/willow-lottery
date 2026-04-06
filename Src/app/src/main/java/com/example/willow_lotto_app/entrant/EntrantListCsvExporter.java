@@ -7,10 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Builds CSV file for event entrant / registration exports.
- * Author: Dev Tiwari
- */
+/** Builds CSV text for exporting entrant registration data. */
 public final class EntrantListCsvExporter {
 
     private static final String HEADER = "Name,Email,Phone,User ID,Registration Status,Enrolled At";

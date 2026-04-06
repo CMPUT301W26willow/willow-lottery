@@ -1,16 +1,3 @@
-/**
- * InvitedEntrantsActivity.java
- *<p>
- * Author: Mehr Dhanda
- *<p>
- * Displays a list of entrants who have been invited (selected by lottery)
- * but have not yet accepted. Allows the organizer to cancel individual entrants.
- *<p>
- * Role: Controller in the MVC pattern.
- *<p>
- * Outstanding issues:
- * - Event ID must be passed via Intent from OrganizerDashboardActivity.
- */
 package com.example.willow_lotto_app.events;
 
 import android.os.Bundle;
@@ -37,9 +24,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Activity that displays invited entrants and allows the organizer to cancel them.
- */
+/** Organizer list of invited entrants who have not accepted yet. */
 public class InvitedEntrantsActivity extends AppCompatActivity {
 
     public static final String EXTRA_EVENT_ID = "event_id";

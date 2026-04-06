@@ -21,40 +21,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Administrator screen for browsing and moderating events.
- * <p>
- * Responsibilities:
- * - Allows admins to browse events.
- * - Allows admins to remove events.
- * - Allows admins to remove event images.
- * - Allows admins to remove event comments that violate app policy.
- */
-
+/** Admin screen to browse events, delete them, or clear their comments. */
 public class AdminBrowseEventsActivity extends AppCompatActivity implements AdminEventAdapter.AdminEventActionListener{
-    /**
-     * RecyclerView for the event list.
-     */
+
     private RecyclerView recyclerView;
-
-    /**
-     * Firestore instance.
-     */
     private FirebaseFirestore db;
-
-    /**
-     * Local event list displayed in the RecyclerView.
-     */
     private final List<Event> events = new ArrayList<>();
-
-    /**
-     * Adapter used by the RecyclerView.
-     */
     private AdminEventAdapter adapter;
-
-    /**
-     * Signed-in admin email used in audit logs.
-     */
     private String adminEmail;
 
     private String searchQueryNormalized = "";
@@ -69,6 +42,7 @@ public class AdminBrowseEventsActivity extends AppCompatActivity implements Admi
         }
         setContentView(R.layout.activity_admin_browse_events);
 
+        // Optional filter from dashboard search
         searchQueryNormalized = AdminSearchTextUtil.normalizeQuery(
                 getIntent().getStringExtra(AdminIntentExtras.EXTRA_SEARCH_QUERY));
 
@@ -99,11 +73,7 @@ public class AdminBrowseEventsActivity extends AppCompatActivity implements Admi
         loadEvents();
     }
 
-    /**
-     * Loads all non-deleted events from Firestore.
-     * <p>
-     * If older events do not yet have an isDeleted field, they are still shown.
-     */
+    // Skip isDeleted; optional text search on name/description/date/id/organizerId
     private void loadEvents() {
         db.collection("events")
                 .get()
@@ -134,6 +104,10 @@ public class AdminBrowseEventsActivity extends AppCompatActivity implements Admi
                         Toast.makeText(this, "Failed to load events", Toast.LENGTH_SHORT).show());
     }
 
+    /**
+     * @param event candidate event row
+     * @return true if search is inactive or any of name, description, date, id, organizerId matches
+     */
     private boolean eventMatchesSearch(Event event) {
         if (searchQueryNormalized.isEmpty()) {
             return true;
@@ -146,9 +120,7 @@ public class AdminBrowseEventsActivity extends AppCompatActivity implements Admi
     }
 
     /**
-     * Shows confirmation before removing an event.
-     *
-     * @param event selected event
+     * @param event event the admin chose to soft-delete
      */
     @Override
     public void onDeleteEventClicked(Event event) {
@@ -160,12 +132,8 @@ public class AdminBrowseEventsActivity extends AppCompatActivity implements Admi
                 .show();
     }
 
-
-
     /**
-     * Shows confirmation before removing comments for an event.
-     *
-     * @param event selected event
+     * @param event event whose thread comments should be marked removed
      */
     @Override
     public void onDeleteCommentsClicked(Event event) {
@@ -178,11 +146,7 @@ public class AdminBrowseEventsActivity extends AppCompatActivity implements Admi
     }
 
     /**
-     * Sends a notification to every user who still has a registration for the event.
-     *
-     * This includes users on the waitlist, invited users, and accepted users.
-     *
-     * @param event removed event
+     * @param event removed event; each registration with this {@code eventId} receives a notification
      */
     private void notifyAffectedUsersAboutRemovedEvent(Event event) {
         db.collection("registrations")
@@ -204,12 +168,7 @@ public class AdminBrowseEventsActivity extends AppCompatActivity implements Admi
     }
 
     /**
-     * Deletes all registration documents associated with a removed event.
-     *
-     * This prevents users from remaining on the waitlist or in accepted/invited
-     * states for an event that no longer exists.
-     *
-     * @param event removed event
+     * @param event deleted event; all {@code registrations} docs with this {@code eventId} are deleted
      */
     private void deleteRegistrationsForRemovedEvent(Event event) {
         db.collection("registrations")
@@ -225,9 +184,7 @@ public class AdminBrowseEventsActivity extends AppCompatActivity implements Admi
     }
 
     /**
-     * Soft-deletes an event and notifies the organizer if organizerId exists.
-     *
-     * @param event selected event
+     * @param event event to soft-delete ({@code isDeleted=true})
      */
     private void deleteEvent(Event event) {
         Map<String, Object> updates = new HashMap<>();
@@ -257,15 +214,8 @@ public class AdminBrowseEventsActivity extends AppCompatActivity implements Admi
                         Toast.makeText(this, "Failed to remove event", Toast.LENGTH_SHORT).show());
     }
 
-
-
-
     /**
-     * Marks all comments belonging to an event as removed.
-     * <p>
-     * This assumes a comments collection with an eventId field and an isRemoved field.
-     *
-     * @param event selected event
+     * @param event event whose {@code comments} docs (matching {@code eventId}) are marked {@code isRemoved}
      */
     private void removeEventComments(Event event) {
         db.collection("comments")
@@ -296,9 +246,7 @@ public class AdminBrowseEventsActivity extends AppCompatActivity implements Admi
     }
 
     /**
-     * Sends an in-app notification to the organizer if the event document has an organizerId.
-     *
-     * @param event removed event
+     * @param event removed event; organizer receives {@code admin_delete_event} if {@code organizerId} is set
      */
     private void notifyOrganizerAboutRemovedEvent(Event event) {
         db.collection("events")

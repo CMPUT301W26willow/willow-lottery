@@ -4,10 +4,7 @@ import androidx.annotation.DrawableRes;
 
 import com.example.willow_lotto_app.R;
 
-/**
- * Picks one of four Willow-themed default poster images when an event has no uploaded poster.
- * Choice is stable per {@code eventId} (hash-based) so list and detail match and rows don’t flicker on scroll.
- */
+/** Default poster drawable per event id when no upload exists. */
 public final class EventPlaceholderDrawables {
 
     private static final int[] PLACEHOLDERS = {

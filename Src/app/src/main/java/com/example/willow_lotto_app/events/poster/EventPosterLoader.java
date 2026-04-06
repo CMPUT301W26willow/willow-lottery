@@ -15,12 +15,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 
-/**
- * Loads event {@code posterUri} values into an {@link ImageView}.
- * <p>
- * Firestore posters are stored as {@code data:image/jpeg;base64,...} strings. Those are too long for
- * reliable {@link Uri#parse(String)} handling, so this path decodes to bytes and loads via Glide.
- */
+/** Loads event poster URIs (including base64 data) into an ImageView with Glide. */
 public final class EventPosterLoader {
 
     private EventPosterLoader() {

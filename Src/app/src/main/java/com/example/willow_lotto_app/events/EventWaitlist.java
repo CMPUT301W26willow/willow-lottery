@@ -6,13 +6,7 @@ import com.example.willow_lotto_app.registration.RegistrationStore;
 
 import java.util.List;
 
-/**
- * Data model class representing an Event.
- * Provides a clean interface for managing waitlist data and database updates.
- * @author Jasdeep Cheema
- * @version 1.0
- * @since 12/03/2026
- */
+/** Helper for loading and updating waitlist registrations for an event. */
 public class EventWaitlist {
 
     private List<Registration> waitingList; // Local cache of waitlisted registrations

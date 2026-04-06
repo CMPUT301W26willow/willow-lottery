@@ -3,13 +3,7 @@ package com.example.willow_lotto_app.events.comments;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Represents a single UI thread for event-related comments.
- * <p>
- * This class follows a "Lazy-Loaded" pattern, where a single
- * top-level comment is initially displayed, and its associated replies
- * are fetched and populated only when the user expands the thread.
- */
+/** UI thread: one top-level comment and lazy-loaded replies. */
 public final class EventCommentThread {
 
     /** The primary parent comment that anchors this thread. */
