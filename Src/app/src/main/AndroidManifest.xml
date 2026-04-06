@@ -62,6 +62,7 @@
         <activity android:name=".organizer.ui.OrganizerMyEventsActivity" android:exported="false"/>
         <activity android:name=".events.CreateEventActivity" android:exported="false"/>
         <activity android:name=".events.EventQrActivity" android:exported="false"/>
+        <activity android:name=".events.CancelledEntrantsActivity" android:exported="false"/>
         <activity
             android:name=".events.ScanEventQrActivity"
             android:exported="false"
