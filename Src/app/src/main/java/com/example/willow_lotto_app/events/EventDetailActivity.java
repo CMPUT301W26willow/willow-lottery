@@ -1,5 +1,6 @@
 package com.example.willow_lotto_app.events;
 
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -770,19 +771,17 @@ public class EventDetailActivity extends AppCompatActivity {
         reg.put("userId", currentUserId);
         reg.put("status", RegistrationStatus.WAITLISTED.getValue());
 
-        db.collection(REGISTRATIONS_COLLECTION).document(docId).set(reg)
-                .addOnSuccessListener(aVoid -> {
-                    joined = true;
-                    registrationId = docId;
-                    currentStatus = RegistrationStatus.WAITLISTED.getValue();
-                    waitingListCount++;
-                    waitingListView.setText(getString(R.string.event_detail_waiting_list_count, waitingListCount));
-                    updateJoinLeaveButton();
-                    sendWaitlistJoinedInAppNotification();
+// Check if event requires geolocation
+        db.collection("events").document(eventId).get()
+                .addOnSuccessListener(eventDoc -> {
+                    Boolean geoRequired = eventDoc.getBoolean("geolocationRequired");
+                    if (Boolean.TRUE.equals(geoRequired)) {
+                        fetchLocationAndJoin(docId, reg);
+                    } else {
+                        saveRegistration(docId, reg);
+                    }
                 })
-                .addOnFailureListener(e -> Toast.makeText(this, "Could not join event", Toast.LENGTH_SHORT).show());
-    }
-
+                .addOnFailureListener(e -> saveRegistration(docId, reg)); }
     // leave logic
     // status-based button logic updates immediately.
     /**
@@ -803,6 +802,56 @@ public class EventDetailActivity extends AppCompatActivity {
                     updateJoinLeaveButton();
                 })
                 .addOnFailureListener(e -> Toast.makeText(this, "Could not leave event", Toast.LENGTH_SHORT).show());
+    }
+    /**
+     * Fetches the device's last known location and saves it with the registration.
+     * If location permission is denied or unavailable, joins without location.
+     *
+     * @param docId The registration document ID.
+     * @param reg   The registration data map.
+     */
+    private void fetchLocationAndJoin(String docId, Map<String, Object> reg) {
+        if (androidx.core.app.ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != android.content.pm.PackageManager.PERMISSION_GRANTED
+                && androidx.core.app.ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            androidx.core.app.ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1001);
+            saveRegistration(docId, reg);
+            return;
+        }
+
+        com.google.android.gms.location.LocationServices
+                .getFusedLocationProviderClient(this)
+                .getLastLocation()
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        reg.put("latitude", location.getLatitude());
+                        reg.put("longitude", location.getLongitude());
+                    }
+                    saveRegistration(docId, reg);
+                })
+                .addOnFailureListener(e -> saveRegistration(docId, reg));
+    }
+
+    /**
+     * Saves the registration document to Firestore and updates the UI.
+     *
+     * @param docId The registration document ID.
+     * @param reg   The registration data map.
+     */
+    private void saveRegistration(String docId, Map<String, Object> reg) {
+        db.collection(REGISTRATIONS_COLLECTION).document(docId).set(reg)
+                .addOnSuccessListener(aVoid -> {
+                    joined = true;
+                    registrationId = docId;
+                    currentStatus = RegistrationStatus.WAITLISTED.getValue();
+                    waitingListCount++;
+                    waitingListView.setText(getString(R.string.event_detail_waiting_list_count, waitingListCount));
+                    updateJoinLeaveButton();
+                    sendWaitlistJoinedInAppNotification();
+                })
+                .addOnFailureListener(e -> Toast.makeText(this, "Could not join event", Toast.LENGTH_SHORT).show());
     }
 
     // Added for US 01.05.02.

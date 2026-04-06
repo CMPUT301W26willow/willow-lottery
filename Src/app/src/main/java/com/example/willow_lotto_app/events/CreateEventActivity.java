@@ -349,7 +349,7 @@ public class CreateEventActivity extends AppCompatActivity {
         event.put("date", eventDate);
         event.put("registrationStart", registrationStart);
         event.put("registrationEnd", registrationEnd);
-        event.put("locationRequired", locationRequired);
+        event.put("geolocationRequired", locationRequired);
         event.put("organizerId", uid);
         event.put("drawSize", 0);
         event.put("registeredUsers", new java.util.ArrayList<String>());
