@@ -5,8 +5,19 @@
     <!--Please don't remove this permission it is required for notifications to work-->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
+    <!-- So ACTION_SEND / chooser can resolve targets on API 30+ (CSV share). -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+            <data android:mimeType="*/*" />
+        </intent>
+    </queries>
 
     <application
         android:allowBackup="true"
@@ -49,6 +60,10 @@
         <activity android:name=".organizer.ui.OrganizerMyEventsActivity" android:exported="false"/>
         <activity android:name=".events.CreateEventActivity" android:exported="false"/>
         <activity android:name=".events.EventQrActivity" android:exported="false"/>
+        <activity
+            android:name=".events.ScanEventQrActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
         <activity android:name=".auth.AdminLoginActivity" android:exported="false"/>
         <!-- Handles deep links like willow-lottery://event/{eventId} -->
         <activity android:name=".events.EventDetailActivity" android:exported="true">
@@ -67,6 +82,7 @@
         <activity android:name=".events.EditEventActivity" android:exported="false"/>
         <activity android:name=".entrant.EntrantMapActivity" android:exported="false"/>
         <activity android:name=".events.InvitedEntrantsActivity" android:exported="false"/>
+        <activity android:name=".events.AcceptedEntrantsActivity" android:exported="false"/>
 
         <provider
             android:name="androidx.core.content.FileProvider"
