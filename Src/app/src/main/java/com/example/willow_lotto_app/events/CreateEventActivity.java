@@ -164,6 +164,7 @@ public class CreateEventActivity extends AppCompatActivity {
                 cal.get(Calendar.MONTH),
                 cal.get(Calendar.DAY_OF_MONTH)
         );
+        dialog.getDatePicker().setMinDate(System.currentTimeMillis());
         dialog.show();
     }
 
