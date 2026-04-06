@@ -209,7 +209,9 @@ public class ProfileActivity extends AppCompatActivity {
         profileAdminSection.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
-    /** Firebase anonymous sessions — same app features except profile Edit (full name shown as Guest). */
+    /**
+     * Firebase anonymous sessions — same app features except profile Edit (full name shown as Guest).
+     */
     private boolean isGuestUser() {
         return mAuth.getCurrentUser() != null && mAuth.getCurrentUser().isAnonymous();
     }
@@ -555,7 +557,9 @@ public class ProfileActivity extends AppCompatActivity {
     // Reads the registeredEvents array stored directly on the user's document,
     // then looks up each event name from the events collection
 
-    /** Validates profile fields; returns error message or null if valid. */
+    /**
+     * Validates profile fields; returns error message or null if valid.
+     */
     static String validateProfileInput(String name, String email) {
         if (name == null || name.trim().isEmpty() ||
                 email == null || email.trim().isEmpty()) {
@@ -567,18 +571,17 @@ public class ProfileActivity extends AppCompatActivity {
     /**
      * Retrieves and displays current user registration history in an alert dialogue
      */
+    // CHANGED: reads from the registrations collection instead of registeredEvents
+// array on the user document, since that array is never populated
     private void showRegistrationHistory() {
-        // Exit early if no user is signed in
         if (mAuth.getCurrentUser() == null) return;
         String uid = mAuth.getCurrentUser().getUid();
-        // Read the user's own document
-        db.collection("users")
-                .document(uid)
+
+        db.collection(REGISTRATIONS_COLLECTION)
+                .whereEqualTo("userId", uid)
                 .get()
-                .addOnSuccessListener(userDoc -> {
-                    // Pull the registeredEvents array directly off the user document
-                    List<String> registeredEvents = (List<String>) userDoc.get("registeredEvents");
-                    if (registeredEvents == null || registeredEvents.isEmpty()) {
+                .addOnSuccessListener(snap -> {
+                    if (snap.isEmpty()) {
                         new AlertDialog.Builder(this)
                                 .setTitle("Registration History")
                                 .setMessage("You have not registered for any events yet.")
@@ -586,19 +589,38 @@ public class ProfileActivity extends AppCompatActivity {
                                 .show();
                         return;
                     }
-                    // Fetch each event document to get its name
+
+                    // collect all event IDs from the registrations
+                    List<String> eventIds = new ArrayList<>();
+                    for (DocumentSnapshot doc : snap.getDocuments()) {
+                        String eventId = doc.getString("eventId");
+                        if (eventId != null && !eventId.isEmpty()) {
+                            eventIds.add(eventId);
+                        }
+                    }
+
+                    if (eventIds.isEmpty()) {
+                        new AlertDialog.Builder(this)
+                                .setTitle("Registration History")
+                                .setMessage("You have not registered for any events yet.")
+                                .setPositiveButton("OK", null)
+                                .show();
+                        return;
+                    }
+
+                    // fetch each event name
                     StringBuilder history = new StringBuilder();
-                    AtomicInteger remaining = new AtomicInteger(registeredEvents.size());
-                    for (String eventId : registeredEvents) {
+                    AtomicInteger remaining = new AtomicInteger(eventIds.size());
+                    for (String eventId : eventIds) {
                         db.collection("events").document(eventId)
                                 .get()
                                 .addOnSuccessListener(eventDoc -> {
                                     String eventName = eventDoc.getString("name");
-                                    history.append("• ").append(eventName != null ? eventName : eventId)
+                                    history.append("• ")
+                                            .append(eventName != null ? eventName : eventId)
                                             .append("\n\n");
-                                    // Show the dialog only once all event lookups are done
                                     if (remaining.decrementAndGet() == 0) {
-                                        new AlertDialog.Builder(this)
+                                        new AlertDialog.Builder(ProfileActivity.this)
                                                 .setTitle("Registration History")
                                                 .setMessage(history.toString().trim())
                                                 .setPositiveButton("OK", null)
@@ -606,9 +628,8 @@ public class ProfileActivity extends AppCompatActivity {
                                     }
                                 })
                                 .addOnFailureListener(e -> {
-                                    // If one event lookup fails, still count it as done
                                     if (remaining.decrementAndGet() == 0) {
-                                        new AlertDialog.Builder(this)
+                                        new AlertDialog.Builder(ProfileActivity.this)
                                                 .setTitle("Registration History")
                                                 .setMessage(history.toString().trim())
                                                 .setPositiveButton("OK", null)
