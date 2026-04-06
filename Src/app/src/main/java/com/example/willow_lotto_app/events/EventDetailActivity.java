@@ -771,17 +771,41 @@ public class EventDetailActivity extends AppCompatActivity {
         reg.put("userId", currentUserId);
         reg.put("status", RegistrationStatus.WAITLISTED.getValue());
 
-// Check if event requires geolocation
-        db.collection("events").document(eventId).get()
-                .addOnSuccessListener(eventDoc -> {
-                    Boolean geoRequired = eventDoc.getBoolean("geolocationRequired");
-                    if (Boolean.TRUE.equals(geoRequired)) {
-                        fetchLocationAndJoin(docId, reg);
-                    } else {
-                        saveRegistration(docId, reg);
+// Fetch user name to display on map
+        db.collection("users").document(currentUserId).get()
+                .addOnSuccessListener(userDoc -> {
+                    if (userDoc.exists()) {
+                        String name = userDoc.getString("name");
+                        if (name != null && !name.trim().isEmpty()) {
+                            reg.put("name", name.trim());
+                        }
                     }
+                    // Continue with geolocation check
+                    db.collection("events").document(eventId).get()
+                            .addOnSuccessListener(eventDoc -> {
+                                Boolean geoRequired = eventDoc.getBoolean("geolocationRequired");
+                                if (Boolean.TRUE.equals(geoRequired)) {
+                                    fetchLocationAndJoin(docId, reg);
+                                } else {
+                                    saveRegistration(docId, reg);
+                                }
+                            })
+                            .addOnFailureListener(e -> saveRegistration(docId, reg));
                 })
-                .addOnFailureListener(e -> saveRegistration(docId, reg)); }
+                .addOnFailureListener(e -> {
+                    db.collection("events").document(eventId).get()
+                            .addOnSuccessListener(eventDoc -> {
+                                Boolean geoRequired = eventDoc.getBoolean("geolocationRequired");
+                                if (Boolean.TRUE.equals(geoRequired)) {
+                                    fetchLocationAndJoin(docId, reg);
+                                } else {
+                                    saveRegistration(docId, reg);
+                                }
+                            })
+                            .addOnFailureListener(e2 -> saveRegistration(docId, reg));
+                });
+
+ }
     // leave logic
     // status-based button logic updates immediately.
     /**
